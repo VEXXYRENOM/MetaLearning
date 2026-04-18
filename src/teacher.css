@@ -1,0 +1,764 @@
+/* teacher.css - Light Mode Premium EdTech UI */
+
+.teacher-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(180deg, #201e50 0%, #523f95 50%, #c1a4f0 100%);
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.teacher-sidebar {
+  width: 90px;
+  background: rgba(10, 5, 25, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0;
+  z-index: 10;
+}
+
+.sidebar-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 3rem;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.sidebar-profile h3 {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: #1e293b;
+}
+
+.profile-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #a78bfa;
+}
+
+.btn-logout {
+  background: none;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  margin-top: 0.5rem;
+  cursor: pointer;
+}
+
+.sidebar-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tool-icon {
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.tool-icon:hover {
+  color: #3b82f6;
+}
+
+.tool-icon.active {
+  color: #2e1065;
+}
+
+/* Main Content */
+.teacher-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 2.5rem;
+  overflow-y: auto;
+}
+
+.teacher-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(25, 25, 35, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.header-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex: 1;
+  text-align: left;
+  padding-left: 1rem;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.user-avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #cbd5e1;
+}
+
+/* Steps Container */
+.teacher-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.step-container {
+  background: rgba(20, 20, 35, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2.5rem;
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.center-content {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 1.4rem;
+  color: #ffffff;
+  margin-bottom: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Step 1: Subjects Grid */
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  width: 300px;
+  margin-bottom: 2rem;
+  margin-right: auto;
+  color: white;
+}
+
+.search-bar input {
+  border: none;
+  background: none;
+  outline: none;
+  padding: 0 0.5rem;
+  font-family: inherit;
+  width: 100%;
+  color: white;
+}
+.search-bar input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 1.5rem;
+}
+
+.subject-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgba(30, 30, 45, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.subject-card:hover {
+  background: rgba(124, 58, 237, 0.3);
+  border-color: #a78bfa;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.2);
+}
+
+.subject-card.active {
+  background: rgba(124, 58, 237, 0.5);
+  border-color: #c4b5fd;
+  color: #ffffff;
+}
+
+.subject-icon {
+  color: inherit;
+}
+
+/* Step 2: Levels */
+.levels-flex {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.level-card {
+  flex: 1;
+  max-width: 220px;
+  background: rgba(30, 30, 45, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.level-card:hover {
+  background: rgba(124, 58, 237, 0.3);
+  border-color: #a78bfa;
+}
+
+.level-card.active {
+  background: rgba(124, 58, 237, 0.5);
+  border-color: #c4b5fd;
+}
+
+.level-image-placeholder {
+  height: 120px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+
+.level-card h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.level-card p {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+}
+
+/* Step 3: Input */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 3rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.input-group label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #e2e8f0;
+}
+
+.large-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: rgba(30, 30, 45, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  font-size: 1rem;
+  text-align: center;
+  font-family: inherit;
+  color: white;
+}
+.large-input option {
+  background: #1e1b4b;
+  color: white;
+}
+
+.integration-illustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.int-box {
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.int-box.meta { color: #a78bfa; }
+.int-box.min { color: #f87171; }
+.int-arrows { text-align: center; color: #cbd5e1; font-size: 0.9rem; }
+
+/* Review List Elements */
+.review-layout {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+}
+
+.review-list {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(30, 30, 45, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.rev-icon {
+  width: 48px;
+  height: 48px;
+  background: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3b82f6;
+  border: 1px solid #e2e8f0;
+}
+
+.review-summary {
+  flex: 1;
+  background: rgba(30, 30, 45, 0.4);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Success View */
+.success-view {
+  background: #1e1b4b;
+  color: white;
+}
+
+.success-view .section-title { color: white; }
+
+.code-display {
+  background: white;
+  color: #1e1b4b;
+  font-size: 2.5rem;
+  font-weight: 800;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  margin: 1rem 0;
+  display: inline-block;
+  letter-spacing: 2px;
+}
+
+/* Buttons */
+.btn-primary {
+  background: #2e1065;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.8rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background: #1e1b4b;
+}
+
+.btn-primary.large {
+  padding: 1rem 2rem;
+  min-width: 200px;
+}
+
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #25D366;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-outline {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-outline:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.width-full {
+  width: 100%;
+}
+
+/* 🌟 Teacher Hub (Step 0) Styles */
+.hub-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hub-header-meta h2 {
+  font-size: 1.8rem;
+  color: #ffffff;
+  margin: 0 0 0.5rem;
+  font-weight: 800;
+}
+
+.hub-header-meta p {
+  color: #cbd5e1;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.quick-actions-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.action-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(30, 30, 45, 0.4);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.action-card.hoverable:hover, .action-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  border-color: #a78bfa;
+}
+
+.action-card.primary-action {
+  background: rgba(124, 58, 237, 0.2);
+}
+
+.action-card.secondary-action {
+  background: rgba(20, 20, 35, 0.8);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.action-card.secondary-action p {
+  color: #94a3b8;
+}
+
+.action-card.secondary-action .btn-outline {
+  border-color: #4facfe;
+  color: #4facfe;
+}
+.action-card.secondary-action .btn-outline:hover {
+  background: rgba(79, 172, 254, 0.1);
+}
+
+.icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.wizard-icon {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.image-ai-icon {
+  background: rgba(79, 172, 254, 0.15);
+  color: #4facfe;
+}
+
+.action-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: #ffffff;
+}
+
+.action-card p {
+  color: #cbd5e1;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin: 0 0 1.5rem;
+  flex: 1;
+}
+
+/* Gallery Grid in Hub */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.gallery-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(30, 30, 45, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+}
+
+.gallery-card:hover {
+  border-color: #a78bfa;
+  box-shadow: 0 10px 15px rgba(124, 58, 237, 0.1);
+  transform: translateY(-2px);
+}
+
+.gallery-thumb {
+  width: 60px;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.gal-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #3b82f6;
+  margin-bottom: 0.25rem;
+}
+
+.gallery-info h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* 🌟 Advanced 3D Lab Styles (Step 4) */
+.lab-step {
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #0f172a; /* Dark sleek background for contrast */
+  color: white;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.lab-header {
+  padding: 1.5rem 2rem;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  z-index: 10;
+}
+
+.lab-header .section-title {
+  color: #f8fafc;
+  margin-bottom: 0.25rem;
+}
+
+.text-gray {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.lab-wrapper {
+  display: flex;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.lab-3d-view {
+  flex: 1;
+  position: relative;
+  background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+  cursor: grab;
+}
+
+.lab-3d-view:active {
+  cursor: grabbing;
+}
+
+.lab-badge {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.6);
+  color: #4facfe;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(79, 172, 254, 0.3);
+  pointer-events: none;
+}
+
+.lab-controls-panel {
+  width: 350px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255,255,255,0.1);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  z-index: 5;
+}
+
+.panel-title {
+  color: white;
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 1rem;
+}
+
+.control-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255,255,255,0.03);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.ctrl-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ctrl-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #e2e8f0;
+}
+
+.ctrl-info small {
+  color: #64748b;
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+.small-select {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 6px;
+  outline: none;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.glow-btn {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  border: none;
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+  color: #fff;
+}
+
+.glow-btn:hover {
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.6);
+  transform: translateY(-2px);
+}
