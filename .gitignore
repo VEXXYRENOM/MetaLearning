@@ -1,4 +1,9 @@
 node_modules
 dist
 *.local
+.env
+.env.*
+!.env.example
 .DS_Store
+VITE_SUPABASE_URL=https://vxfffnaeotydvwnpqqcx.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_2pOd3iqsevtUolUBSoOpeA_-yLJkz3S

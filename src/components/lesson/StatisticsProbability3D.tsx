@@ -13,8 +13,9 @@ const R = 12;
 const W = 0.5; 
 const H = 0.5; 
 const Y_START = 3.5; 
-const TOTAL_BALLS = 600;
 const DURATION = 8; 
+
+type Quality = 'low' | 'medium' | 'high';
 
 interface Ball { 
     id: number;
@@ -28,12 +29,21 @@ interface Ball {
 
 // === MAIN GALTON BOARD COMPONENT ===
 export const StatisticsProbability3D = () => {
+  const [quality, setQuality] = useState<Quality>(() => {
+    // Hardware detection check
+    const cores = typeof window !== 'undefined' ? (window.navigator.hardwareConcurrency || 4) : 4;
+    return cores >= 8 ? 'high' : cores >= 4 ? 'medium' : 'low';
+  });
+  
+  const totalBalls = quality === 'high' ? 600 : quality === 'medium' ? 300 : 100;
+
   const [bias, setBias] = useState(0.5);
   const [simSpeed, setSimSpeed] = useState(1);
   const ballsRef = useRef<Ball[]>([]);
   const ballMeshRef = useRef<THREE.InstancedMesh>(null);
   const barsRef = useRef<THREE.InstancedMesh>(null);
   const simTime = useRef(0);
+  const skipFrames = useRef(0); // For FPS throttling
   
   const [liveStats, setLiveStats] = useState({ count: 0, mean: 0, stdDev: 0 });
   const lastStatUpdate = useRef(0);
@@ -48,7 +58,7 @@ export const StatisticsProbability3D = () => {
   const resetSim = (newBias: number) => {
      const balls: Ball[] = [];
      const binCountTracker = new Array(R + 1).fill(0);
-     for(let i=0; i<TOTAL_BALLS; i++) {
+     for(let i=0; i<totalBalls; i++) {
        const path = [];
        let bin = 0;
        for(let r=0; r<R; r++) {
@@ -61,7 +71,7 @@ export const StatisticsProbability3D = () => {
        
        balls.push({
           id: i,
-          delay: (i / TOTAL_BALLS) * DURATION,
+          delay: (i / totalBalls) * DURATION,
           path,
           finalBin: bin,
           restX: -(R*W)/2 + bin*W + (Math.random()-0.5)*0.15,
@@ -74,7 +84,7 @@ export const StatisticsProbability3D = () => {
      setLiveStats({ count: 0, mean: 0, stdDev: 0 });
   };
 
-  useEffect(() => { resetSim(bias); }, [bias]); // reset on bias change
+  useEffect(() => { resetSim(bias); }, [bias, quality, totalBalls]); // reset on bias or quality change
 
   // Peg geometry pre-calc
   const pegsPositions = useMemo(() => {
@@ -90,6 +100,13 @@ export const StatisticsProbability3D = () => {
 
   useFrame((state, delta) => {
       simTime.current += delta * simSpeed;
+      
+      // FPS Capping Strategy (Hardware Opt)
+      // High = render every frame. Med = render every 2nd. Low = render every 3rd.
+      const frameSkipAmount = quality === 'high' ? 0 : quality === 'medium' ? 1 : 2;
+      skipFrames.current++;
+      const shouldRenderMeshes = skipFrames.current > frameSkipAmount;
+      if (shouldRenderMeshes) skipFrames.current = 0;
       
       // SHAKE AR DETECTION
       if (isActive && handData) {
@@ -108,8 +125,8 @@ export const StatisticsProbability3D = () => {
 
       const currentCounts = new Array(R+1).fill(0);
       
-      // Update Balls
-      for (let i=0; i<TOTAL_BALLS; i++) {
+      // Accumulate logic
+      for (let i=0; i<totalBalls; i++) {
         const b = ballsRef.current[i];
         let t = simTime.current - b.delay;
         
@@ -136,10 +153,12 @@ export const StatisticsProbability3D = () => {
            pos.set(x, y, z);
         }
         
-        dummy.updateMatrix();
-        ballMeshRef.current.setMatrixAt(i, dummy.matrix);
+        if (shouldRenderMeshes) {
+          dummy.updateMatrix();
+          ballMeshRef.current.setMatrixAt(i, dummy.matrix);
+        }
       }
-      ballMeshRef.current.instanceMatrix.needsUpdate = true;
+      if (shouldRenderMeshes) ballMeshRef.current.instanceMatrix.needsUpdate = true;
 
       // Update Histograms
       const color = new THREE.Color();
@@ -150,11 +169,18 @@ export const StatisticsProbability3D = () => {
           dummy.updateMatrix();
           barsRef.current.setMatrixAt(b, dummy.matrix);
           
-          color.setHSL(0.55 - (currentCounts[b] / (TOTAL_BALLS*0.15)) * 0.55, 0.8, 0.6); // Heatmap coloring
-          barsRef.current.setColorAt(b, color);
+          color.setHSL(0.55 - (currentCounts[b] / (totalBalls*0.15)) * 0.55, 0.8, 0.6); // Heatmap coloring
+          
+          if (shouldRenderMeshes) {
+            barsRef.current.setColorAt(b, color);
+            barsRef.current.setMatrixAt(b, dummy.matrix);
+          }
       }
-      barsRef.current.instanceMatrix.needsUpdate = true;
-      if(barsRef.current.instanceColor) barsRef.current.instanceColor.needsUpdate = true;
+      
+      if (shouldRenderMeshes) {
+        barsRef.current.instanceMatrix.needsUpdate = true;
+        if(barsRef.current.instanceColor) barsRef.current.instanceColor.needsUpdate = true;
+      }
 
       // Live Stats Table update
       if (state.clock.elapsedTime - lastStatUpdate.current > 0.2) {
@@ -183,12 +209,12 @@ export const StatisticsProbability3D = () => {
     for(let xStr = -1; xStr <= R + 1; xStr += 0.2) {
        let xPos = -(R*W)/2 + xStr*W;
        let exp = Math.exp(-Math.pow(xStr - mu, 2) / (2 * Math.pow(stdDev, 2)));
-       let expectedCount = TOTAL_BALLS * (1 / (stdDev * Math.sqrt(2 * Math.PI))) * exp; 
+       let expectedCount = totalBalls * (1 / (stdDev * Math.sqrt(2 * Math.PI))) * exp; 
        let yPos = Y_START - R*H - 1.2 + Math.max(0, expectedCount * 0.055);
        pts.push(new THREE.Vector3(xPos, yPos, 0.3)); // Front glowing line
     }
     return pts;
-  }, [bias]);
+  }, [bias, totalBalls]);
 
   // UI Control Panel State
   const [panelPos, setPanelPos] = useState(() => ({ 
@@ -248,8 +274,8 @@ export const StatisticsProbability3D = () => {
       </instancedMesh>
 
       {/* Instanced Bouncing Balls */}
-      <instancedMesh ref={ballMeshRef} args={[undefined, undefined, TOTAL_BALLS]} position={[0,-0.5,0]}>
-         <sphereGeometry args={[0.05, 16, 16]} />
+      <instancedMesh ref={ballMeshRef} args={[undefined, undefined, totalBalls]} position={[0,-0.5,0]}>
+         <sphereGeometry args={[0.05, quality === 'high' ? 16 : 8, quality === 'high' ? 16 : 8]} />
          <meshStandardMaterial color="#38bdf8" roughness={0.1} metalness={0.6} emissive="#0284c7" emissiveIntensity={0.5} />
       </instancedMesh>
 
@@ -309,18 +335,27 @@ export const StatisticsProbability3D = () => {
                  </div>
               </div>
 
-              {/* Toggles and Sliders */}
-              <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '12px', marginBottom: '16px' }}>
-                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#cbd5e1' }}>
-                    نسبة الاحتمالية (Bias: {Math.round(bias * 100)}% لليمين)
-                 </label>
-                 <input type="range" min="0.1" max="0.9" step="0.05" value={bias} onChange={e => setBias(parseFloat(e.target.value))} style={{ width: '100%' }} />
-                 
-                 <label style={{ display: 'block', margin: '16px 0 8px 0', fontSize: '14px', color: '#cbd5e1' }}>
-                    سرعة المحاكاة ({simSpeed}x)
-                 </label>
-                 <input type="range" min="0.5" max="3" step="0.5" value={simSpeed} onChange={e => setSimSpeed(parseFloat(e.target.value))} style={{ width: '100%' }} />
-              </div>
+               {/* Toggles and Sliders */}
+               <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '12px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                     <label style={{ fontSize: '14px', color: '#cbd5e1' }}>جودة المحاكاة ({quality})</label>
+                     <select value={quality} onChange={e => setQuality(e.target.value as Quality)} style={{ background: '#1e293b', color: 'white', border: '1px solid #475569', borderRadius: '4px', padding: '2px 8px' }}>
+                       <option value="low">Low (100 Balls)</option>
+                       <option value="medium">Medium (300 Balls)</option>
+                       <option value="high">High (600 Balls)</option>
+                     </select>
+                  </div>
+
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#cbd5e1' }}>
+                     نسبة الاحتمالية (Bias: {Math.round(bias * 100)}% لليمين)
+                  </label>
+                  <input type="range" min="0.1" max="0.9" step="0.05" value={bias} onChange={e => setBias(parseFloat(e.target.value))} style={{ width: '100%' }} />
+                  
+                  <label style={{ display: 'block', margin: '16px 0 8px 0', fontSize: '14px', color: '#cbd5e1' }}>
+                     سرعة المحاكاة ({simSpeed}x)
+                  </label>
+                  <input type="range" min="0.5" max="3" step="0.5" value={simSpeed} onChange={e => setSimSpeed(parseFloat(e.target.value))} style={{ width: '100%' }} />
+               </div>
 
               {/* Data Table */}
               <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '12px' }}>
@@ -328,7 +363,7 @@ export const StatisticsProbability3D = () => {
                   <tbody>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                       <td style={{ padding: '8px', color: '#94a3b8' }}>إجمالي الكرات ($N$)</td>
-                      <td style={{ padding: '8px', fontSize: '18px', fontWeight: 'bold', color: '#60a5fa' }}>{liveStats.count} / {TOTAL_BALLS}</td>
+                      <td style={{ padding: '8px', fontSize: '18px', fontWeight: 'bold', color: '#60a5fa' }}>{liveStats.count} / {totalBalls}</td>
                     </tr>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                       <td style={{ padding: '8px', color: '#94a3b8' }}>المتوسط الحسابي ($\mu$)</td>

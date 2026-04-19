@@ -25,7 +25,7 @@ export const PlatonicSolids3D: React.FC = () => {
   // Create un-indexed base geometry to compute face explosions smoothly
   // We use scale 1.5 for the mesh.
   const baseGeo = useMemo(() => {
-    let geo: THREE.BufferGeometry = new currentSolid.Geo(1.5, 0);
+    let geo: any = new currentSolid.Geo(1.5, 0);
     // BoxGeometry uses W,H,D instead of radius, so we adjust if it's hexahedron
     if (activeSolid === "hexahedron") {
         geo = new THREE.BoxGeometry(2, 2, 2);
@@ -33,7 +33,7 @@ export const PlatonicSolids3D: React.FC = () => {
     // Convert to non-indexed so each triangle has its own vertices/normals
     geo = geo.toNonIndexed();
     geo.computeVertexNormals();
-    return geo;
+    return geo as THREE.BufferGeometry;
   }, [activeSolid, currentSolid]);
 
   const activeSolidGeo = useMemo(() => baseGeo.clone(), [baseGeo]);
@@ -99,7 +99,7 @@ export const PlatonicSolids3D: React.FC = () => {
             
             {/* The Solid Body (Blue Crystal) */}
             {showSolid && (
-                <mesh geometry={activeSolidGeo}>
+                <mesh geometry={activeSolidGeo as any}>
                 <meshPhysicalMaterial 
                     color="#ffffff" 
                     transmission={1} 
@@ -119,7 +119,7 @@ export const PlatonicSolids3D: React.FC = () => {
 
             {/* The Wireframe (Gold) */}
             {showWireframe && (
-                <mesh geometry={activeWireGeo}>
+                <mesh geometry={activeWireGeo as any}>
                 <meshPhysicalMaterial 
                     color="#fbbf24" 
                     emissive="#d97706"

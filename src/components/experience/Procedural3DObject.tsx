@@ -401,7 +401,7 @@ function ScienceObject() {
 // ── فضاء / كوكب ───────────────────────────────────────────────────────────
 function SpaceObject() {
   const planet = new THREE.MeshStandardMaterial({ color: "#2255cc", roughness: 0.6, metalness: 0.2 });
-  const ocean = new THREE.MeshStandardMaterial({ color: "#1144bb", roughness: 0.4, metalness: 0.3 });
+  // const ocean = new THREE.MeshStandardMaterial({ color: "#1144bb", roughness: 0.4, metalness: 0.3 });
   const land = new THREE.MeshStandardMaterial({ color: "#228833", roughness: 0.8 });
   const ring = new THREE.MeshStandardMaterial({ color: "#c8a842", roughness: 0.6, transparent: true, opacity: 0.75 });
   const moon = new THREE.MeshStandardMaterial({ color: "#bbbbaa", roughness: 0.9 });

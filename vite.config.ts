@@ -39,6 +39,12 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/lexica/, ""),
         },
+
+        // ── Local Express Backend ──
+        "/api/fal": {
+          target: "http://localhost:3001",
+          changeOrigin: true,
+        },
       },
     },
   };

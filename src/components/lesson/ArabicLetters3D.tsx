@@ -93,10 +93,9 @@ export function ArabicLetters3D() {
         ];
         const geo = new THREE.BufferGeometry().setFromPoints(points);
         return (
-          <line key={`line-${i}`} geometry={geo}>
-            {/* @ts-ignore */}
+          <lineSegments key={`line-${i}`} geometry={geo}>
             <lineBasicMaterial color="#ffffff" transparent opacity={0.1} />
-          </line>
+          </lineSegments>
         );
       })}
 

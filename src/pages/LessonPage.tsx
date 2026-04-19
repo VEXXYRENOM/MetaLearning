@@ -4,11 +4,12 @@ import {
   useEffect,
   useRef,
   useState,
+  lazy,
   type ChangeEvent,
 } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Html } from "@react-three/drei";
 import { QRCodeSVG } from "qrcode.react";
 import { getLesson, type LessonKind } from "../data/lessons";
 import { GltfScene } from "../components/lesson/GltfScene";
@@ -16,42 +17,45 @@ import { ArtifactGltfModel } from "../components/experience/ArtifactGltfModel";
 import { RotatingGroup } from "../components/lesson/RotatingGroup";
 import { SceneBackdrop } from "../components/lesson/SceneBackdrop";
 import { ImageTo3dVolume } from "../components/lesson/ImageTo3dVolume";
-import { BeatingHeart3D } from "../components/lesson/BeatingHeart3D";
-import { AtomModel3D } from "../components/lesson/AtomModel3D";
-import { SolarSystem3D } from "../components/lesson/SolarSystem3D";
-import { Pyramid3D } from "../components/lesson/Pyramid3D";
-import { PlatonicSolids3D } from "../components/lesson/PlatonicSolids3D";
-import { AnimalCell3D } from "../components/lesson/AnimalCell3D";
-import { PlantCell3D } from "../components/lesson/PlantCell3D";
-import { WaterMolecule3D } from "../components/lesson/WaterMolecule3D";
-import { DNAHelix3D } from "../components/lesson/DNAHelix3D";
-import { EarthLayers3D } from "../components/lesson/EarthLayers3D";
-import { Volcano3D } from "../components/lesson/Volcano3D";
-import { WaterCycle3D } from "../components/lesson/WaterCycle3D";
-import { LungsModel3D } from "../components/lesson/LungsModel3D";
-import { EyeAnatomy3D } from "../components/lesson/EyeAnatomy3D";
-import { FunctionGraph3D } from "../components/lesson/FunctionGraph3D";
-import { GeometricVolumes3D } from "../components/lesson/GeometricVolumes3D";
-import { Colosseum3D } from "../components/lesson/Colosseum3D";
-import { CarthageRuins3D } from "../components/lesson/CarthageRuins3D";
-import { KairouanMosque3D } from "../components/lesson/KairouanMosque3D";
-import { ArabicLetters3D } from "../components/lesson/ArabicLetters3D";
-import { VocalAnatomy3D } from "../components/lesson/VocalAnatomy3D";
-import { RoomObjects3D } from "../components/lesson/RoomObjects3D";
-import { ColorWheel3D } from "../components/lesson/ColorWheel3D";
-import { Pottery3D } from "../components/lesson/Pottery3D";
-import { PaintingFrame3D } from "../components/lesson/PaintingFrame3D";
-import { ImageCropModal } from "../components/lesson/ImageCropModal";
 import { useHandTracking } from "../hooks/useHandTracking";
 import { HandTrackedModel } from "../components/lesson/HandTrackedModel";
 import { HandLight } from "../components/lesson/HandLight";
-import { OrthographicProjection3D } from "../components/lesson/OrthographicProjection3D";
-import { Vectors3D } from "../components/lesson/Vectors3D";
-import { Transformations3D } from "../components/lesson/Transformations3D";
-import { StatisticsProbability3D } from "../components/lesson/StatisticsProbability3D";
-import { Sequences3D } from "../components/lesson/Sequences3D";
-import { MathematicalLogic3D } from "../components/lesson/MathematicalLogic3D";
-import { RobotKinematics3D } from "../components/lesson/RobotKinematics3D";
+import { ImageCropModal } from "../components/lesson/ImageCropModal";
+
+// --- Lazy Load ALL Heavy 3D Assets ---
+const BeatingHeart3D = lazy(() => import("../components/lesson/BeatingHeart3D").then(m => ({ default: m.BeatingHeart3D })));
+const AtomModel3D = lazy(() => import("../components/lesson/AtomModel3D").then(m => ({ default: m.AtomModel3D })));
+const SolarSystem3D = lazy(() => import("../components/lesson/SolarSystem3D").then(m => ({ default: m.SolarSystem3D })));
+const Pyramid3D = lazy(() => import("../components/lesson/Pyramid3D").then(m => ({ default: m.Pyramid3D })));
+const PlatonicSolids3D = lazy(() => import("../components/lesson/PlatonicSolids3D").then(m => ({ default: m.PlatonicSolids3D })));
+const AnimalCell3D = lazy(() => import("../components/lesson/AnimalCell3D").then(m => ({ default: m.AnimalCell3D })));
+const PlantCell3D = lazy(() => import("../components/lesson/PlantCell3D").then(m => ({ default: m.PlantCell3D })));
+const WaterMolecule3D = lazy(() => import("../components/lesson/WaterMolecule3D").then(m => ({ default: m.WaterMolecule3D })));
+const DNAHelix3D = lazy(() => import("../components/lesson/DNAHelix3D").then(m => ({ default: m.DNAHelix3D })));
+const EarthLayers3D = lazy(() => import("../components/lesson/EarthLayers3D").then(m => ({ default: m.EarthLayers3D })));
+const Volcano3D = lazy(() => import("../components/lesson/Volcano3D").then(m => ({ default: m.Volcano3D })));
+const WaterCycle3D = lazy(() => import("../components/lesson/WaterCycle3D").then(m => ({ default: m.WaterCycle3D })));
+const LungsModel3D = lazy(() => import("../components/lesson/LungsModel3D").then(m => ({ default: m.LungsModel3D })));
+const EyeAnatomy3D = lazy(() => import("../components/lesson/EyeAnatomy3D").then(m => ({ default: m.EyeAnatomy3D })));
+const FunctionGraph3D = lazy(() => import("../components/lesson/FunctionGraph3D").then(m => ({ default: m.FunctionGraph3D })));
+const GeometricVolumes3D = lazy(() => import("../components/lesson/GeometricVolumes3D").then(m => ({ default: m.GeometricVolumes3D })));
+const Colosseum3D = lazy(() => import("../components/lesson/Colosseum3D").then(m => ({ default: m.Colosseum3D })));
+const CarthageRuins3D = lazy(() => import("../components/lesson/CarthageRuins3D").then(m => ({ default: m.CarthageRuins3D })));
+const KairouanMosque3D = lazy(() => import("../components/lesson/KairouanMosque3D").then(m => ({ default: m.KairouanMosque3D })));
+const ArabicLetters3D = lazy(() => import("../components/lesson/ArabicLetters3D").then(m => ({ default: m.ArabicLetters3D })));
+const VocalAnatomy3D = lazy(() => import("../components/lesson/VocalAnatomy3D").then(m => ({ default: m.VocalAnatomy3D })));
+const RoomObjects3D = lazy(() => import("../components/lesson/RoomObjects3D").then(m => ({ default: m.RoomObjects3D })));
+const ColorWheel3D = lazy(() => import("../components/lesson/ColorWheel3D").then(m => ({ default: m.ColorWheel3D })));
+const Pottery3D = lazy(() => import("../components/lesson/Pottery3D").then(m => ({ default: m.Pottery3D })));
+const PaintingFrame3D = lazy(() => import("../components/lesson/PaintingFrame3D").then(m => ({ default: m.PaintingFrame3D })));
+const OrthographicProjection3D = lazy(() => import("../components/lesson/OrthographicProjection3D").then(m => ({ default: m.OrthographicProjection3D })));
+const Vectors3D = lazy(() => import("../components/lesson/Vectors3D").then(m => ({ default: m.Vectors3D })));
+const Transformations3D = lazy(() => import("../components/lesson/Transformations3D").then(m => ({ default: m.Transformations3D })));
+const StatisticsProbability3D = lazy(() => import("../components/lesson/StatisticsProbability3D").then(m => ({ default: m.StatisticsProbability3D })));
+const Sequences3D = lazy(() => import("../components/lesson/Sequences3D").then(m => ({ default: m.Sequences3D })));
+const MathematicalLogic3D = lazy(() => import("../components/lesson/MathematicalLogic3D").then(m => ({ default: m.MathematicalLogic3D })));
+const RobotKinematics3D = lazy(() => import("../components/lesson/RobotKinematics3D").then(m => ({ default: m.RobotKinematics3D })));
+
 /** خريطة تربط كل نوع درس إجرائي بالمكون ثلاثي الأبعاد المناسب */
 const PROCEDURAL_COMPONENTS: Partial<Record<LessonKind, React.FC>> = {
   "procedural-heart": BeatingHeart3D,
@@ -532,7 +536,14 @@ export function LessonPage() {
                 dpr={[1, 2]}
                 onPointerMissed={clearSelection}
               >
-                <Suspense fallback={null}>
+                <Suspense fallback={
+                  <Html center>
+                    <div style={{ color: '#38bdf8', fontFamily: 'system-ui', textAlign: 'center', width: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div className="animate-spin" style={{ width: '40px', height: '40px', border: '4px solid #0f172a', borderTopColor: '#38bdf8', borderRadius: '50%', marginBottom: '10px' }} />
+                      <div style={{ fontWeight: 'bold' }}>جاري الحوسبة (Building 3D Mesh)...</div>
+                    </div>
+                  </Html>
+                }>
                   {!isActive && <SceneBackdrop />}
                   {isActive && handData && (
                     <HandLight x={handData.palmPosition.x} y={handData.palmPosition.y} />

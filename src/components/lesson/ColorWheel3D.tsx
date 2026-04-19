@@ -61,8 +61,8 @@ export function ColorWheel3D() {
   }) => {
     const startAngle = (index / total) * Math.PI * 2;
     const endAngle = ((index + 1) / total) * Math.PI * 2;
-    const midAngle = (startAngle + endAngle) / 2;
-    const midR = (innerR + outerR) / 2;
+    
+    
 
     // شكل القطاع
     const shape = new THREE.Shape();

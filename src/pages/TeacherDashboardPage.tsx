@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
   Atom, Calculator, Book, Globe, Languages, Settings, 
@@ -41,12 +41,16 @@ import { Transformations3D } from "../components/lesson/Transformations3D";
 import { StatisticsProbability3D } from "../components/lesson/StatisticsProbability3D";
 import { Sequences3D } from "../components/lesson/Sequences3D";
 import { MathematicalLogic3D } from "../components/lesson/MathematicalLogic3D";
+import { useEffect } from "react";
 import "../teacher.css"; // تنسيق النمط الفاتح المستقل
 import { LESSONS } from "../data/lessons"; // لاستيراد النماذج الجاهزة للأستاذ
+import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "../services/supabaseClient";
 
 type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export function TeacherDashboardPage() {
+  const { profile, signOut } = useAuth();
   const [step, setStep] = useState<Step>(0); // 🚀 نبدأ من الـ Hub (Step 0)
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
@@ -54,11 +58,11 @@ export function TeacherDashboardPage() {
   const [autoExplain, setAutoExplain] = useState<boolean>(true);
 
   const nextStep = () => {
-    if (step < 6) setStep((prev) => (prev + 1) as Step);
+    if (step < 6) setStep((prev: Step) => (prev + 1) as Step);
   };
 
   const prevStep = () => {
-    if (step > 0) setStep((prev) => (prev - 1) as Step);
+    if (step > 0) setStep((prev: Step) => (prev - 1) as Step);
   };
 
   return (
@@ -69,9 +73,9 @@ export function TeacherDashboardPage() {
           <div className="profile-img">
             <User size={30} color="#cbd5e1" />
           </div>
-          <h3>Nour</h3>
+          <h3>{profile?.full_name || 'Nour'}</h3>
           <p>Teacher</p>
-          <button className="btn-logout">Log in</button>
+          <button className="btn-logout" onClick={() => signOut()}>Logout</button>
         </div>
         
         <div className="sidebar-tools">
@@ -97,7 +101,7 @@ export function TeacherDashboardPage() {
           )}
           <h2 className="header-title">Meta Learning Workspace</h2>
           <div className="header-user">
-            <span>Welcome, Nour</span>
+            <span>Welcome, {profile?.full_name || 'Teacher'}</span>
             <div className="user-avatar-small"></div>
           </div>
         </header>
@@ -125,7 +129,7 @@ export function TeacherDashboardPage() {
           {step === 3 && <Step3Input selectedSubject={selectedSubject} lessonName={lessonName} onChange={setLessonName} onNext={nextStep} />}
           {step === 4 && <Step4LabPreview lessonName={lessonName} autoExplain={autoExplain} setAutoExplain={setAutoExplain} onNext={nextStep} />}
           {step === 5 && <Step5Review lessonName={lessonName} autoExplain={autoExplain} onNext={nextStep} />}
-          {step === 6 && <Step6Success lessonName={lessonName} />}
+          {step === 6 && <Step6Success lessonName={lessonName} subject={selectedSubject} profile={profile} />}
         </div>
       </main>
     </div>
@@ -457,18 +461,112 @@ function Step5Review({ lessonName, autoExplain, onNext }: any) {
   );
 }
 
-function Step6Success({ }: any) {
+function Step6Success({ lessonName, subject, profile }: any) {
+  const [pinCode, setPinCode] = useState<string | null>(null);
+  const [joinedStudents, setJoinedStudents] = useState<any[]>([]);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    let activeSessionId = "";
+    
+    async function createLessonAndSession() {
+      if (!profile) return;
+      try {
+        const generatedPin = `MTL-${Math.floor(100 + Math.random() * 900)}`;
+        setPinCode(generatedPin);
+
+        // 1. Create Lesson
+        const { data: lesson, error: lessonError } = await supabase
+          .from("lessons")
+          .insert({
+            teacher_id: profile.id,
+            title: lessonName || "Unnnamed Lesson",
+            subject: subject || "General",
+            model_type: "preset",
+            share_code: generatedPin
+          })
+          .select()
+          .single();
+
+        if (lessonError) throw lessonError;
+
+        // 2. Create Live Session
+        const { data: session, error: sessionError } = await supabase
+          .from("sessions")
+          .insert({
+            lesson_id: lesson.id,
+            teacher_id: profile.id,
+            pin_code: generatedPin,
+            is_active: true
+          })
+          .select()
+          .single();
+
+        if (sessionError) throw sessionError;
+        activeSessionId = session.id;
+
+        // 3. Listen to student_joins using Realtime
+        const channel = supabase.channel(`session-${activeSessionId}`)
+          .on(
+            "postgres_changes",
+            { event: "INSERT", schema: "public", table: "student_joins", filter: `session_id=eq.${activeSessionId}` },
+            (payload) => {
+              setJoinedStudents(prev => [...prev, payload.new]);
+            }
+          )
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(channel);
+        };
+      } catch (err: any) {
+        console.error(err);
+        setErrorMsg("Failed to generate live session");
+      }
+    }
+
+    createLessonAndSession();
+  }, [profile, lessonName, subject]);
+
   return (
     <div className="step-container center-content success-view">
       <div className="confetti-placeholder">🎉</div>
       <h2 className="success-msg">Lesson Created Successfully!</h2>
-      <p className="success-sub">Access Code</p>
-      <div className="code-display">METAE-SCI-739</div>
-      <p className="code-hint">Copy this secure code and share it with your students to begin.</p>
-      <div className="share-actions">
-        <button className="btn-whatsapp"><Send size={18} /> Send via WhatsApp</button>
-        <button className="btn-outline"><Copy size={18} /> Copy Code</button>
-      </div>
+      {errorMsg ? (
+        <p style={{ color: 'red' }}>{errorMsg}</p>
+      ) : (
+        <>
+          <p className="success-sub">Access Code</p>
+          <div className="code-display" style={{ fontSize: '2.5rem', letterSpacing: '4px', padding: '1rem', background: '#38bdf822', border: '2px solid #38bdf8', borderRadius: '12px' }}>
+            {pinCode || "..."}
+          </div>
+          <p className="code-hint mt-2">Copy this secure code and share it with your students to begin.</p>
+          
+          {/* Live Students list */}
+          <div style={{ marginTop: '2rem', padding: '1rem', background: '#1f2937', borderRadius: '12px', width: '100%', maxWidth: '400px' }}>
+            <h4 style={{ color: '#9ca3af', marginBottom: '1rem', borderBottom: '1px solid #374151', paddingBottom: '0.5rem' }}>
+              📡 Live Connected Students ({joinedStudents.length})
+            </h4>
+            {joinedStudents.length === 0 ? (
+              <p style={{ color: '#4b5563', fontSize: '0.9rem' }}>Waiting for students to join...</p>
+            ) : (
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {joinedStudents.map((st, i) => (
+                  <li key={i} style={{ padding: '0.5rem', background: '#374151', marginBottom: '0.5rem', borderRadius: '6px', color: '#6ee7b7', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                     <span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', background: '#34d399' }}></span>
+                     {st.student_name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="share-actions mt-6">
+            <button className="btn-whatsapp"><Send size={18} /> Send via WhatsApp</button>
+            <button className="btn-outline"><Copy size={18} /> Copy Code</button>
+          </div>
+        </>
+      )}
       <div className="lesson-summary-footer mt-6">
         <Link to="/">← Back to Home</Link>
       </div>

@@ -122,7 +122,7 @@ export const FunctionGraph3D: React.FC = () => {
                 const eps = 0.05;
                 const currX = aiPos.current.x;
                 const currY = aiPos.current.y;
-                const currZ = getZ(currX, currY, t);
+                
                 const dx = (getZ(currX + eps, currY, t) - getZ(currX - eps, currY, t)) / (2 * eps);
                 const dy = (getZ(currX, currY + eps, t) - getZ(currX, currY - eps, t)) / (2 * eps);
 
