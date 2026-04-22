@@ -1,64 +1,13 @@
-import { Suspense, useRef, useState, useMemo, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Canvas, useFrame } from "@react-three/fiber";
-import * as THREE from "three";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { MetaTags } from "../components/MetaTags";
 import { Zap, Crown, Trophy, ArrowRight, Star, ShieldCheck } from "lucide-react";
 import { supabase } from "../services/supabaseClient";
 
-// ─── AMBIENT PARTICLES ───
-const AmbientParticles = () => {
-  const ref = useRef<THREE.Points>(null);
-  const COUNT = 1000;
-  const positions = useMemo(() => {
-    const a = new Float32Array(COUNT * 3);
-    for (let i = 0; i < COUNT; i++) {
-      a[i * 3] = (Math.random() - 0.5) * 40;
-      a[i * 3 + 1] = (Math.random() - 0.5) * 30;
-      a[i * 3 + 2] = (Math.random() - 0.5) * 30;
-    }
-    return a;
-  }, []);
-  useFrame((s) => { if (ref.current) ref.current.rotation.y = s.clock.elapsedTime * 0.02; });
-  return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={COUNT} array={positions} itemSize={3} />
-      </bufferGeometry>
-      <pointsMaterial size={0.05} color="#06b6d4" transparent opacity={0.6} sizeAttenuation depthWrite={false} blending={THREE.AdditiveBlending} />
-    </points>
-  );
-};
-
-// ─── FLOATING GEOMETRY HERO ───
-const FloatingShapes = () => {
-  const groupRef = useRef<THREE.Group>(null);
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.5;
-      groupRef.current.rotation.y += 0.005;
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      <mesh position={[-2, 1, 0]} rotation={[0.5, 0.5, 0]}>
-        <torusKnotGeometry args={[1, 0.3, 128, 16]} />
-        <meshPhysicalMaterial color="#a855f7" metalness={0.8} roughness={0.2} wireframe />
-      </mesh>
-      <mesh position={[2, -1, 1]} rotation={[-0.5, 0.5, 0.5]}>
-        <icosahedronGeometry args={[1.5, 0]} />
-        <meshPhysicalMaterial color="#06b6d4" metalness={0.7} roughness={0.1} clearcoat={1} transmission={0.9} thickness={1} ior={1.5} />
-      </mesh>
-      <mesh position={[0, 0, -3]}>
-        <sphereGeometry args={[2, 64, 64]} />
-        <meshPhysicalMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={0.2} metalness={0.9} roughness={0.1} wireframe />
-      </mesh>
-    </group>
-  );
-};
+// Lazy load the 3D background so Three.js is not in the main bundle!
+const Hero3DBackground = lazy(() => import("../components/Hero3DBackground"));
 
 // ─── LEADERBOARD COMPONENT ───
 const TopPlayers = () => {
@@ -124,14 +73,9 @@ export function HomePage() {
 
       {/* 3D Background Canvas */}
       <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100vh", zIndex: 0 }}>
-        <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[10, 10, 5]} intensity={1.5} />
-          <Suspense fallback={null}>
-            <AmbientParticles />
-            <FloatingShapes />
-          </Suspense>
-        </Canvas>
+        <Suspense fallback={null}>
+          <Hero3DBackground />
+        </Suspense>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(2,6,23,0.3) 0%, #020617 100%)", pointerEvents: "none" }} />
       </div>
 
