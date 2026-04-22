@@ -146,12 +146,13 @@ export function StudentDashboardPage() {
       <main className="teacher-main" style={{ width: "100%", padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
         
         {/* HEADER */}
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", borderBottom: "1px solid #1e293b", paddingBottom: "1rem" }}>
+        <header style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", borderBottom: "1px solid #1e293b", paddingBottom: "1rem", gap: "1rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
             <UserCircle size={48} color="#a855f7" />
-            <div>
-              <h1 style={{ color: "white", fontSize: "1.8rem", margin: 0 }}>
-                {t("student_dashboard.welcome", "Welcome back")}, {profile?.full_name || "Student"}
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <h1 style={{ color: "white", fontSize: "1.6rem", margin: 0, display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                <span>{t("student_dashboard.welcome", "Welcome back")}</span>
+                <span>{profile?.full_name || "Student"}</span>
               </h1>
               <p style={{ color: "#94a3b8", margin: 0 }}>{t("student_dashboard.title", "Student Dashboard")}</p>
             </div>
