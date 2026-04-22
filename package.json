@@ -10,6 +10,9 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },
+  "overrides": {
+    "onnxruntime-web": "^1.24.3"
+  },
   "dependencies": {
     "@gradio/client": "^2.1.0",
     "@imgly/background-removal": "^1.7.0",
