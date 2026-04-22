@@ -11,7 +11,9 @@
     "preview": "vite preview"
   },
   "overrides": {
-    "onnxruntime-web": "^1.24.3"
+    "onnxruntime-web": "^1.24.3",
+    "dompurify": "^3.3.4",
+    "esbuild": "^0.25.0"
   },
   "dependencies": {
     "@gradio/client": "^2.1.0",
