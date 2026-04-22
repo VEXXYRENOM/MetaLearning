@@ -1,4 +1,4 @@
-import {
+import React, {
   Suspense,
   useCallback,
   useEffect,
@@ -8,19 +8,52 @@ import {
   type ChangeEvent,
 } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 import { OrbitControls, Html } from "@react-three/drei";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { QRCodeSVG } from "qrcode.react";
 import { getLesson, type LessonKind } from "../data/lessons";
+import { supabase } from "../services/supabaseClient";
 import { GltfScene } from "../components/lesson/GltfScene";
 import { ArtifactGltfModel } from "../components/experience/ArtifactGltfModel";
 import { RotatingGroup } from "../components/lesson/RotatingGroup";
 import { SceneBackdrop } from "../components/lesson/SceneBackdrop";
 import { ImageTo3dVolume } from "../components/lesson/ImageTo3dVolume";
-import { useHandTracking } from "../hooks/useHandTracking";
+import { useMediaPipe } from "../hooks/useMediaPipe";
 import { HandTrackedModel } from "../components/lesson/HandTrackedModel";
 import { HandLight } from "../components/lesson/HandLight";
 import { ImageCropModal } from "../components/lesson/ImageCropModal";
+import { ThreeErrorBoundary } from "../components/ThreeErrorBoundary";
+import { MetaTags } from "../components/MetaTags";
+import { showToast } from "../components/Toast";
+import { useAuth } from "../contexts/AuthContext";
+import { LessonQA } from "../components/lesson/LessonQA";
+import { QuizEditor } from "../components/lesson/QuizEditor";
+import { QuizOverlay } from "../components/lesson/QuizOverlay";
+import { LessonRating } from "../components/lesson/LessonRating";
+import { useClassroomSync, type CameraState } from "../hooks/useClassroomSync";
+import { useHotspots, HotspotMarker, PendingHotspotMarker, HotspotForm } from "../components/lesson/HotspotSystem";
+import { Target } from "lucide-react";
+import { useLearningAnalytics } from "../lib/learningAnalytics";
+
+// ── Premium 3D loading spinner shown while lazy components load ──────────────
+const ThreeDLoading = () => (
+  <div style={{
+    display: 'flex', flexDirection: 'column', alignItems: 'center',
+    justifyContent: 'center', height: '100%', minHeight: '400px',
+    color: '#94a3b8', gap: '16px',
+  }}>
+    <div style={{
+      width: '40px', height: '40px',
+      border: '3px solid rgba(255,255,255,0.1)',
+      borderTop: '3px solid #3b82f6',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+    }}/>
+    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <span style={{ fontSize: '0.9rem' }}>جاري تحميل النموذج ثلاثي الأبعاد...</span>
+  </div>
+);
 
 // --- Lazy Load ALL Heavy 3D Assets ---
 const BeatingHeart3D = lazy(() => import("../components/lesson/BeatingHeart3D").then(m => ({ default: m.BeatingHeart3D })));
@@ -96,10 +129,43 @@ function isProcedural(kind: LessonKind): boolean {
   return kind.startsWith("procedural-");
 }
 
+/** True if the id looks like a Supabase UUID (e.g. "3f7a-bc12-...") */
+function isUUID(id: string | undefined): boolean {
+  return !!id && id.length > 20 && id.includes("-");
+}
+
 export function LessonPage() {
   const { lessonId } = useParams();
-  const lesson = getLesson(lessonId);
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get("session") ?? "";
+  const { profile } = useAuth();
+  const isTeacher = profile?.role === "teacher";
 
+  // Start with direct lookup (works for preset IDs like "beating-heart")
+  const [resolvedLesson, setResolvedLesson] = useState(() => getLesson(lessonId));
+  const [dbLoading, setDbLoading] = useState(false);
+
+  // If lessonId is a Supabase UUID, fetch model_key from DB to resolve the preset
+  useEffect(() => {
+    if (isUUID(lessonId) && !resolvedLesson) {
+      setDbLoading(true);
+      supabase
+        .from("lessons")
+        .select("model_key")
+        .eq("id", lessonId)
+        .single()
+        .then(({ data }) => {
+          if (data?.model_key) {
+            const found = getLesson(data.model_key);
+            setResolvedLesson(found ?? undefined);
+          }
+          setDbLoading(false);
+        });
+    }
+  }, [lessonId, resolvedLesson]);
+
+  // Use resolvedLesson everywhere (replaces the old `lesson` variable)
+  const lesson = resolvedLesson;
   const [modelScale, setModelScale] = useState(1);
   const [autoRotate, setAutoRotate] = useState(true);
   const [xrayMode, setXrayMode] = useState(false);
@@ -114,10 +180,60 @@ export function LessonPage() {
   const [teacherImageHint, setTeacherImageHint] = useState<string | null>(null);
   const [rawImageForCrop, setRawImageForCrop] = useState<string | null>(null);
   const [cropModalOpen, setCropModalOpen] = useState(false);
+  
+  const [showQuizEditor, setShowQuizEditor] = useState(false);
+  const [showQuizOverlay, setShowQuizOverlay] = useState(false);
+  const [quizScore, setQuizScore] = useState<number | null>(null);
+
   const canvasHostRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { handData, startTracking, stopTracking, isActive, isLoading } = useHandTracking(videoRef);
+  const orbitRef = useRef<OrbitControlsImpl>(null);
+  const [remoteCam, setRemoteCam] = useState<CameraState | null>(null);
+  const { handData, startTracking, stopTracking, isActive, isLoading } = useMediaPipe({ enabled: false, videoRef });
 
+  // ── X-1: Live Classroom Sync ──────────────────────────────────────────────
+  const { broadcastCamera } = useClassroomSync({
+    sessionId,
+    role: isTeacher ? "teacher" : "student",
+    teacherId: profile?.id ?? "",
+    onRemoteUpdate: (cam) => {
+      setRemoteCam(cam);
+    },
+  });
+
+  // Apply remote camera to OrbitControls (students only)
+  useEffect(() => {
+    if (!remoteCam || isTeacher) return;
+    const oc = orbitRef.current;
+    if (!oc) return;
+    const { position, target } = remoteCam;
+    oc.object.position.set(...position);
+    oc.target.set(...target);
+    oc.update();
+  }, [remoteCam, isTeacher]);
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // ── X-2: Spatial Annotator (Hotspots) ────────────────────────────────────
+  const {
+    hotspots,
+    pendingPos,
+    placingMode,
+    setPlacingMode,
+    handleModelClick,
+    saveHotspot,
+    deleteHotspot,
+    cancelPending,
+  } = useHotspots(lessonId, isTeacher);
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // ── X-3: Spatial Analytics Engine ────────────────────────────────────────
+  const { trackHotspotClick, trackQuizAnswer } = useLearningAnalytics({
+    lessonId: lessonId || "",
+    studentId: profile?.id || "",
+    sessionId: sessionId,
+    enabled: !isTeacher // Only track students
+  });
+  // ─────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
     const u = new URL(window.location.href);
@@ -247,9 +363,11 @@ export function LessonPage() {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopyDone(true);
+      showToast({ type: 'success', title: 'Link Copied!', message: 'Lesson URL copied to clipboard' });
       setTimeout(() => setCopyDone(false), 2000);
     } catch {
       setCopyDone(false);
+      showToast({ type: 'error', title: 'Copy Failed', message: 'Could not access clipboard' });
     }
   };
 
@@ -258,6 +376,21 @@ export function LessonPage() {
     if (!el) return;
     void el.requestFullscreen?.();
   };
+
+  // Show loading while resolving UUID from Supabase
+  if (dbLoading) {
+    return (
+      <div style={{
+        height: "100vh", display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        background: "#0a0e14", color: "#a78bfa", gap: "1rem"
+      }}>
+        <div style={{ width: 48, height: 48, border: "4px solid #a78bfa", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <p style={{ fontSize: "1.1rem", fontWeight: 600 }}>Loading lesson…</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   if (!lesson) {
     return <Navigate to="/" replace />;
@@ -274,6 +407,25 @@ export function LessonPage() {
 
   return (
     <div className="lesson-layout">
+      <MetaTags
+        title={lesson.titleEn || lesson.titleAr}
+        description={`Interactive 3D lesson: ${lesson.titleEn || lesson.titleAr}. Powered by MetaLearning AI.`}
+        path={`/lesson/${lessonId}`}
+      />
+      {lessonId && profile && (
+        <LessonQA lessonId={lessonId} studentId={profile.id} isTeacher={isTeacher} />
+      )}
+      {showQuizEditor && lessonId && <QuizEditor lessonId={lessonId} onClose={() => setShowQuizEditor(false)} />}
+      {showQuizOverlay && lessonId && (
+        <QuizOverlay 
+          lessonId={lessonId} 
+          onClose={() => setShowQuizOverlay(false)} 
+          onComplete={(score) => {
+            setQuizScore(score);
+            trackQuizAnswer("quiz_overall", score > 50, `Score: ${score}`);
+          }}
+        />
+      )}
       {isHeart && (
         <ImageCropModal
           open={cropModalOpen}
@@ -466,6 +618,38 @@ export function LessonPage() {
         </section>
 
         <section className="lesson-section">
+          <h2 className="lesson-h2">التفاعل والتقييم</h2>
+          <div className="lesson-row" style={{ flexDirection: "column", gap: "10px" }}>
+            {isTeacher ? (
+              <>
+                <button type="button" className="lesson-btn" onClick={() => setShowQuizEditor(true)}>
+                  إدارة الاختبار (Quiz)
+                </button>
+                <button 
+                  type="button" 
+                  className={`lesson-btn ${placingMode ? 'primary' : ''}`}
+                  onClick={() => setPlacingMode(!placingMode)}
+                  style={placingMode ? { background: '#06b6d4', color: '#000', borderColor: '#06b6d4' } : {}}
+                >
+                  <Target size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> 
+                  {placingMode ? "إلغاء وضع النقاط" : "إضافة نقاط تفاعلية (Hotspot)"}
+                </button>
+              </>
+            ) : (
+              <button type="button" className="lesson-btn primary" onClick={() => setShowQuizOverlay(true)}>
+                إجراء الاختبار
+              </button>
+            )}
+          </div>
+          
+          {!isTeacher && lessonId && profile && (
+            <div style={{ marginTop: "1rem" }}>
+              <LessonRating lessonId={lessonId} studentId={profile.id} />
+            </div>
+          )}
+        </section>
+
+        <section className="lesson-section">
           <h2 className="lesson-h2">مشاركة مع التلاميذ</h2>
           <div className="lesson-row">
             <button type="button" className="lesson-btn primary" onClick={copyLink}>
@@ -519,6 +703,16 @@ export function LessonPage() {
             )}
           </div>
         )}
+        
+        {/* Render Hotspot Form outside canvas for crisp text */}
+        {pendingPos && profile && isTeacher && (
+          <HotspotForm
+            teacherId={profile.id}
+            onSave={saveHotspot}
+            onCancel={cancelPending}
+          />
+        )}
+
         <div className="lesson-main-stage" style={{ zIndex: 1 }}>
           <div className="lesson-canvas-inner">
             {!showCanvas && (
@@ -528,6 +722,8 @@ export function LessonPage() {
               </div>
             )}
             {showCanvas && (
+              <ThreeErrorBoundary>
+              <React.Suspense fallback={<ThreeDLoading />}>
               <Canvas
                 shadows
                 camera={{ position: [0, 0.35, 4.1], fov: 45 }}
@@ -553,44 +749,70 @@ export function LessonPage() {
                   )}
                   <RotatingGroup enabled={autoRotate && !isActive} speed={0.42}>
                     <HandTrackedModel handData={isActive ? handData : null} baseScale={1}>
-                      {isHeart && teacherImageUrl && (
-                        <ImageTo3dVolume
-                          key={teacherImageUrl}
-                          url={teacherImageUrl}
-                          modelScale={modelScale}
-                          depthScale={0.45}
-                        />
-                      )}
-                      {isHeart && !teacherImageUrl && <BeatingHeart3D />}
-                      {!isHeart && isProceduralLesson && ProceduralComponent && (
-                        <group scale={[modelScale, modelScale, modelScale]}>
-                          <ProceduralComponent />
-                        </group>
-                      )}
-                      {!isProceduralLesson && effectiveGltfUrl && lesson.kind === "gltf-artifact" && (
-                        <group scale={[2.5, 2.5, 2.5]}>
-                          <ArtifactGltfModel url={effectiveGltfUrl} modelScale={modelScale} />
-                        </group>
-                      )}
-                      {!isProceduralLesson && effectiveGltfUrl && lesson.kind !== "gltf-artifact" && (
-                        <GltfScene
-                          url={effectiveGltfUrl}
-                          modelScale={modelScale * 0.08}
-                          selectedName={selectedGltfName}
-                          onSelectName={onGltfSelect}
-                          xrayMode={xrayMode}
-                        />
-                      )}
+                      <group onPointerUp={handleModelClick}>
+                        {isHeart && teacherImageUrl && (
+                          <ImageTo3dVolume
+                            key={teacherImageUrl}
+                            url={teacherImageUrl}
+                            modelScale={modelScale}
+                            depthScale={0.45}
+                          />
+                        )}
+                        {isHeart && !teacherImageUrl && <BeatingHeart3D />}
+                        {!isHeart && isProceduralLesson && ProceduralComponent && (
+                          <group scale={[modelScale, modelScale, modelScale]}>
+                            <ProceduralComponent />
+                          </group>
+                        )}
+                        {!isProceduralLesson && effectiveGltfUrl && lesson.kind === "gltf-artifact" && (
+                          <group scale={[2.5, 2.5, 2.5]}>
+                            <ArtifactGltfModel url={effectiveGltfUrl} modelScale={modelScale} />
+                          </group>
+                        )}
+                        {!isProceduralLesson && effectiveGltfUrl && lesson.kind !== "gltf-artifact" && (
+                          <GltfScene
+                            url={effectiveGltfUrl}
+                            modelScale={modelScale * 0.08}
+                            selectedName={selectedGltfName}
+                            onSelectName={onGltfSelect}
+                            xrayMode={xrayMode}
+                          />
+                        )}
+                        
+                        {/* Hotspot Markers */}
+                        {hotspots.map((hs) => (
+                          <HotspotMarker 
+                            key={hs.id} 
+                            hotspot={hs} 
+                            isTeacher={isTeacher} 
+                            onDelete={deleteHotspot}
+                            onClick={() => trackHotspotClick(hs.id, hs.title)}
+                          />
+                        ))}
+                        {pendingPos && <PendingHotspotMarker position={pendingPos} />}
+                      </group>
                     </HandTrackedModel>
                   </RotatingGroup>
                   <OrbitControls
+                    ref={orbitRef}
                     enablePan
                     minDistance={1.2}
                     maxDistance={12}
                     target={[0, 0.1, 0]}
+                    onChange={() => {
+                      if (!isTeacher || !orbitRef.current) return;
+                      const cam = orbitRef.current.object;
+                      const tgt = orbitRef.current.target;
+                      broadcastCamera({
+                        position: [cam.position.x, cam.position.y, cam.position.z],
+                        target: [tgt.x, tgt.y, tgt.z],
+                      });
+                    }}
                   />
                 </Suspense>
               </Canvas>
+              </React.Suspense>
+              </ThreeErrorBoundary>
             )}
           </div>
         </div>

@@ -1,0 +1,135 @@
+{
+  "hero": {
+    "title_meta": "Meta",
+    "title_learning": "Learning",
+    "desc": "Dive into immersive 3D education. Explore interactive worlds and generate custom lessons powered by advanced AI.",
+    "btn_start": "Let's begin"
+  },
+  "options": {
+    "subtitle": "Supported by TunEdu AI",
+    "teacher_title": "Teacher Portal",
+    "teacher_desc": "Create interactive 3D lessons effortlessly. Advanced tools for educators to design immersive learning experiences.",
+    "teacher_link": "Start Designing →",
+    "lab_title": "AI 3D Lab",
+    "lab_desc": "Access our advanced AI Hub. Transform 2D images or write prompts to generate high-fidelity 3D models instantly.",
+    "lab_link": "Enter Lab →",
+    "student_title": "Student / Explorer",
+    "student_desc": "Join a live session with a PIN code or QR scan. Interact with 3D educational modules.",
+    "student_link": "Join Lesson →"
+  },
+  "auth": {
+    "login_title": "Sign In",
+    "signup_title": "Create Account",
+    "email": "Email",
+    "password": "Password",
+    "full_name": "Full Name",
+    "role": "Role",
+    "teacher": "Teacher",
+    "student": "Student",
+    "login_btn": "Sign In",
+    "signup_btn": "Create Account",
+    "switch_to_signup": "Don't have an account? Sign up",
+    "switch_to_login": "Already have an account? Sign in",
+    "loading": "Loading...",
+    "google_signin": "Continue with Google"
+  },
+  "join": {
+    "title": "Join a Lesson",
+    "name_label": "Your Name",
+    "name_placeholder": "Enter your full name",
+    "code_label": "Lesson Code",
+    "code_placeholder": "e.g. MTL-739",
+    "btn_join": "Join Now",
+    "joining": "Joining...",
+    "error_not_found": "Code not found or session expired",
+    "success": "Joined successfully!"
+  },
+  "nav": {
+    "back_hub": "Back to Hub",
+    "logout": "Logout"
+  },
+  "lang": {
+    "ar": "العربية",
+    "en": "English",
+    "fr": "Français",
+    "es": "Español"
+  },
+  "student_dashboard": {
+    "title": "Student Dashboard",
+    "welcome": "Welcome back",
+    "recent_lessons": "Recent Lessons",
+    "join_new": "Join a New Lesson",
+    "total_lessons": "Total Lessons",
+    "subjects": "Subjects",
+    "days_active": "Days Active",
+    "no_history": "You haven't attended any lessons yet"
+  },
+  "analytics": {
+    "title": "Teacher Analytics Hub",
+    "total_lessons": "Total Lessons",
+    "total_students": "Enrolled Students",
+    "total_sessions": "Active Sessions",
+    "subject_dist": "Subject Distribution",
+    "recent_sessions": "Recent Sessions",
+    "btn_export": "Export PDF"
+  },
+  "role": {
+    "title": "Choose Your Identity",
+    "desc": "Select how you want to experience the MetaLearning platform",
+    "teacher": "Teacher / Creator",
+    "teacher_desc": "Design 3D lesson paths, manage live sessions, and track student analytics.",
+    "student": "Student / Explorer",
+    "student_desc": "Join live 3D classes, interact with 3D modules, and complete educational quests.",
+    "creator": "Creator / Engineer",
+    "creator_desc": "Transform images and ideas into 3D models using advanced AI. For engineers, designers and hobbyists.",
+    "admin": "Platform Admin",
+    "admin_desc": "Full platform management: users, roles, and performance statistics.",
+    "btn_confirm": "Enter Workspace"
+  },
+  "generation_stages": {
+    "removing_bg": "Remove BG",
+    "connecting": "Connect",
+    "uploading": "Upload",
+    "processing": "Analyze",
+    "completed": "Ready"
+  },
+  "quiz": {
+    "title": "Interactive Quiz",
+    "question": "Question",
+    "next": "Next",
+    "submit": "Submit Answer",
+    "correct": "Correct!",
+    "incorrect": "Incorrect",
+    "score": "Your Score",
+    "complete": "Quiz Complete!",
+    "add_question": "Add Question",
+    "no_quiz": "No quiz for this lesson"
+  },
+  "rating": {
+    "title": "Rate this lesson",
+    "thanks": "Thanks for your review!",
+    "placeholder": "Optional comment..."
+  },
+  "embed": {
+    "title": "Embed on your site",
+    "copy": "Copy embed code",
+    "copied": "Copied!"
+  },
+  "qa": {
+    "title": "Ask a Question",
+    "placeholder": "Type your question...",
+    "send": "Send",
+    "no_questions": "No questions yet",
+    "mark_answered": "Mark Answered"
+  },
+  "cookie": {
+    "message": "We use essential cookies for authentication and language preferences. No tracking or advertising cookies.",
+    "accept": "Accept & Continue",
+    "learn_more": "Learn more"
+  },
+  "upgrade": {
+    "banner": "Upgrade to Pro — Unlimited lessons · Image to 3D · Full analytics",
+    "cta": "$9/mo →",
+    "annual_save": "Save 17%"
+  }
+}

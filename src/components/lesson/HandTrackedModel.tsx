@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Group } from "three";
-import { HandData } from "../../hooks/useHandTracking";
+import { HandData } from "../../hooks/useMediaPipe";
 
 interface HandTrackedModelProps {
   handData: HandData | null;

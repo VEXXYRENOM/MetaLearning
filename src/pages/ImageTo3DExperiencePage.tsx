@@ -1,4 +1,5 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, Stars } from "@react-three/drei";
@@ -25,11 +26,12 @@ import { DepthMesh3D } from "../components/experience/DepthMesh3D";
 import { HandFollowGroup } from "../components/experience/HandFollowGroup";
 import { True3DViewer } from "../components/experience/True3DViewer";
 import { Procedural3DObject } from "../components/experience/Procedural3DObject";
-import { useMediaPipeHands } from "../hooks/useMediaPipeHands";
+import { useMediaPipe } from "../hooks/useMediaPipe";
 
-import { stableFast3dPipeline, SF3DStatus } from "../services/stableFast3dService";
+import { generateImageTo3D } from "../services/threeDGenerationService";
 import { matchPromptToPresetModel, translateForCategory, detectCategory3D } from "../services/freeAiEngine";
 import { searchGlobal3DModels } from "../services/globalModelSearchService";
+import { huggingfaceTextTo3DPipeline } from "../services/huggingfaceTextTo3D";
 import "../ai-lab.css";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -45,30 +47,41 @@ function fileToDataUri(file: File): Promise<string> {
 
 // ── Stage Tracker Data ─────────────────────────────────────────────────────
 
+export type SF3DStatus = "REMOVING_BG" | "CONNECTING" | "UPLOADING" | "PROCESSING" | "SUCCEEDED" | "FAILED";
+
 interface Stage {
   key: SF3DStatus;
   label: string;
   icon: React.ElementType;
 }
 
-const STAGES: Stage[] = [
-  { key: "REMOVING_BG", label: "خلفية",  icon: Scissors    },
-  { key: "CONNECTING",  label: "اتصال",   icon: Wifi        },
-  { key: "UPLOADING",   label: "رفع",     icon: Send        },
-  { key: "PROCESSING",  label: "بناء",    icon: Wand2       },
-  { key: "SUCCEEDED",   label: "اكتمل",  icon: CheckCircle },
-];
+// STAGES moved inside component for t() access
 
-function getStageIndex(status: SF3DStatus | null): number {
-  if (!status) return -1;
-  return STAGES.findIndex(s => s.key === status);
-}
+
+// getStageIndex moved inside component for STAGES access
+
 
 // ── Component ──────────────────────────────────────────────────────────────
 
 export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaultInputType?: "image" | "text" }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const STAGES: Stage[] = [
+    { key: "REMOVING_BG", label: t("generation_stages.removing_bg"),  icon: Scissors    },
+    { key: "CONNECTING",  label: t("generation_stages.connecting"),   icon: Wifi        },
+    { key: "UPLOADING",   label: t("generation_stages.uploading"),    icon: Send        },
+    { key: "PROCESSING",  label: t("generation_stages.processing"),   icon: Wand2       },
+    { key: "SUCCEEDED",   label: t("generation_stages.completed"),    icon: CheckCircle },
+  ];
+
   const inputType = defaultInputType;
+
+  function getStageIndex(status: string | null): number {
+    if (!status) return -1;
+    return STAGES.findIndex((s: Stage) => s.key === status);
+  }
+
   const [textPrompt, setTextPrompt]   = useState("");
 
   const [imageUri, setImageUri]       = useState<string | null>(null);
@@ -77,7 +90,7 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
   const [displacementScale, setDisplacementScale] = useState(0.65);
   const [procedural3DCategory, setProcedural3DCategory] = useState<string | null>(null);
 
-  const [sf3dStatus,   setSf3dStatus]   = useState<SF3DStatus | null>(null);
+  const [sf3dStatus,   setSf3dStatus]   = useState<string | null>(null);
   const [sf3dMessage,  setSf3dMessage]  = useState<string>("");
   const [sf3dProgress, setSf3dProgress] = useState(0);
   const [sf3dError,    setSf3dError]    = useState<string | null>(null);
@@ -104,12 +117,30 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
   }, [sf3dProgress, processing]);
 
   const { videoRef, palm, ready: handsReady, error: handsError } =
-    useMediaPipeHands(handTracking && Boolean(imageUri));
+    useMediaPipe({ enabled: handTracking && Boolean(imageUri) });
 
   // ── Image Pick & Pipeline ──────────────────────────────────────────────
 
   const onPickImage = useCallback(async (file: File | null) => {
-    if (!file || !file.type.startsWith("image/")) return;
+    if (!file) return;
+
+    // Validate type
+    const validTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      setSf3dStatus("FAILED");
+      setSf3dError("❌ صيغة غير مدعومة! يرجى رفع صورة JPG أو PNG أو WEBP.");
+      setImageUri(null);
+      return;
+    }
+
+    // Validate size (Max 10MB)
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setSf3dStatus("FAILED");
+      setSf3dError("❌ الصورة كبيرة جداً! الحد الأقصى هو 10 ميغابايت.");
+      setImageUri(null);
+      return;
+    }
 
     setProcessing(true);
     setImageUri(null);
@@ -124,12 +155,12 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
       const uri = await fileToDataUri(file);
 
       if (mode === "3d") {
-        const glbUrl = await stableFast3dPipeline(uri, (p, s, msg) => {
+        const result = await generateImageTo3D(uri, (p, s, msg) => {
           setSf3dProgress(p);
           setSf3dStatus(s);
           setSf3dMessage(msg);
         });
-        setTrue3dGlbUrl(glbUrl);
+        setTrue3dGlbUrl(result.modelUrl);
         setImageUri(uri);
         setProcessing(false);
       } else {
@@ -147,6 +178,13 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
   }, [mode]);
 
   // ── Text To 3D Logic ───────────────────────────────────────────────────
+
+  const handleCancel = useCallback(() => {
+    setProcessing(false);
+    setSf3dStatus("FAILED");
+    setSf3dError("تم إلغاء التوليد بنجاح.");
+    setSf3dProgress(0);
+  }, []);
 
   const handleTextSubmit = async () => {
     if (!textPrompt.trim()) return;
@@ -178,7 +216,7 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
     }
 
     // ── الأولوية 2: البحث في مكتبات المجسمات المجانية (سريع وموثوق) ──
-    setSf3dProgress(30);
+    setSf3dProgress(20);
     try {
       const globalResult = await searchGlobal3DModels(textPrompt, (msg) => {
         setSf3dMessage(msg);
@@ -198,14 +236,42 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
       console.warn("Global search failed:", err);
     }
 
-    // ── الأولوية 3: مجسم Three.js إجرائي (يعمل دائماً كحل بديل فوري) ──────────────
-    setSf3dProgress(70);
-    setSf3dMessage("🔧 تعذر العثور على مجسم جاهز، جاري بناء مجسم إجرائي...");
+    // ── الأولوية 3: توليد AI حقيقي عبر HuggingFace (نص → صورة → 3D) ──────
+    setSf3dProgress(35);
+    setSf3dMessage("🤖 لم يُعثر على مجسم جاهز، جاري التوليد بالذكاء الاصطناعي...");
+    try {
+      const glbUrl = await huggingfaceTextTo3DPipeline(
+        textPrompt,
+        (progress, _status, message) => {
+          // Scale HF progress (0→100) into our range (35→95)
+          const scaled = 35 + Math.round(progress * 0.60);
+          setSf3dProgress(scaled);
+          setSf3dStatus("PROCESSING");
+          setSf3dMessage(message);
+        }
+      );
+      setSf3dProgress(100);
+      setSf3dStatus("SUCCEEDED");
+      setSf3dMessage("🎉 تم توليد المجسم بالذكاء الاصطناعي بنجاح!");
+      setMode("3d");
+      setTrue3dGlbUrl(glbUrl);
+      setImageUri(SVG_PLACEHOLDER);
+      setTextPrompt("");
+      setProcessing(false);
+      return;
+    } catch (aiErr: any) {
+      console.warn("[Text-to-3D] HuggingFace AI generation failed, falling back to Procedural:", aiErr);
+      setSf3dMessage("⚠️ الذكاء الاصطناعي غير متاح الآن، جاري بناء مجسم إجرائي...");
+    }
+
+    // ── الأولوية 4: مجسم Three.js إجرائي (الملاذ الأخير — يعمل دائماً) ──
+    setSf3dProgress(90);
     const englishWord = await translateForCategory(textPrompt);
     const category = detectCategory3D(englishWord);
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 400));
     setSf3dProgress(100);
     setSf3dStatus("SUCCEEDED");
+    setSf3dMessage("✅ تم بناء مجسم إجرائي استناداً على تصنيف الموضوع.");
     setProcedural3DCategory(category);
     setMode("procedural");
     setImageUri("placeholder");
@@ -473,7 +539,7 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
 
               <p className="progress-message" dir="rtl">{sf3dMessage}</p>
 
-              <div className="ai-progress-track mt-4" style={{ width: "260px", height: "5px" }}>
+              <div className="ai-progress-track mt-4" style={{ width: "260px", height: "5px", marginBottom: "8px" }}>
                 <div
                   className="ai-progress-fill"
                   style={{
@@ -483,6 +549,28 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
                   }}
                 />
               </div>
+              
+              <div style={{ color: "#94a3b8", fontSize: "0.85rem", marginBottom: "20px" }}>
+                {sf3dProgress > 0 && sf3dProgress < 100 ? `⏳ الوقت المتبقي تقريباً: ${Math.max(1, Math.ceil((100 - sf3dProgress) / 15))} ثانية` : ""}
+              </div>
+
+              <button 
+                onClick={handleCancel}
+                style={{
+                  background: "transparent",
+                  border: "1px solid #ef4444",
+                  color: "#ef4444",
+                  padding: "6px 16px",
+                  borderRadius: "20px",
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                  transition: "all 0.2s"
+                }}
+                onMouseOver={e => e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.1)"}
+                onMouseOut={e => e.currentTarget.style.backgroundColor = "transparent"}
+              >
+                إلغاء العملية (Cancel)
+              </button>
             </div>
           )}
 

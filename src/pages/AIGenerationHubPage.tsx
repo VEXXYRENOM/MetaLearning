@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "../ai-lab.css";
 
 // CSS-only floating dots to avoid WebGL context exhaustion
@@ -25,8 +26,9 @@ const HubBackground = () => (
 );
 
 export function AIGenerationHubPage() {
+  const { t } = useTranslation();
   return (
-    <div className="ml-landing" style={{ minHeight: "100vh", position: "relative" }}>
+    <div className="ml-landing" style={{ minHeight: "100vh", position: "relative" }} dir={t("dir") === "rtl" ? "rtl" : "ltr"}>
       <style>{`
         @keyframes hub-float {
           from { transform: translateY(0px) scale(1); }
@@ -44,17 +46,17 @@ export function AIGenerationHubPage() {
         <Link
           to="/"
           style={{
-            position: "absolute", top: "2rem", left: "2rem",
+            position: "absolute", top: "2rem", left: t("dir") === "rtl" ? "auto" : "2rem", right: t("dir") === "rtl" ? "2rem" : "auto",
             color: "#a78bfa", textDecoration: "none", fontSize: "1.1rem",
             fontWeight: "bold", display: "flex", alignItems: "center", gap: "0.5rem", zIndex: 10,
           }}
         >
-          ← Back to Home
+          {t("nav.back_hub")}
         </Link>
 
         <div className="ml-options-header" style={{ marginBottom: "4rem" }}>
-          <h2 className="ml-options-title" style={{ fontSize: "3.5rem" }}>AI 3D Lab</h2>
-          <p className="ml-options-sub" style={{ fontSize: "1.2rem" }}>Choose your preferred generation method</p>
+          <h2 className="ml-options-title" style={{ fontSize: "3.5rem" }}>{t("options.lab_title")}</h2>
+          <p className="ml-options-sub" style={{ fontSize: "1.2rem" }}>{t("options.lab_desc")}</p>
         </div>
 
         {/* Cards */}

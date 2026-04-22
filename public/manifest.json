@@ -1,0 +1,26 @@
+{
+  "short_name": "MetaLearning",
+  "name": "MetaLearning — AI 3D Education",
+  "icons": [
+    {
+      "src": "pwa-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "pwa-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#0f172a",
+  "background_color": "#020617",
+  "description": "Revolutionizing education with interactive 3D and AI.",
+  "orientation": "portrait",
+  "dir": "ltr",
+  "lang": "en"
+}

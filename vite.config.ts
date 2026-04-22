@@ -1,51 +1,59 @@
-import { defineConfig, loadEnv } from "vite";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    // Increase chunk size warning threshold (Three.js is inherently large)
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Chunk 1: React core — almost never changes, cached forever
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
 
-  return {
-    plugins: [react()],
-    server: {
-      proxy: {
-        // ── Meshy 3D API ──
-        "/api/meshy": {
-          target: "https://api.meshy.ai",
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/meshy/, ""),
-          configure: (proxy) => {
-            proxy.on("proxyReq", (proxyReq) => {
-              const key = env.MESHY_API_KEY;
-              if (key) proxyReq.setHeader("Authorization", `Bearer ${key}`);
-            });
-          },
-        },
+          // Chunk 2: Three.js ecosystem — large but changes rarely
+          'three-vendor': [
+            'three',
+            '@react-three/fiber',
+            '@react-three/drei',
+            '@react-three/postprocessing',
+          ],
 
-        // ── Pollinations AI Image Generator ──
-        "/api/pollinations": {
-          target: "https://image.pollinations.ai",
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/pollinations/, ""),
-          configure: (proxy) => {
-            proxy.on("proxyReq", (proxyReq) => {
-              proxyReq.setHeader("referer", "https://image.pollinations.ai");
-            });
-          },
-        },
+          // Chunk 3: Supabase + Stripe — auth/payments
+          'backend-vendor': [
+            '@supabase/supabase-js',
+          ],
 
-        // ── Lexica.art AI Image Search ──
-        "/api/lexica": {
-          target: "https://lexica.art",
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/lexica/, ""),
-        },
+          // Chunk 4: i18n — translations
+          'i18n-vendor': [
+            'i18next',
+            'react-i18next',
+            'i18next-browser-languagedetector',
+          ],
 
-        // ── Local Express Backend ──
-        "/api/fal": {
-          target: "http://localhost:3001",
-          changeOrigin: true,
+          // Chunk 5: Animation (framer-motion) — only for pages that use it
+          'animation-vendor': ['framer-motion'],
+
+          // Chunk 6: Heavy AI/ML libraries — lazy-loaded pages only
+          'ai-vendor': [
+            '@tensorflow/tfjs',
+            '@tensorflow-models/depth-estimation',
+            'onnxruntime-web',
+            '@imgly/background-removal',
+            '@gradio/client',
+          ],
         },
       },
     },
-  };
+  },
+  // Prevent Vite from pre-bundling heavy libs (they are split above)
+  optimizeDeps: {
+    exclude: [
+      '@tensorflow/tfjs',
+      '@tensorflow-models/depth-estimation',
+      'onnxruntime-web',
+      '@imgly/background-removal',
+    ],
+  },
 });

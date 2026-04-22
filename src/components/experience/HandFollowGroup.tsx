@@ -3,7 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import type { ReactNode } from "react";
 import type { Group } from "three";
 import { Vector3 } from "three";
-import type { HandLandmark2D } from "../../hooks/useMediaPipeHands";
+import type { HandLandmark2D } from "../../hooks/useMediaPipe";
 
 type Props = {
   palm: HandLandmark2D | null;

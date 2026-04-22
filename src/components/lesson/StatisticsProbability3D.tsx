@@ -7,7 +7,7 @@ import {
   Line,
   Html,
 } from "@react-three/drei";
-import { useHandTracking } from "../../hooks/useHandTracking";
+import { useMediaPipe } from "../../hooks/useMediaPipe";
 
 const R = 12; 
 const W = 0.5; 
@@ -50,7 +50,7 @@ export const StatisticsProbability3D = () => {
 
   // AR Settings
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { handData, startTracking, isActive, isLoading } = useHandTracking(videoRef);
+  const { handData, startTracking, isActive, isLoading } = useMediaPipe({ enabled: false, videoRef });
   const lastHandPos = useRef(new THREE.Vector2());
   const [isShaking, setIsShaking] = useState(false);
 

@@ -1,0 +1,135 @@
+{
+  "hero": {
+    "title_meta": "Meta",
+    "title_learning": "Learning",
+    "desc": "Sumérgete en la educación 3D interactiva. Crea lecciones personalizadas con IA avanzada.",
+    "btn_start": "Comenzar"
+  },
+  "options": {
+    "subtitle": "Impulsado por TunEdu AI",
+    "teacher_title": "Portal del Profesor",
+    "teacher_desc": "Crea lecciones 3D interactivas sin esfuerzo. Herramientas avanzadas para que los educadores diseñen experiencias de aprendizaje inmersivas.",
+    "teacher_link": "Comenzar a Diseñar →",
+    "lab_title": "Laboratorio IA 3D",
+    "lab_desc": "Accede a nuestro avanzado Hub de IA. Transforma imágenes 2D o escribe prompts para generar modelos 3D de alta fidelidad al instante.",
+    "lab_link": "Entrar al Laboratorio →",
+    "student_title": "Estudiante / Explorador",
+    "student_desc": "Únete a una sesión en vivo con un código PIN o escaneo QR. Interactúa con módulos educativos 3D.",
+    "student_link": "Unirse a la Lección →"
+  },
+  "auth": {
+    "login_title": "Iniciar Sesión",
+    "signup_title": "Crear Cuenta",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "full_name": "Nombre completo",
+    "role": "Rol",
+    "teacher": "Profesor",
+    "student": "Estudiante",
+    "login_btn": "Iniciar Sesión",
+    "signup_btn": "Crear Cuenta",
+    "switch_to_signup": "¿No tienes una cuenta? Regístrate",
+    "switch_to_login": "¿Ya tienes una cuenta? Iniciar sesión",
+    "loading": "Cargando...",
+    "google_signin": "Continuar con Google"
+  },
+  "join": {
+    "title": "Unirse a una Lección",
+    "name_label": "Tu Nombre",
+    "name_placeholder": "Ingresa tu nombre completo",
+    "code_label": "Código de la Lección",
+    "code_placeholder": "ej. MTL-739",
+    "btn_join": "Unirse Ahora",
+    "joining": "Uniéndose...",
+    "error_not_found": "Código no encontrado o sesión expirada",
+    "success": "¡Te uniste exitosamente!"
+  },
+  "nav": {
+    "back_hub": "Volver al Hub",
+    "logout": "Cerrar sesión"
+  },
+  "lang": {
+    "ar": "Árabe",
+    "en": "Inglés",
+    "fr": "Francés",
+    "es": "Español"
+  },
+  "student_dashboard": {
+    "title": "Panel del Estudiante",
+    "welcome": "Bienvenido de vuelta",
+    "recent_lessons": "Lecciones Recientes",
+    "join_new": "Unirse a una Nueva Lección",
+    "total_lessons": "Lecciones Totales",
+    "subjects": "Materias",
+    "days_active": "Días Activos",
+    "no_history": "Aún no has asistido a ninguna lección"
+  },
+  "analytics": {
+    "title": "Centro de Análisis",
+    "total_lessons": "Lecciones Totales",
+    "total_students": "Estudiantes Inscritos",
+    "total_sessions": "Sesiones Activas",
+    "subject_dist": "Distribución de Materias",
+    "recent_sessions": "Lecciones Recientes",
+    "btn_export": "Exportar PDF"
+  },
+  "role": {
+    "title": "Elige tu Identidad",
+    "desc": "Selecciona cómo quieres experimentar la plataforma MetaLearning",
+    "teacher": "Profesor / Creador",
+    "teacher_desc": "Diseña rutas de lecciones 3D, gestiona sesiones en vivo y haz seguimiento de análisis de estudiantes.",
+    "student": "Estudiante / Explorador",
+    "student_desc": "Únete a clases 3D en vivo, interactúa con módulos 3D y completa misiones educativas.",
+    "creator": "Creador / Ingeniero",
+    "creator_desc": "Transforma imágenes e ideas en modelos 3D usando IA avanzada. Para ingenieros, diseñadores y aficionados.",
+    "admin": "Administrador de Plataforma",
+    "admin_desc": "Gestión completa de plataforma: usuarios, roles y estadísticas de rendimiento.",
+    "btn_confirm": "Entrar al Espacio de Trabajo"
+  },
+  "generation_stages": {
+    "removing_bg": "Eliminar Fondo",
+    "connecting": "Conectar",
+    "uploading": "Subir",
+    "processing": "Analizar",
+    "completed": "Listo"
+  },
+  "quiz": {
+    "title": "Cuestionario",
+    "question": "Pregunta",
+    "next": "Siguiente",
+    "submit": "Enviar Respuesta",
+    "correct": "¡Correcto!",
+    "incorrect": "Incorrecto",
+    "score": "Tu Puntuación",
+    "complete": "¡Cuestionario Completado!",
+    "add_question": "Agregar Pregunta",
+    "no_quiz": "No hay cuestionario para esta lección"
+  },
+  "rating": {
+    "title": "Califica esta lección",
+    "thanks": "¡Gracias por tu reseña!",
+    "placeholder": "Comentario opcional..."
+  },
+  "embed": {
+    "title": "Incrustar en tu sitio web",
+    "copy": "Copiar código de incrustación",
+    "copied": "¡Copiado!"
+  },
+  "qa": {
+    "title": "Hacer una Pregunta",
+    "placeholder": "Escribe tu pregunta...",
+    "send": "Enviar",
+    "no_questions": "Aún no hay preguntas",
+    "mark_answered": "Marcar Respondido"
+  },
+  "cookie": {
+    "message": "Utilizamos cookies esenciales para la autenticación y las preferencias de idioma. No hay cookies de seguimiento o publicidad.",
+    "accept": "Aceptar y Continuar",
+    "learn_more": "Aprender más"
+  },
+  "upgrade": {
+    "banner": "Mejora a Pro — Lecciones ilimitadas · Imagen a 3D · Análisis completo",
+    "cta": "$9/mes →",
+    "annual_save": "Ahorra 17%"
+  }
+}

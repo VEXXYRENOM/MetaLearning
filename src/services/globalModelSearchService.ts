@@ -36,6 +36,19 @@ const quickTranslate: Record<string, string> = {
   "راديو": "radio", "موسيقى": "music",
 };
 
+async function fetchWithRetry(url: string, options?: RequestInit, retries = 3, delay = 2000): Promise<Response> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.ok) return res;
+    } catch (e) {
+      if (i === retries - 1) throw e;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  throw new Error(`Failed to fetch after ${retries} attempts`);
+}
+
 async function smartTranslate(text: string): Promise<string> {
   const lower = text.toLowerCase().trim();
 
@@ -44,17 +57,21 @@ async function smartTranslate(text: string): Promise<string> {
     if (lower.includes(ar)) return en;
   }
 
-  // 2. Google Translate مجاني
+  // 2. Google Translate مجاني مع إعادة المحاولة
   const hasArabic = /[\u0600-\u06FF]/.test(lower);
   if (hasArabic) {
     try {
-      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ar&tl=en&dt=t&q=${encodeURIComponent(lower)}`;
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        if (data?.[0]?.[0]?.[0]) return data[0][0][0].toLowerCase();
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        return lower; // تخطي الترجمة إذا لم يكن هناك إنترنت
       }
-    } catch (e) { /* ignore */ }
+      
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ar&tl=en&dt=t&q=${encodeURIComponent(lower)}`;
+      const res = await fetchWithRetry(url, undefined, 3, 2000);
+      const data = await res.json();
+      if (data?.[0]?.[0]?.[0]) return data[0][0][0].toLowerCase();
+    } catch (e) { 
+      console.warn("[Translate Error]", e);
+    }
   }
 
   return lower;
@@ -100,9 +117,11 @@ const VERIFIED_MODELS: VerifiedModel[] = [
 
 async function verifyUrl(url: string): Promise<boolean> {
   try {
-    const res = await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(8000) });
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return false;
+    const res = await fetchWithRetry(url, { method: "HEAD", signal: AbortSignal.timeout(8000) }, 3, 2000);
     return res.ok;
-  } catch {
+  } catch (e){
+    console.warn("[Verify URL Error]", e);
     return false;
   }
 }
@@ -119,6 +138,13 @@ export async function searchGlobal3DModels(
   prompt: string,
   onUpdate?: (msg: string) => void
 ): Promise<SearchResult | null> {
+  
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    onUpdate?.("❌ لا يوجد اتصال بالإنترنت! يرجى التحقق من الشبكة ثم المحاولة...");
+    await new Promise(r => setTimeout(r, 1500));
+    return null;
+  }
+
   onUpdate?.("🔍 جاري ترجمة وتحليل طلبك...");
   const englishQuery = await smartTranslate(prompt);
   console.log("[3D Search] Query:", prompt, "→", englishQuery);

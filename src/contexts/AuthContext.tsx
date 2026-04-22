@@ -7,7 +7,9 @@ interface AuthContextType {
   profile: Profile | null;
   session: SupabaseSession | null;
   isLoading: boolean;
+  isPro: boolean;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -15,7 +17,9 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   session: null,
   isLoading: true,
+  isPro: false,
   signOut: async () => {},
+  refreshProfile: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -27,11 +31,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // 1. Fetch initial session
     const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) await fetchProfile(session.user.id);
-      setIsLoading(false);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) await fetchProfile(session.user.id);
+      } catch (err) {
+        console.error("Auth initialization error:", err);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     initAuth();
@@ -39,14 +48,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // 2. Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, newSession) => {
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-        if (newSession?.user) {
-          await fetchProfile(newSession.user.id);
-        } else {
-          setProfile(null);
+        try {
+          setSession(newSession);
+          setUser(newSession?.user ?? null);
+          if (newSession?.user) {
+            await fetchProfile(newSession.user.id);
+          } else {
+            setProfile(null);
+          }
+        } catch(err) {
+          console.error("Auth state change error:", err);
+        } finally {
+          setIsLoading(false);
         }
-        setIsLoading(false);
       }
     );
 
@@ -73,8 +87,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await supabase.auth.signOut();
   };
 
+  const isPro =
+    profile?.subscription_tier === "pro"  ||
+    profile?.subscription_tier === "max"  ||
+    profile?.plan === "pro"               || // legacy fallback
+    profile?.plan === "school";              // legacy fallback
+
   return (
-    <AuthContext.Provider value={{ user, profile, session, isLoading, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      profile, 
+      session, 
+      isLoading, 
+      isPro: isPro ?? false, 
+      signOut,
+      refreshProfile: async () => { if (user) await fetchProfile(user.id); }
+    }}>
       {children}
     </AuthContext.Provider>
   );

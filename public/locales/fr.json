@@ -1,0 +1,135 @@
+{
+  "hero": {
+    "title_meta": "Meta",
+    "title_learning": "Learning",
+    "desc": "Plongez dans l'éducation 3D immersive. Explorez des mondes interactifs et générez des leçons personnalisées grâce à l'IA avancée.",
+    "btn_start": "Commençons"
+  },
+  "options": {
+    "subtitle": "Propulsé par TunEdu AI",
+    "teacher_title": "Portail Enseignant",
+    "teacher_desc": "Créez des leçons 3D interactives sans effort. Outils avancés pour les éducateurs afin de concevoir des expériences d'apprentissage immersives.",
+    "teacher_link": "Commencer →",
+    "lab_title": "Labo IA 3D",
+    "lab_desc": "Accédez à notre Hub IA avancé. Transformez des images 2D ou écrivez des prompts pour générer des modèles 3D haute fidélité instantanément.",
+    "lab_link": "Entrer dans le Labo →",
+    "student_title": "Étudiant / Explorateur",
+    "student_desc": "Rejoignez une session en direct avec un code PIN ou scannez un QR. Interagissez avec les modules éducatifs 3D.",
+    "student_link": "Rejoindre la Leçon →"
+  },
+  "auth": {
+    "login_title": "Connexion",
+    "signup_title": "Créer un Compte",
+    "email": "Email",
+    "password": "Mot de passe",
+    "full_name": "Nom complet",
+    "role": "Rôle",
+    "teacher": "Enseignant",
+    "student": "Étudiant",
+    "login_btn": "Se connecter",
+    "signup_btn": "Créer le compte",
+    "switch_to_signup": "Pas de compte ? S'inscrire",
+    "switch_to_login": "Déjà un compte ? Se connecter",
+    "loading": "Chargement...",
+    "google_signin": "Continuer avec Google"
+  },
+  "join": {
+    "title": "Rejoindre une Leçon",
+    "name_label": "Votre Nom",
+    "name_placeholder": "Entrez votre nom complet",
+    "code_label": "Code de la Leçon",
+    "code_placeholder": "ex: MTL-739",
+    "btn_join": "Rejoindre",
+    "joining": "En cours...",
+    "error_not_found": "Code introuvable ou session expirée",
+    "success": "Rejoint avec succès!"
+  },
+  "nav": {
+    "back_hub": "Retour",
+    "logout": "Déconnexion"
+  },
+  "lang": {
+    "ar": "العربية",
+    "en": "English",
+    "fr": "Français",
+    "es": "Español"
+  },
+  "student_dashboard": {
+    "title": "Tableau de bord étudiant",
+    "welcome": "Bienvenue",
+    "recent_lessons": "Leçons récentes",
+    "join_new": "Rejoindre une nouvelle leçon",
+    "total_lessons": "Total des leçons",
+    "subjects": "Matières",
+    "days_active": "Jours actifs",
+    "no_history": "Vous n'avez pas encore assisté à des leçons"
+  },
+  "analytics": {
+    "title": "Hub d'Analyses Enseignant",
+    "total_lessons": "Total Leçons",
+    "total_students": "Étudiants Inscrits",
+    "total_sessions": "Sessions Actives",
+    "subject_dist": "Répartition par Matière",
+    "recent_sessions": "Sessions Récentes",
+    "btn_export": "Exporter PDF"
+  },
+  "role": {
+    "title": "Choisissez Votre Identité",
+    "desc": "Sélectionnez la manière dont vous souhaitez découvrir la plateforme MetaLearning",
+    "teacher": "Enseignant / Créateur",
+    "teacher_desc": "Concevez des parcours de leçons 3D, gérez des sessions en direct et suivez les analyses des étudiants.",
+    "student": "Étudiant / Explorateur",
+    "student_desc": "Rejoignez des cours 3D en direct, interagissez avec des modules 3D et complétez des quêtes éducatives.",
+    "creator": "Créateur / Ingénieur",
+    "creator_desc": "Transformez vos images et idées en modèles 3D grâce à l'IA. Pour ingénieurs, designers et passionnés.",
+    "admin": "Admin Plateforme",
+    "admin_desc": "Gestion complète de la plateforme : utilisateurs, rôles et statistiques de performance.",
+    "btn_confirm": "Entrer dans l'espace"
+  },
+  "generation_stages": {
+    "removing_bg": "Détourage",
+    "connecting": "Connexion",
+    "uploading": "Envoi",
+    "processing": "Analyse",
+    "completed": "Prêt"
+  },
+  "quiz": {
+    "title": "Quiz interactif",
+    "question": "Question",
+    "next": "Suivant",
+    "submit": "Valider",
+    "correct": "Correct !",
+    "incorrect": "Incorrect",
+    "score": "Votre Score",
+    "complete": "Quiz terminé !",
+    "add_question": "Ajouter une question",
+    "no_quiz": "Aucun quiz pour cette leçon"
+  },
+  "rating": {
+    "title": "Notez cette leçon",
+    "thanks": "Merci pour votre avis !",
+    "placeholder": "Commentaire optionnel..."
+  },
+  "embed": {
+    "title": "Intégrer sur votre site",
+    "copy": "Copier le code d’intégration",
+    "copied": "Copié !"
+  },
+  "qa": {
+    "title": "Poser une question",
+    "placeholder": "Tapez votre question...",
+    "send": "Envoyer",
+    "no_questions": "Aucune question pour l'instant",
+    "mark_answered": "Marquer comme répondu"
+  },
+  "cookie": {
+    "message": "Nous utilisons des cookies essentiels pour l’authentification et les préférences linguistiques. Aucun cookie publicitaire.",
+    "accept": "Accepter et Continuer",
+    "learn_more": "En savoir plus"
+  },
+  "upgrade": {
+    "banner": "Passez à Pro — Leçons illimitées · Image vers 3D · Analytiques complètes",
+    "cta": "9€/mois →",
+    "annual_save": "Economisez 17%"
+  }
+}

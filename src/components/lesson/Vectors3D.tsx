@@ -9,7 +9,7 @@ import {
   Text,
   Html,
 } from "@react-three/drei";
-import { useHandTracking } from "../../hooks/useHandTracking";
+import { useMediaPipe } from "../../hooks/useMediaPipe";
 
 // === 1. Custom Vector Arrow Component ===
 const VectorArrow = ({ position, color, vectorName }: { position: THREE.Vector3, color: string, vectorName: string }) => {
@@ -109,7 +109,7 @@ export const Vectors3D = () => {
 
   // AR / Hand Tracking State
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { handData, startTracking, isActive, isLoading } = useHandTracking(videoRef);
+  const { handData, startTracking, isActive, isLoading } = useMediaPipe({ enabled: false, videoRef });
   const [arTarget, setArTarget] = useState<'none'|'v1'|'v2'>('none');
 
   useFrame((state, delta) => {

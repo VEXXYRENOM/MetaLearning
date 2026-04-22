@@ -1,15 +1,26 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>MetaLearning — نظام التعلم المستقبلي</title>
+    <link rel="icon" type="image/svg+xml" href="/pwa-icon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0f172a" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
+    <!-- SEO Static fallback before React hydrates -->
+    <meta name="description" content="Transform education with interactive 3D lessons powered by AI." />
+    <meta property="og:title" content="MetaLearning — AI 3D Education" />
+    <meta property="og:description" content="Create and share 3D lessons instantly. No VR headset needed." />
+    <meta property="og:image" content="/og-image.svg" />
+    <meta name="robots" content="index, follow" />
   </head>
   <body>
     <div id="root"></div>

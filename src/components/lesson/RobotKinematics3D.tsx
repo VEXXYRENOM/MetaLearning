@@ -8,7 +8,7 @@ import {
   Text,
   Html,
 } from "@react-three/drei";
-import { useHandTracking } from "../../hooks/useHandTracking";
+import { useMediaPipe } from "../../hooks/useMediaPipe";
 
 // --- CUSTOM AUDIO ---
 const playSuccessSound = () => {
@@ -128,7 +128,7 @@ export const RobotKinematics3D = () => {
 
   // AR State
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { handData, startTracking, isActive, isLoading } = useHandTracking(videoRef);
+  const { handData, startTracking, isActive, isLoading } = useMediaPipe({ enabled: false, videoRef });
   const prevPinchRef = useRef(false);
 
   // MATH CALCULATIONS

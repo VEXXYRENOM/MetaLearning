@@ -8,7 +8,7 @@ import {
   Text,
   Html,
 } from "@react-three/drei";
-import { useHandTracking } from "../../hooks/useHandTracking";
+import { useMediaPipe } from "../../hooks/useMediaPipe";
 
 // --- AUDIO SYNTHESIZER ---
 const playSuccessSound = () => {
@@ -188,7 +188,7 @@ export const MathematicalLogic3D = () => {
 
   // AR Settings
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { handData, startTracking, isActive, isLoading } = useHandTracking(videoRef);
+  const { handData, startTracking, isActive, isLoading } = useMediaPipe({ enabled: false, videoRef });
   const cooldownRef = useRef(0);
 
   useFrame((state, delta) => {
