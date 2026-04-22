@@ -137,24 +137,36 @@ export function useMediaPipe(config: {
   const stopTracking = useCallback(() => {
     setIsActive(false);
     setIsLoading(false);
+
+    // 1. Stop MediaPipe Camera processor
     if (cameraRef.current) {
-      cameraRef.current.stop();
+      try { cameraRef.current.stop(); } catch (_) {}
       cameraRef.current = null;
     }
-    if (videoElement && videoElement.srcObject) {
-      const stream = videoElement.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
-      videoElement.srcObject = null;
-    }
+
+    // 2. Stop MediaPipe Hands model
     if (handsRef.current) {
-      handsRef.current.close();
+      try { handsRef.current.close(); } catch (_) {}
       handsRef.current = null;
     }
+
+    // 3. Stop getUserMedia stream (turns off the green light)
+    const videoEl = externalVideoRef?.current || internalVideoEl;
+    if (videoEl?.srcObject) {
+      try {
+        (videoEl.srcObject as MediaStream)
+          .getTracks()
+          .forEach(track => track.stop());
+      } catch (_) {}
+      videoEl.srcObject = null;
+    }
+
+    // 4. Reset states
     setHandData(null);
     setPalm(null);
-    pinchState.current = { isPinching: false, baseDistance: 0, baseZoom: 1 };
+    pinchState.current  = { isPinching: false, baseDistance: 0, baseZoom: 1 };
     rotationState.current = { prevX: 0, prevY: 0, angleX: 0, angleY: 0, isGrabbed: false };
-  }, []);
+  }, [externalVideoRef, internalVideoEl]);
 
   const startTracking = useCallback(async () => {
     if (!videoElement) return;
