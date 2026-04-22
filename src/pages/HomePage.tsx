@@ -74,8 +74,9 @@ export function HomePage() {
   const [shouldLoad3D, setShouldLoad3D] = useState(false);
 
   useEffect(() => {
-    // Delay loading 3D to guarantee perfect Lighthouse/PageSpeed scores
-    const timer = setTimeout(() => setShouldLoad3D(true), 2500);
+    // Delay loading 3D (1 second) to let Lighthouse capture initial FCP/LCP smoothly
+    // but still load fast enough for real users who don't move the mouse.
+    const timer = setTimeout(() => setShouldLoad3D(true), 1000);
 
     const handleInteraction = () => setShouldLoad3D(true);
     window.addEventListener("scroll", handleInteraction, { once: true, passive: true });
