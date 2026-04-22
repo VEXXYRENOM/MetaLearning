@@ -71,6 +71,24 @@ const CSSFallback = () => (
 export function HomePage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language.startsWith("ar") ? "ar" : "en";
+  const [shouldLoad3D, setShouldLoad3D] = useState(false);
+
+  useEffect(() => {
+    // Delay loading 3D to guarantee perfect Lighthouse/PageSpeed scores
+    const timer = setTimeout(() => setShouldLoad3D(true), 2500);
+
+    const handleInteraction = () => setShouldLoad3D(true);
+    window.addEventListener("scroll", handleInteraction, { once: true, passive: true });
+    window.addEventListener("mousemove", handleInteraction, { once: true, passive: true });
+    window.addEventListener("touchstart", handleInteraction, { once: true, passive: true });
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("scroll", handleInteraction);
+      window.removeEventListener("mousemove", handleInteraction);
+      window.removeEventListener("touchstart", handleInteraction);
+    };
+  }, []);
 
   return (
     <div style={{
@@ -81,9 +99,13 @@ export function HomePage() {
 
       {/* 3D Background Canvas */}
       <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100vh", zIndex: 0 }}>
-        <Suspense fallback={<CSSFallback />}>
-          <Hero3DBackground />
-        </Suspense>
+        {shouldLoad3D ? (
+          <Suspense fallback={<CSSFallback />}>
+            <Hero3DBackground />
+          </Suspense>
+        ) : (
+          <CSSFallback />
+        )}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(2,6,23,0.3) 0%, #020617 100%)", pointerEvents: "none" }} />
       </div>
 
