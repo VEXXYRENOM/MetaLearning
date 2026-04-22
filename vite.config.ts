@@ -20,9 +20,10 @@ export default defineConfig({
             '@react-three/postprocessing',
           ],
 
-          // Chunk 3: Supabase + Stripe — auth/payments
+          // Chunk 3: Supabase + Paddle — auth/payments
           'backend-vendor': [
             '@supabase/supabase-js',
+            '@paddle/paddle-js',
           ],
 
           // Chunk 4: i18n — translations

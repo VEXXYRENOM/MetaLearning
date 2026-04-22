@@ -16,10 +16,10 @@
     "@mediapipe/camera_utils": "^0.3.1675466862",
     "@mediapipe/hands": "^0.4.1675469240",
     "@mediapipe/selfie_segmentation": "^0.1.1675465747",
+    "@paddle/paddle-js": "^1.6.4",
     "@react-three/drei": "^9.117.0",
     "@react-three/fiber": "^8.17.10",
     "@react-three/postprocessing": "^3.0.4",
-    "@stripe/stripe-js": "^9.2.0",
     "@supabase/supabase-js": "^2.103.3",
     "@tensorflow-models/body-segmentation": "^1.0.2",
     "@tensorflow-models/depth-estimation": "^0.0.4",
@@ -42,7 +42,6 @@
     "react-helmet-async": "^3.0.0",
     "react-i18next": "^17.0.4",
     "react-router-dom": "^6.28.0",
-    "stripe": "^22.0.2",
     "three": "^0.170.0"
   },
   "devDependencies": {

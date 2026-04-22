@@ -1,0 +1,33 @@
+# ==========================================
+# 🚀 VERCEL ENVIRONMENT VARIABLES DEPLOYMENT
+# ==========================================
+# انسخ جميع الأسطر أدناه والصقها في مربع 
+# (Environment Variables) داخل إعدادات Vercel.
+# Vercel سيتعرف عليها ويقسمها تلقائياً!
+# 
+# ⚠️ استبدل القيم التي تبدأ بـ "your_..." بالقيم الحقيقية من لوحة التحكم.
+
+# ── 1. Supabase (قاعدة البيانات والهوية) ──────────────────────
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# ── 2. Paddle (نظام الدفع) ────────────────────────────────────
+# Client Token: Paddle Dashboard > Developer Tools > Authentication
+VITE_PADDLE_CLIENT_TOKEN=pdl_live_your_client_token_here
+# Price IDs: Paddle Dashboard > Catalog > Prices
+VITE_PADDLE_PRO_PRICE_ID=pri_your_pro_price_id
+VITE_PADDLE_MAX_PRICE_ID=pri_your_max_price_id
+# Webhook Secret: Paddle Dashboard > Notifications > Webhooks
+PADDLE_WEBHOOK_SECRET=pdl_ntfset_your_webhook_secret
+# رابط تطبيقك على Vercel (لإعادة التوجيه بعد الدفع)
+VITE_APP_URL=https://your-app-domain.vercel.app
+
+# ── 3. Fal.ai (توليد الـ 3D والذكاء الاصطناعي) ───────────────
+FAL_API_KEY=your_fal_api_key_here
+
+# ── 4. Security & API Proxy (الأمان الداخلي) ─────────────────
+# يجب أن يحملا نفس القيمة تماماً
+VITE_PROXY_SECRET=meta_learning_secure_random_key_2026
+PROXY_CLIENT_SECRET=meta_learning_secure_random_key_2026
