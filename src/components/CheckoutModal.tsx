@@ -14,7 +14,7 @@ interface CheckoutModalProps {
 const TIER_CONFIG = {
   pro: {
     name:  "PRO",
-    price: "20 د.ت",
+    price: "$9/mo",
     color: "#06b6d4",
     glow:  "rgba(6,182,212,0.4)",
     gradient: "linear-gradient(135deg, #0891b2, #06b6d4)",
@@ -22,7 +22,7 @@ const TIER_CONFIG = {
   },
   max: {
     name:  "MAX",
-    price: "30 د.ت",
+    price: "$14/mo",
     color: "#f59e0b",
     glow:  "rgba(245,158,11,0.4)",
     gradient: "linear-gradient(135deg, #d97706, #f59e0b)",

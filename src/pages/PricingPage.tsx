@@ -14,7 +14,7 @@ const PLANS = [
     id: "free" as const,
     key: "free",
     price_monthly: "0",
-    currency: "د.ت",
+    currency: "$",
     icon: <Zap size={28} />,
     color: "#64748b",
     border: "rgba(100,116,139,0.35)",
@@ -33,8 +33,8 @@ const PLANS = [
   {
     id: "pro" as const,
     key: "pro",
-    price_monthly: "20",
-    currency: "د.ت",
+    price_monthly: "9",
+    currency: "$",
     icon: <Zap size={28} />,
     color: "#06b6d4",
     border: "rgba(6,182,212,0.5)",
@@ -53,8 +53,8 @@ const PLANS = [
   {
     id: "max" as const,
     key: "max",
-    price_monthly: "30",
-    currency: "د.ت",
+    price_monthly: "14",
+    currency: "$",
     icon: <Crown size={28} />,
     color: "#f59e0b",
     border: "rgba(245,158,11,0.7)",
@@ -203,18 +203,12 @@ export function PricingPage() {
 
               {/* Price */}
               <div style={{ marginBottom: "1.75rem" }}>
-                <span style={{ fontSize: "3rem", fontWeight: 900, color: plan.id === "free" ? "#94a3b8" : plan.color }}>
-                  {plan.price_monthly}
+                <span style={{ fontSize: "2.5rem", fontWeight: 900, color: plan.id === "free" ? "#94a3b8" : plan.color }}>
+                  {plan.currency}{plan.price_monthly}
                 </span>
-                <span style={{ color: "#475569", marginLeft: "6px" }}>{plan.currency}/</span>
-                <span style={{ color: "#475569", fontSize: "0.85rem" }}>
-                  {lang === "ar" ? "شهر" : lang === "fr" ? "mois" : lang === "es" ? "mes" : "month"}
+                <span style={{ color: "#475569", fontSize: "0.85rem", marginLeft: "4px" }}>
+                  /{lang === "ar" ? "شهر" : lang === "fr" ? "mois" : lang === "es" ? "mes" : "month"}
                 </span>
-                {plan.id !== "free" && (
-                  <p style={{ color: "#475569", fontSize: "0.75rem", margin: "4px 0 0" }}>
-                    ≈ ${(parseFloat(plan.price_monthly) * 0.32).toFixed(0)} USD/mo
-                  </p>
-                )}
               </div>
 
               {/* Features */}
@@ -295,7 +289,7 @@ export function PricingPage() {
 
         {/* Footer note */}
         <p style={{ textAlign: "center", color: "#334155", fontSize: "0.8rem" }}>
-          <Sparkles size={12} style={{ verticalAlign: "middle" }} /> Prices in Tunisian Dinar (TND). International cards accepted via Paddle. Cancel anytime.
+          <Sparkles size={12} style={{ verticalAlign: "middle" }} /> Prices in USD. International cards accepted via Paddle. Cancel anytime.
         </p>
       </div>
 
