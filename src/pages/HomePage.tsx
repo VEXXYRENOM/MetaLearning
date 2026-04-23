@@ -185,8 +185,8 @@ export function HomePage() {
               <h3 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem" }}>FREE</h3>
               <p style={{ color: "#64748b", margin: "0 0 2rem", minHeight: "45px" }}>Perfect to taste the 3D learning experience.</p>
               <div style={{ marginBottom: "2rem" }}>
-                <span style={{ fontSize: "3rem", fontWeight: 900, color: "white" }}>0</span>
-                <span style={{ color: "#64748b" }}> د.ت / month</span>
+                <span style={{ fontSize: "3rem", fontWeight: 900, color: "white" }}>$0</span>
+                <span style={{ color: "#64748b" }}> / month</span>
               </div>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", flex: 1 }}>
                 <li style={{ color: "#94a3b8", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#06b6d4" /> 3 daily lessons</li>
@@ -211,8 +211,8 @@ export function HomePage() {
               <h3 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem" }}>PRO</h3>
               <p style={{ color: "#64748b", margin: "0 0 2rem", minHeight: "45px" }}>The full academy in your pocket.</p>
               <div style={{ marginBottom: "2rem" }}>
-                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#06b6d4" }}>20</span>
-                <span style={{ color: "#64748b" }}> د.ت / month</span>
+                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#06b6d4" }}>$9</span>
+                <span style={{ color: "#64748b" }}> / month</span>
               </div>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", flex: 1 }}>
                 <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#06b6d4" /> Unlimited lessons</li>
@@ -237,8 +237,8 @@ export function HomePage() {
               <h3 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem", display: "flex", alignItems: "center", gap: "8px" }}>MAX <Crown size={20} color="#f59e0b" /></h3>
               <p style={{ color: "#64748b", margin: "0 0 2rem", minHeight: "45px" }}>Uncompromised immersion and priority.</p>
               <div style={{ marginBottom: "2rem" }}>
-                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#f59e0b" }}>30</span>
-                <span style={{ color: "#64748b" }}> د.ت / month</span>
+                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#f59e0b" }}>$14</span>
+                <span style={{ color: "#64748b" }}> / month</span>
               </div>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", flex: 1 }}>
                 <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Everything in PRO</li>
