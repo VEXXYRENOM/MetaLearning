@@ -1,10 +1,15 @@
 import { createHmac } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// Module-level client — reused across warm Vercel invocations
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!supabaseUrl || !supabaseKey) throw new Error('Missing Supabase server credentials');
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: { persistSession: false }
+});
+
 
 // --- Raw body helper (needed for Vercel serverless) ---
 async function getRawBody(req) {

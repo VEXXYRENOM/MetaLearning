@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
@@ -6,8 +6,29 @@ import { MetaTags } from "../components/MetaTags";
 import { Zap, Crown, Trophy, ArrowRight, Star, ShieldCheck } from "lucide-react";
 import { supabase } from "../services/supabaseClient";
 
-// Lazy load the 3D background so Three.js is not in the main bundle!
-const Hero3DBackground = lazy(() => import("../components/Hero3DBackground"));
+// CSS-only animated background — zero WebGL context cost
+const CSSBackground = () => (
+  <div style={{
+    position: "absolute", inset: 0, overflow: "hidden",
+    background: "radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(168,85,247,0.08) 0%, transparent 60%), #020617",
+    zIndex: 0
+  }}>
+    {[
+      { size: 300, x: "10%", y: "20%", color: "rgba(99,102,241,0.06)", dur: 8, delay: 0 },
+      { size: 200, x: "80%", y: "60%", color: "rgba(168,85,247,0.06)", dur: 10, delay: 2 },
+      { size: 150, x: "50%", y: "80%", color: "rgba(6,182,212,0.05)",  dur: 12, delay: 4 },
+    ].map((orb, i) => (
+      <div key={i} style={{
+        position: "absolute", width: orb.size, height: orb.size,
+        left: orb.x, top: orb.y, borderRadius: "50%",
+        background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
+        animation: `cssOrb ${orb.dur}s ease-in-out infinite`,
+        animationDelay: `${orb.delay}s`,
+      }} />
+    ))}
+    <style>{`@keyframes cssOrb { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-30px) scale(1.05); } }`}</style>
+  </div>
+);
 
 // ─── LEADERBOARD COMPONENT ───
 const TopPlayers = () => {
@@ -60,36 +81,12 @@ const TopPlayers = () => {
   );
 };
 
-const CSSFallback = () => (
-  <div style={{ width: "100%", height: "100%", background: "radial-gradient(circle at center, #0f172a 0%, #020617 100%)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative" }}>
-    <div style={{ position: "absolute", top: "40%", left: "50%", width: "600px", height: "600px", background: "radial-gradient(circle, rgba(168,85,247,0.15) 0%, rgba(0,0,0,0) 70%)", transform: "translate(-50%, -50%)", animation: "pulseGlow 4s ease-in-out infinite alternate" }} />
-    <div style={{ position: "absolute", top: "60%", left: "30%", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(6,182,212,0.1) 0%, rgba(0,0,0,0) 70%)", transform: "translate(-50%, -50%)", animation: "pulseGlow 3s ease-in-out infinite alternate-reverse" }} />
-    <style>{`@keyframes pulseGlow { 0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } }`}</style>
-  </div>
-);
+
+
 
 export function HomePage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language.startsWith("ar") ? "ar" : "en";
-  const [shouldLoad3D, setShouldLoad3D] = useState(false);
-
-  useEffect(() => {
-    // Delay loading 3D (1 second) to let Lighthouse capture initial FCP/LCP smoothly
-    // but still load fast enough for real users who don't move the mouse.
-    const timer = setTimeout(() => setShouldLoad3D(true), 1000);
-
-    const handleInteraction = () => setShouldLoad3D(true);
-    window.addEventListener("scroll", handleInteraction, { once: true, passive: true });
-    window.addEventListener("mousemove", handleInteraction, { once: true, passive: true });
-    window.addEventListener("touchstart", handleInteraction, { once: true, passive: true });
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("scroll", handleInteraction);
-      window.removeEventListener("mousemove", handleInteraction);
-      window.removeEventListener("touchstart", handleInteraction);
-    };
-  }, []);
 
   return (
     <div style={{
@@ -98,17 +95,8 @@ export function HomePage() {
     }}>
       <MetaTags title="MetaLearning — The 3D Education Revolution" description="The Future of Tunisian Education is 3D." />
 
-      {/* 3D Background Canvas */}
-      <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100vh", zIndex: 0 }}>
-        {shouldLoad3D ? (
-          <Suspense fallback={<CSSFallback />}>
-            <Hero3DBackground />
-          </Suspense>
-        ) : (
-          <CSSFallback />
-        )}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(2,6,23,0.3) 0%, #020617 100%)", pointerEvents: "none" }} />
-      </div>
+      {/* CSS Animated Background — no WebGL context used */}
+      <CSSBackground />
 
       {/* Navigation */}
       <header style={{

@@ -37,7 +37,7 @@ export function CheckoutModal({ tier, onClose, onSuccess }: CheckoutModalProps) 
 
   useEffect(() => {
     initializePaddle({
-      environment: "sandbox", // TODO: Change to "production" for live deployment
+      environment: (import.meta.env.VITE_PADDLE_ENVIRONMENT as "sandbox" | "production") ?? "sandbox",
       token: import.meta.env.VITE_PADDLE_CLIENT_TOKEN || "",
     }).then((paddleInstance) => {
       if (paddleInstance) {
@@ -63,6 +63,9 @@ export function CheckoutModal({ tier, onClose, onSuccess }: CheckoutModalProps) 
         items: [{ priceId, quantity: 1 }],
         customer: {
           email: user.email!,
+        },
+        settings: {
+          locale: navigator.language || "en",
         },
         customData: {
           userId: user.id,

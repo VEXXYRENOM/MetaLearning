@@ -4,6 +4,7 @@ import { AnimatePresence } from "framer-motion";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ToastContainer } from "./components/Toast";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 import { CookieBanner } from "./components/CookieBanner";
 import { PageTransition } from "./components/PageTransition";
@@ -118,6 +119,13 @@ function AnimatedRoutes() {
           <ProtectedRoute requiredRole={["teacher", "creator"]}>
             <Suspense fallback={<PageSkeleton />}><PageTransition><ImageTo3DExperiencePage key="text" defaultInputType="text" /></PageTransition></Suspense>
           </ProtectedRoute>
+        } />
+
+        {/* ── 404 ─────────────────────────────────────────────── */}
+        <Route path="*" element={
+          <Suspense fallback={<PageSkeleton />}>
+            <PageTransition><NotFoundPage /></PageTransition>
+          </Suspense>
         } />
       </Routes>
     </AnimatePresence>

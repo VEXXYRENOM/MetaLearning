@@ -87,7 +87,7 @@ const COMPARISON = [
 type Tier = "pro" | "max";
 
 export function PricingPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate  = useNavigate();
   const { i18n }  = useTranslation();
   const lang = i18n.language.startsWith("ar") ? "ar"
@@ -103,8 +103,14 @@ export function PricingPage() {
   };
 
   const handleSuccess = () => {
-    showToast({ type: "success", title: "🎉 Subscription activated!", message: "Enjoy your new MetaLearning plan." });
-    navigate(user ? "/student/dashboard" : "/");
+    showToast({ type: "success", title: "🎉 Subscription activated!", message: "Your MetaLearning plan is now active." });
+    if (!user) { navigate("/"); return; }
+    switch (profile?.role) {
+      case "teacher":  navigate("/teacher/create");    break;
+      case "creator":  navigate("/creator/lab");       break;
+      case "admin":    navigate("/admin");              break;
+      default:         navigate("/student/dashboard"); break;
+    }
   };
 
   return (
@@ -204,6 +210,11 @@ export function PricingPage() {
                 <span style={{ color: "#475569", fontSize: "0.85rem" }}>
                   {lang === "ar" ? "شهر" : lang === "fr" ? "mois" : lang === "es" ? "mes" : "month"}
                 </span>
+                {plan.id !== "free" && (
+                  <p style={{ color: "#475569", fontSize: "0.75rem", margin: "4px 0 0" }}>
+                    ≈ ${(parseFloat(plan.price_monthly) * 0.32).toFixed(0)} USD/mo
+                  </p>
+                )}
               </div>
 
               {/* Features */}
@@ -284,7 +295,7 @@ export function PricingPage() {
 
         {/* Footer note */}
         <p style={{ textAlign: "center", color: "#334155", fontSize: "0.8rem" }}>
-          <Sparkles size={12} style={{ verticalAlign: "middle" }} /> Prices in Tunisian Dinar (TND / د.ت) · Cancel anytime · 30-day refund guarantee
+          <Sparkles size={12} style={{ verticalAlign: "middle" }} /> Prices in Tunisian Dinar (TND). International cards accepted via Paddle. Cancel anytime.
         </p>
       </div>
 
