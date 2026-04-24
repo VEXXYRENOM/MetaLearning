@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense, lazy } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { MetaTags } from "../components/MetaTags";
 import { Zap, Crown, Trophy, ArrowRight, Star, ShieldCheck } from "lucide-react";
 import { supabase } from "../services/supabaseClient";
+
+const Hero3DBackground = lazy(() => import("../components/Hero3DBackground"));
 
 // CSS-only animated background — zero WebGL context cost
 const CSSBackground = () => (
@@ -87,6 +89,13 @@ const TopPlayers = () => {
 export function HomePage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language.startsWith("ar") ? "ar" : "en";
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth > 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div style={{
@@ -95,8 +104,16 @@ export function HomePage() {
     }}>
       <MetaTags title="MetaLearning — The 3D Education Revolution" description="The Future of Tunisian Education is 3D." />
 
-      {/* CSS Animated Background — no WebGL context used */}
-      <CSSBackground />
+      {/* 3D Background on Desktop, CSS on Mobile */}
+      {isDesktop ? (
+        <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+          <Suspense fallback={<CSSBackground />}>
+            <Hero3DBackground />
+          </Suspense>
+        </div>
+      ) : (
+        <CSSBackground />
+      )}
 
       {/* Navigation */}
       <header style={{
