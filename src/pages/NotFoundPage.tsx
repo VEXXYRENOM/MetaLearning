@@ -1,13 +1,18 @@
 import { Link } from "react-router-dom";
 import { Home, AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function NotFoundPage() {
+  const { i18n } = useTranslation();
+  const isAr = i18n.language.startsWith("ar");
+
   return (
     <div style={{
       minHeight: "100vh", background: "#020617", color: "white",
       display: "flex", flexDirection: "column", alignItems: "center",
       justifyContent: "center", fontFamily: "'Inter', system-ui, sans-serif",
-      padding: "2rem", textAlign: "center"
+      padding: "2rem", textAlign: "center",
+      direction: isAr ? "rtl" : "ltr",
     }}>
       <AlertTriangle size={64} color="#f59e0b" style={{ marginBottom: "1.5rem" }} />
       <h1 style={{
@@ -17,10 +22,12 @@ export function NotFoundPage() {
         backgroundClip: "text",
       }}>404</h1>
       <h2 style={{ color: "#94a3b8", margin: "0 0 1rem", fontSize: "1.5rem" }}>
-        Page Not Found
+        {isAr ? "الصفحة غير موجودة" : "Page Not Found"}
       </h2>
       <p style={{ color: "#475569", maxWidth: "400px", lineHeight: 1.6 }}>
-        The page you are looking for doesn't exist or has been moved.
+        {isAr
+          ? "الصفحة التي تبحث عنها غير موجودة أو تم نقلها."
+          : "The page you are looking for doesn't exist or has been moved."}
       </p>
       <Link to="/" style={{
         marginTop: "2rem",
@@ -29,7 +36,7 @@ export function NotFoundPage() {
         color: "white", padding: "12px 24px", borderRadius: "12px",
         textDecoration: "none", fontWeight: "bold"
       }}>
-        <Home size={18} /> Back to Home
+        <Home size={18} /> {isAr ? "العودة للرئيسية" : "Back to Home"}
       </Link>
 
       {/* Decorative glows */}

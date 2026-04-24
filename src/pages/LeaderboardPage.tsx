@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { getLevelTitle, getXpToNextLevel, BADGES } from "../lib/xpSystem";
 import { Trophy, Star, ArrowLeft, Crown, Zap, Target } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 import type { LeaderEntry } from "../services/supabaseClient";
 
@@ -16,6 +17,8 @@ const RANK_STYLES: Record<number, { bg: string; border: string; color: string; i
 
 export function LeaderboardPage() {
   const { profile } = useAuth();
+  const { i18n } = useTranslation();
+  const isAr = i18n.language.startsWith("ar");
   const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
   const [loading, setLoading]  = useState(true);
   const [myRank,  setMyRank]   = useState<number | null>(null);
@@ -53,7 +56,7 @@ export function LeaderboardPage() {
         <div style={{ marginBottom: "2rem" }}>
           <Link to="/student/dashboard" style={{ color: "#38bdf8", textDecoration: "none",
             display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "1.5rem", fontSize: "0.9rem" }}>
-            <ArrowLeft size={16} /> Back to Dashboard
+            <ArrowLeft size={16} /> {isAr ? "العودة للوحة التحكم" : "Back to Dashboard"}
           </Link>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: "3rem", marginBottom: "0.5rem" }}>🏆</div>
@@ -114,9 +117,9 @@ export function LeaderboardPage() {
                 background: "rgba(255,255,255,0.03)", animation: "pulse 1.5s ease-in-out infinite" }} />
             ))
           ) : leaders.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "4rem 2rem", color: "#475569" }}>
+            <div style={{ textAlign: "center", padding: "4rem 2rem", color: "#475569", direction: "ltr" }}>
               <Trophy size={48} style={{ opacity: 0.3, marginBottom: "1rem" }} />
-              <p>No ranked students yet. Complete quizzes to be first!</p>
+              <p>{isAr ? "لا يوجد طلاب مصنفون بعد. أكمل الاختبارات لتكون الأول!" : "No ranked students yet. Complete quizzes to be first!"}</p>
             </div>
           ) : (
             <AnimatePresence>
