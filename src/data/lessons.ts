@@ -66,8 +66,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "❤️",
-    kind: "gltf-artifact",
-    gltfUrl: "/models/heart/scene.gltf",
+    kind: "procedural-heart",
   },
   {
     id: "animal-cell",
