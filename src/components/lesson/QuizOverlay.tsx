@@ -54,7 +54,7 @@ export function QuizOverlay({ lessonId, onClose, onComplete }: { lessonId: strin
   if (finished || questions.length === 0) {
     return (
       <div style={{
-        position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+        position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
         background: "rgba(15,23,42,0.95)", display: "flex", flexDirection: "column",
         justifyContent: "center", alignItems: "center", color: "white", zIndex: 100, backdropFilter: "blur(10px)"
       }}>
@@ -95,7 +95,7 @@ export function QuizOverlay({ lessonId, onClose, onComplete }: { lessonId: strin
 
   return (
     <div style={{
-      position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+      position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
       background: "rgba(15,23,42,0.9)", display: "flex", flexDirection: "column",
       justifyContent: "center", alignItems: "center", color: "white", zIndex: 100, backdropFilter: "blur(5px)"
     }}>

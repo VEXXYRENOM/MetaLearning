@@ -138,12 +138,18 @@ export function QuizEditor({ lessonId, onClose }: { lessonId: string, onClose: (
 
   return (
     <div style={{
-      background: "rgba(15,23,42,0.95)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: "16px", padding: "1.5rem", color: "white",
-      backdropFilter: "blur(10px)", maxHeight: "80vh", overflowY: "auto",
-      display: "flex", flexDirection: "column", gap: "1.5rem"
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
+      background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
+      backdropFilter: 'blur(5px)'
     }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{
+        background: "rgba(15,23,42,0.95)", border: "1px solid rgba(255,255,255,0.1)",
+        borderRadius: "16px", padding: "1.5rem", color: "white", width: "100%", maxWidth: "800px",
+        maxHeight: "90vh", overflowY: "auto",
+        display: "flex", flexDirection: "column", gap: "1.5rem",
+        boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)"
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h3 style={{ margin: 0, fontSize: "1.5rem" }}>{t("quiz.title", "Quiz Editor")}</h3>
         <button onClick={addQuestion} style={{
           background: "rgba(59,130,246,0.2)", border: "1px solid #3b82f6", color: "#60a5fa",

@@ -722,11 +722,26 @@ export function LessonPage() {
         <div className="lesson-main-stage" style={{ zIndex: 1 }}>
           <div className="lesson-canvas-inner">
             {!showCanvas && (
-
               <div className="canvas-placeholder">
                 <p>ارفع ملف GLB من الشريط الجانبي لعرضه هنا.</p>
               </div>
             )}
+            <video
+              ref={videoRef}
+              playsInline
+              autoPlay
+              muted
+              style={{
+                position: isActive ? "absolute" : "fixed",
+                top: isActive ? 0 : "-9999px",
+                left: isActive ? 0 : "-9999px",
+                width: isActive ? "100%" : "1px",
+                height: isActive ? "100%" : "1px",
+                objectFit: "cover",
+                zIndex: 0,
+                transform: "scaleX(-1)", // Mirror the camera feed
+              }}
+            />
             {showCanvas && (
               <ThreeErrorBoundary>
               <React.Suspense fallback={<ThreeDLoading />}>
