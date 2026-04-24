@@ -437,8 +437,14 @@ export function LessonPage() {
       )}
 
       <aside className="lesson-sidebar">
-        <Link className="lesson-back" to="/">
-          ← الرئيسية
+        <Link className="lesson-back" to={
+          profile?.role === "teacher" ? "/teacher/create"
+          : profile?.role === "creator" ? "/creator/lab"
+          : profile?.role === "admin"   ? "/admin/dashboard"
+          : profile?.role === "student" ? "/student/dashboard"
+          : "/"
+        }>
+          ← {profile?.role === "teacher" ? "لوحة المعلم" : profile?.role === "student" ? "لوحتي" : "الرئيسية"}
         </Link>
         <p className="lesson-subject">{lesson.subjectAr}</p>
         <h1 className="lesson-title">{lesson.titleAr}</h1>

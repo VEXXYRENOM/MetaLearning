@@ -2,23 +2,42 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabaseClient';
 
+const ROLE_HOME: Record<string, string> = {
+  teacher: '/teacher/create',
+  student: '/student/dashboard',
+  creator: '/creator/lab',
+  admin:   '/admin/dashboard',
+};
+
 export function AuthCallbackPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
     const handleCallback = async () => {
-      // Small timeout to allow Supabase to process the URL hash completely
+      // Give Supabase time to process the hash/session from the URL
       setTimeout(async () => {
         const { data: { session }, error } = await supabase.auth.getSession();
-        
+
         if (error || !session) {
           navigate('/auth');
           return;
         }
 
-        // Just push to role selection, which handles everything safely via upsert.
-        navigate('/auth/role-selection');
-      }, 500);
+        // Check if user already has a profile with a role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile?.role && ROLE_HOME[profile.role]) {
+          // Existing user — go straight to their dashboard
+          navigate(ROLE_HOME[profile.role]);
+        } else {
+          // New user — pick a role first
+          navigate('/auth/role-selection');
+        }
+      }, 600);
     };
 
     handleCallback();
