@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, ShieldCheck, ArrowLeft } from "lucide-react";
+import { ArrowRight, ShieldCheck, ArrowLeft, Mail } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { MetaTags } from "../components/MetaTags";
 
 export function PrivacyPolicyPage() {
   const { i18n } = useTranslation();
@@ -12,6 +13,8 @@ export function PrivacyPolicyPage() {
       fontFamily: "'Inter', system-ui, sans-serif", padding: "2rem", lineHeight: "1.7",
       direction: isArabic ? "rtl" : "ltr"
     }}>
+      <MetaTags title={isArabic ? "سياسة الخصوصية" : "Privacy Policy"} />
+
       <div style={{ maxWidth: "800px", margin: "0 auto", paddingBottom: "4rem" }}>
         
         <div style={{ marginBottom: "2rem" }}>
@@ -45,8 +48,8 @@ export function PrivacyPolicyPage() {
             </h2>
             <p>
               {isArabic 
-                ? "مرحباً بكم في MetaLearning. نحن ملتزمون بحماية خصوصيتكم وضمان معالجة معلوماتكم الشخصية بطريقة آمنة ومسؤولة. توضح هذه السياسة كيفية جمعنا، واستخدامنا، وحمايتنا لبياناتكم." 
-                : "Welcome to MetaLearning. We are committed to protecting your privacy and ensuring that your personal information is handled in a safe and responsible manner. This Privacy Policy outlines how we collect, use, and protect your data."}
+                ? "مرحباً بكم في MetaLearning. نحن ملتزمون بحماية خصوصيتكم وضمان معالجة معلوماتكم الشخصية بطريقة آمنة ومسؤولة. متحكم البيانات في هذا الموقع هو Taki Allah Hichri." 
+                : "Welcome to MetaLearning. We are committed to protecting your privacy and ensuring that your personal information is handled in a safe and responsible manner. The data controller for this platform is Taki Allah Hichri."}
             </p>
           </section>
 
@@ -61,7 +64,7 @@ export function PrivacyPolicyPage() {
             </p>
             <ul>
               <li><strong>{isArabic ? "بيانات الحساب:" : "Account data:"}</strong> {isArabic ? "البريد الإلكتروني، الاسم الكامل، واختيار الدور (معلم/طالب)." : "Email address, full name, and your selected role."}</li>
-              <li><strong>{isArabic ? "تحليلات الطلاب:" : "Student Analytics:"}</strong> {isArabic ? "نسجل تفاعلات الطلاب مع النقاط الفعالة وإجابات الاختبارات بهدف مساعدة المعلم على تقييم الفهم فقط. لا نستخدم التحليلات للإعلانات أبداً." : "We log student interactions with hotspots and quiz answers strictly to help the teacher assess understanding. Analytics are never used for advertising."}</li>
+              <li><strong>{isArabic ? "تحليلات الطلاب:" : "Student Analytics:"}</strong> {isArabic ? "نسجل تفاعلات الطلاب مع النقاط الفعالة وإجابات الاختبارات بهدف مساعدة المعلم على تقييم الفهم فقط." : "We log student interactions with hotspots and quiz answers strictly to help the teacher assess understanding."}</li>
             </ul>
           </section>
 
@@ -71,8 +74,8 @@ export function PrivacyPolicyPage() {
             </h2>
             <p>
               {isArabic 
-                ? "جميع بياناتاتكم محفوظة بشكل آمن باستخدام قواعد بيانات Supabase. حيث يتم تشفير البيانات أثناء النقل وأثناء التخزين على الخواص (Encryption at Rest and in Transit) مع سياسات وصول دقيقة (Row Level Security)." 
-                : "All your data is securely stored using Supabase databases. Data is encrypted in transit and at rest, guarded by strict Row Level Security (RLS) policies."}
+                ? "جميع بياناتاتكم محفوظة بشكل آمن باستخدام قواعد بيانات Supabase. حيث يتم تشفير البيانات أثناء النقل وأثناء التخزين (Encryption at Rest and in Transit)." 
+                : "All your data is securely stored using Supabase databases. Data is encrypted in transit and at rest."}
             </p>
           </section>
 
@@ -82,8 +85,8 @@ export function PrivacyPolicyPage() {
             </h2>
             <p>
               {isArabic 
-                ? "منصة MetaLearning متوافقة بالكامل مع اللائحة العامة لحماية البيانات (GDPR). يمتلك المستخدمون حق الوصول لبياناتهم، حق النسيان (حذف الحساب بالكامل)، وحق نقل البيانات." 
-                : "MetaLearning is fully compliant with the General Data Protection Regulation (GDPR). Users retain the right to access data, the right to be forgotten (full account deletion), and data portability."}
+                ? "منصة MetaLearning متوافقة مع اللائحة العامة لحماية البيانات (GDPR). يمتلك المستخدمون حق الوصول لبياناتهم وحق حذف الحساب بالكامل." 
+                : "MetaLearning is designed with GDPR principles in mind. Users retain the right to access data and the right to be forgotten (full account deletion)."}
             </p>
           </section>
 
@@ -93,8 +96,21 @@ export function PrivacyPolicyPage() {
             </h2>
             <p>
               {isArabic 
-                ? "حماية الطلاب أولوية مطلقة. تلتزم المنصة بقانون حماية خصوصية الأطفال على الإنترنت (COPPA). نحن لا نبيع أبدًا بيانات الطلاب لجهات خارجية ولا نعرض أي إعلانات مستهدفة." 
-                : "Student protection is an absolute priority. We comply heavily with the Children's Online Privacy Protection Act (COPPA). We never sell student data to third parties, nor do we run targeted advertisements."}
+                ? "حماية الطلاب أولوية مطلقة. نحن لا نبيع أبدًا بيانات الطلاب لجهات خارجية ولا نعرض أي إعلانات مستهدفة." 
+                : "Student protection is an absolute priority. We never sell student data to third parties, nor do we run targeted advertisements."}
+            </p>
+          </section>
+
+          <section>
+            <h2 style={{ color: "#38bdf8", borderBottom: "1px solid #1e293b", paddingBottom: "0.5rem", marginBottom: "1rem" }}>
+              {isArabic ? "6. التواصل معنا" : "6. Contact Us"}
+            </h2>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#94a3b8" }}>
+              <Mail size={18} />
+              <a href="mailto:takihichri76@gmail.com" style={{ color: "#38bdf8", textDecoration: "none" }}>takihichri76@gmail.com</a>
+            </div>
+            <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#64748b" }}>
+              {isArabic ? "متحكم البيانات: Taki Allah Hichri" : "Data Controller: Taki Allah Hichri"}
             </p>
           </section>
 
