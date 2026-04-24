@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../services/supabaseClient";
 import { UserCircle, Mail, Lock, LogIn, UserPlus } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import "../ai-lab.css";
@@ -9,6 +10,7 @@ import "../ai-lab.css";
 export function AuthPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { session, profile, isLoading } = useAuth();
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [resetSent, setResetSent] = useState(false);
@@ -18,6 +20,16 @@ export function AuthPage() {
   const [role, setRole] = useState<"student" | "teacher">("student");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Auto-redirect if already logged in (handles OAuth edge cases)
+  useEffect(() => {
+    if (isLoading || !session) return;
+    if (profile?.role === "teacher") navigate("/teacher/create");
+    else if (profile?.role === "student") navigate("/student/dashboard");
+    else if (profile?.role === "creator") navigate("/creator/lab");
+    else if (profile?.role === "admin") navigate("/admin/dashboard");
+    else if (!profile?.role) navigate("/auth/role-selection");
+  }, [session, profile, isLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

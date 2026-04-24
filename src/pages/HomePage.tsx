@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { MetaTags } from "../components/MetaTags";
-import { Zap, Crown, Trophy, ArrowRight, Star, ShieldCheck } from "lucide-react";
+import { Zap, Crown, Trophy, ArrowRight, Star, ShieldCheck, LogOut } from "lucide-react";
 import { supabase } from "../services/supabaseClient";
+import { useAuth } from "../contexts/AuthContext";
 
 const Hero3DBackground = lazy(() => import("../components/Hero3DBackground"));
 
@@ -88,6 +89,7 @@ const TopPlayers = () => {
 
 export function HomePage() {
   const { t, i18n } = useTranslation();
+  const { session, profile } = useAuth();
   const lang = i18n.language.startsWith("ar") ? "ar" : "en";
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
 
@@ -126,14 +128,39 @@ export function HomePage() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
           <LanguageSwitcher theme="dark" />
-          <Link to="/auth" style={{ color: "white", textDecoration: "none", fontWeight: 600, fontSize: "0.95rem" }}>Log In</Link>
-          <Link to="/auth" style={{
-            background: "linear-gradient(90deg, #06b6d4, #3b82f6)",
-            color: "white", textDecoration: "none", padding: "10px 20px", borderRadius: "999px",
-            fontWeight: 700, fontSize: "0.95rem", boxShadow: "0 4px 15px rgba(6,182,212,0.3)"
-          }}>
-            Get Started
-          </Link>
+          {session ? (
+            <>
+              <button onClick={() => supabase.auth.signOut()} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontWeight: 600 }}>
+                <LogOut size={16} /> {lang === "ar" ? "خروج" : "Sign Out"}
+              </button>
+              <Link to={
+                profile?.role === "teacher" ? "/teacher/create"
+                : profile?.role === "creator" ? "/creator/lab"
+                : profile?.role === "admin" ? "/admin/dashboard"
+                : profile?.role === "student" ? "/student/dashboard"
+                : "/auth/role-selection"
+              } style={{
+                background: "linear-gradient(90deg, #06b6d4, #3b82f6)",
+                color: "white", textDecoration: "none", padding: "10px 20px", borderRadius: "999px",
+                fontWeight: 700, fontSize: "0.95rem", boxShadow: "0 4px 15px rgba(6,182,212,0.3)"
+              }}>
+                {lang === "ar" ? "لوحة التحكم" : "Dashboard"}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/auth" style={{ color: "white", textDecoration: "none", fontWeight: 600, fontSize: "0.95rem" }}>
+                {lang === "ar" ? "تسجيل الدخول" : "Log In"}
+              </Link>
+              <Link to="/auth" style={{
+                background: "linear-gradient(90deg, #06b6d4, #3b82f6)",
+                color: "white", textDecoration: "none", padding: "10px 20px", borderRadius: "999px",
+                fontWeight: 700, fontSize: "0.95rem", boxShadow: "0 4px 15px rgba(6,182,212,0.3)"
+              }}>
+                {lang === "ar" ? "ابدأ الآن" : "Get Started"}
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
