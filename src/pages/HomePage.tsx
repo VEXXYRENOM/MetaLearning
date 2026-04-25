@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { MetaTags } from "../components/MetaTags";
-import { Zap, Crown, Trophy, ArrowRight, Star, ShieldCheck, LogOut, Rocket } from "lucide-react";
+import { Zap, Crown, Trophy, ArrowRight, Star, ShieldCheck, LogOut } from "lucide-react";
 import { supabase } from "../services/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -195,14 +195,6 @@ export function HomePage() {
             boxShadow: "0 8px 30px rgba(168,85,247,0.4)"
           }}>
             Join the Revolution <ArrowRight size={20} />
-          </Link>
-          <Link to="/explore" style={{
-            background: "linear-gradient(135deg, #0ea5e9, #3b82f6)",
-            color: "white", textDecoration: "none", padding: "16px 36px", borderRadius: "999px",
-            fontWeight: 800, fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "8px",
-            boxShadow: "0 8px 30px rgba(59,130,246,0.4)"
-          }}>
-            <Rocket size={20} /> Explore the Galaxy
           </Link>
           <Link to="/join" style={{
             background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",

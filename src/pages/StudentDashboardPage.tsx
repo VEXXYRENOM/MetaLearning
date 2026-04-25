@@ -1,70 +1,123 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { supabase } from "../services/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
-import { UserCircle, Calendar, BookOpen, Activity, Hash, Play, Rocket, Stars } from "lucide-react";
+import {
+  BookOpen, Hash, Play, Zap, Flame, FlaskConical,
+  ChevronRight, LogOut, Trophy, Brain
+} from "lucide-react";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { OnboardingWizard } from "../components/OnboardingWizard";
 import { Skeleton } from "../components/Skeleton";
 import { XPProgressWidget } from "../components/XPProgressWidget";
 import { useAccessControl } from "../hooks/useAccessControl";
+import { getLevelTitle, getXpToNextLevel } from "../lib/xpSystem";
+import { getTodayChallenge, getChallengeText } from "../lib/dailyChallenges";
+import { checkAndUpdateStreak } from "../lib/streakSystem";
 
+// ─── Design tokens ─────────────────────────────────────────────
+const C = {
+  bg:         "#020617",
+  card:       "rgba(15, 23, 42, 0.85)",
+  border:     "rgba(255,255,255,0.07)",
+  borderHover:"rgba(255,255,255,0.14)",
+  textPrimary:"#f1f5f9",
+  textMuted:  "#64748b",
+  indigo:     "#6366f1",
+  cyan:       "#06b6d4",
+  amber:      "#f59e0b",
+  emerald:    "#10b981",
+};
+
+const glass = {
+  background: C.card,
+  backdropFilter: "blur(16px)",
+  border: `1px solid ${C.border}`,
+  borderRadius: "20px",
+};
+
+// ─── Bento Card Wrapper ─────────────────────────────────────────
+function BentoCard({
+  children, style = {}, onClick, accent = C.indigo
+}: {
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+  accent?: string;
+}) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      onClick={onClick}
+      style={{
+        ...glass,
+        padding: "1.5rem",
+        cursor: onClick ? "pointer" : "default",
+        border: `1px solid ${hovered && onClick ? accent + "55" : C.border}`,
+        boxShadow: hovered && onClick ? `0 8px 32px ${accent}22` : "none",
+        transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
+        transform: hovered && onClick ? "translateY(-2px)" : "translateY(0)",
+        ...style,
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ─── Main Dashboard ─────────────────────────────────────────────
 export function StudentDashboardPage() {
-  const { t } = useTranslation();
-  const { profile } = useAuth();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+  const isRTL = lang.startsWith("ar");
+  const { profile, signOut } = useAuth();
   const navigate = useNavigate();
   const access = useAccessControl();
 
   const [pinCode, setPinCode] = useState("");
   const [loadingJoin, setLoadingJoin] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-
   const [recentSessions, setRecentSessions] = useState<any[]>([]);
   const [stats, setStats] = useState({ total: 0, subjects: 0, days: 0 });
   const [loadingData, setLoadingData] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
+  const [streak, setStreak] = useState({ current: 0, longest: 0 });
+  const [challengeDone, setChallengeDone] = useState(false);
+
+  const todayChallenge = getTodayChallenge();
 
   useEffect(() => {
-    if (profile && profile.onboarding_done === false) {
-      setShowWizard(true);
-    }
+    if (profile && profile.onboarding_done === false) setShowWizard(true);
   }, [profile]);
 
   useEffect(() => {
-    async function fetchDashboardData() {
-      if (!profile) return;
+    if (!profile) return;
+
+    // Daily streak check
+    checkAndUpdateStreak(profile.id).then(({ currentStreak, longestStreak }) => {
+      setStreak({ current: currentStreak, longest: longestStreak });
+    });
+
+    // Fetch session data
+    (async () => {
       try {
-        // Query student_joins with related session and lesson
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from("student_joins")
-          .select(`
-            joined_at,
-            sessions (
-              id,
-              lesson_id,
-              lessons (
-                title,
-                subject,
-                model_key
-              )
-            )
-          `)
+          .select(`joined_at, sessions(id, lesson_id, lessons(title, subject, model_key))`)
           .eq("student_id", profile.id)
           .order("joined_at", { ascending: false });
 
-        if (error) throw error;
-
         const joins = data || [];
-        
-        // Extract valid models
         const sessionsList = joins
-          .map(j => {
-            const session = j.sessions as unknown as {
-              id: string;
-              lesson_id: string;
-              lessons: { title: string; subject: string; model_key: string } | null;
-            } | null;
+          .map((j: any) => {
+            const session = j.sessions as any;
             return {
               joined_at: j.joined_at,
               session_id: session?.id,
@@ -74,261 +127,401 @@ export function StudentDashboardPage() {
               model_key: session?.lessons?.model_key,
             };
           })
-          .filter(s => s.session_id && s.title) as any[];
+          .filter((s: any) => s.session_id && s.title);
 
         setRecentSessions(sessionsList.slice(0, 5));
 
-        // Calculate Stats
-        const uniqueSubjects = new Set(sessionsList.map(s => s.subject));
-        const uniqueDays = new Set(sessionsList.map(s => new Date(s.joined_at).toDateString()));
-
-        setStats({
-          total: sessionsList.length,
-          subjects: uniqueSubjects.size,
-          days: uniqueDays.size
-        });
-      } catch (err) {
-        console.error("Error fetching dashboard:", err);
-      } finally {
-        setLoadingData(false);
-      }
-    }
-    fetchDashboardData();
+        const subjectSet = new Set(sessionsList.map((s: any) => s.subject));
+        const daySet = new Set(sessionsList.map((s: any) => s.joined_at?.split("T")[0]));
+        setStats({ total: sessionsList.length, subjects: subjectSet.size, days: daySet.size });
+      } catch {/* silent */}
+      finally { setLoadingData(false); }
+    })();
   }, [profile]);
 
-  const handleJoin = async (e: React.FormEvent) => {
+  async function handleJoin(e: React.FormEvent) {
     e.preventDefault();
-    if (!pinCode.trim()) return;
-
-    // [E-4] Gate: enforce daily lesson limit for free tier
-    if (!access.isPaid && stats.total >= access.dailyLessonLimit) {
-      setErrorMsg(`Free plan limit reached (${access.dailyLessonLimit} lessons/day). Upgrade to PRO for unlimited access.`);
-      return;
-    }
-
+    if (!profile || !pinCode.trim()) return;
     setLoadingJoin(true);
     setErrorMsg("");
-
     try {
-      const formattedPin = pinCode.trim();
-
-      const { data: sessionData, error: sessionError } = await supabase
+      const code = pinCode.trim().toUpperCase();
+      const { data: session } = await supabase
         .from("sessions")
-        .select("id, lesson_id, is_active")
-        .eq("pin_code", formattedPin)
+        .select("id, lesson_id")
+        .eq("share_code", code)
         .eq("is_active", true)
-        .single();
-
-      if (sessionError || !sessionData) {
-        throw new Error(t("join.error_not_found") || "Session not found");
+        .maybeSingle();
+      if (!session) { setErrorMsg("Invalid or expired PIN code."); return; }
+      const { data: existing } = await supabase
+        .from("student_joins")
+        .select("id")
+        .eq("session_id", session.id)
+        .eq("student_id", profile.id)
+        .maybeSingle();
+      if (!existing) {
+        await supabase.from("student_joins").insert({
+          session_id: session.id, student_id: profile.id,
+        });
       }
+      navigate(`/lesson/${session.lesson_id}`);
+    } catch { setErrorMsg("Something went wrong. Try again."); }
+    finally { setLoadingJoin(false); }
+  }
 
-      if (profile) {
-        await supabase
-          .from("student_joins")
-          .insert({
-            session_id: sessionData.id,
-            student_id: profile.id,
-            student_name: profile.full_name || profile.email,
-          });
-      }
+  if (!profile) return (
+    <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <Skeleton width="400px" height="300px" borderRadius="20px" />
+    </div>
+  );
 
-      navigate(`/lesson/${sessionData.lesson_id}?session=${sessionData.id}`);
-    } catch (err: any) {
-      setErrorMsg(err.message);
-    } finally {
-      setLoadingJoin(false);
-    }
+  const xp = getXpToNextLevel(profile.points ?? 0);
+  const levelTitle = getLevelTitle(profile.level ?? 1);
+  const categoryColors: Record<string, string> = {
+    ai: "#6366f1", robotics: "#06b6d4", logic: "#f59e0b", critical: "#10b981"
   };
+  const challengeColor = categoryColors[todayChallenge.category];
 
   return (
-    <div className="teacher-layout" dir="ltr" style={{ minHeight: "100vh", background: "#0f172a" }}>
-      {showWizard && (
-        <OnboardingWizard role="student" onComplete={() => setShowWizard(false)} />
-      )}
-      <main className="teacher-main" style={{ width: "100%", padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-        
-        {/* HEADER */}
-        <header style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", borderBottom: "1px solid #1e293b", paddingBottom: "1rem", gap: "1rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <UserCircle size={48} color="#a855f7" />
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <h1 style={{ color: "white", fontSize: "1.6rem", margin: 0, display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                <span>{t("student_dashboard.welcome", "Welcome back")}</span>
-                <span>{profile?.full_name || "Student"}</span>
-              </h1>
-              <p style={{ color: "#94a3b8", margin: 0 }}>{t("student_dashboard.title", "Student Dashboard")}</p>
+    <div dir={isRTL ? "rtl" : "ltr"} style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', system-ui, sans-serif" }}>
+      {showWizard && <OnboardingWizard role="student" onComplete={() => setShowWizard(false)} />}
+
+      {/* ── Top Nav ─────────────────────────────────── */}
+      <header style={{
+        position: "sticky", top: 0, zIndex: 50,
+        background: "rgba(2,6,23,0.8)", backdropFilter: "blur(12px)",
+        borderBottom: `1px solid ${C.border}`,
+        padding: "0.75rem 2rem",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{
+            background: "linear-gradient(135deg, #6366f1, #a855f7)",
+            borderRadius: "10px", padding: "6px 12px",
+            color: "white", fontWeight: 800, fontSize: "0.9rem", letterSpacing: "1px"
+          }}>ML</div>
+          <span style={{ color: C.textMuted, fontSize: "0.9rem" }}>MetaLearning</span>
+        </div>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          {profile && <XPProgressWidget compact points={profile.points} level={profile.level} badges={profile.badges} />}
+          <LanguageSwitcher />
+          <button
+            onClick={() => signOut()}
+            style={{ background: "none", border: `1px solid ${C.border}`, color: C.textMuted, padding: "6px 10px", borderRadius: "8px", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem" }}
+          >
+            <LogOut size={14} /> {t("nav.signout", "Sign Out")}
+          </button>
+        </div>
+      </header>
+
+      {/* ── Bento Grid ──────────────────────────────── */}
+      <main style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem 1.5rem" }}>
+
+        {/* Welcome row */}
+        <div style={{ marginBottom: "1.5rem" }}>
+          <h1 style={{ color: C.textPrimary, fontSize: "clamp(1.4rem, 3vw, 2rem)", fontWeight: 700, margin: "0 0 4px" }}>
+            {t("student_dashboard.welcome", "Welcome back")}, {profile.full_name?.split(" ")[0] || "Student"} 👋
+          </h1>
+          <p style={{ color: C.textMuted, margin: 0, fontSize: "0.95rem" }}>
+            {t("student_dashboard.subtitle", "Your daily growth hub — show up, level up.")}
+          </p>
+        </div>
+
+        {/* BENTO GRID */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(12, 1fr)",
+          gap: "1rem",
+          alignItems: "start",
+        }}>
+
+          {/* 1. XP / Level Hero Card — 8 cols */}
+          <BentoCard accent={C.indigo} style={{ gridColumn: "span 8" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", flexWrap: "wrap" }}>
+              <motion.div
+                animate={{ boxShadow: ["0 0 16px #6366f155", "0 0 32px #a855f777", "0 0 16px #6366f155"] }}
+                transition={{ duration: 2.5, repeat: Infinity }}
+                style={{
+                  width: "72px", height: "72px", borderRadius: "50%", flexShrink: 0,
+                  background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "white", fontWeight: 900, fontSize: "1.8rem"
+                }}
+              >
+                {profile.level ?? 1}
+              </motion.div>
+              <div style={{ flex: 1, minWidth: "200px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "6px" }}>
+                  <div>
+                    <p style={{ margin: 0, color: "#a5b4fc", fontWeight: 700, fontSize: "1.1rem" }}>{levelTitle}</p>
+                    <p style={{ margin: 0, color: C.textMuted, fontSize: "0.8rem" }}>
+                      <Zap size={11} style={{ display: "inline", verticalAlign: "middle" }} /> {(profile.points ?? 0).toLocaleString()} XP total
+                    </p>
+                  </div>
+                  <Link to="/leaderboard" style={{ color: C.indigo, textDecoration: "none", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "4px" }}>
+                    <Trophy size={14} /> {t("student_dashboard.leaderboard", "Leaderboard")}
+                  </Link>
+                </div>
+                <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: "999px", height: "10px", overflow: "hidden" }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${xp.percent}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    style={{ height: "100%", background: "linear-gradient(90deg, #6366f1, #a855f7, #ec4899)", borderRadius: "999px" }}
+                  />
+                </div>
+                <p style={{ margin: "4px 0 0", color: C.textMuted, fontSize: "0.75rem" }}>
+                  {xp.current} / {xp.needed} XP {t("student_dashboard.to_next", "to next level")}
+                </p>
+              </div>
             </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-            <LanguageSwitcher theme="dark" />
-            {profile && (
-              <XPProgressWidget
-                compact
-                points={profile.points}
-                level={profile.level}
-                badges={profile.badges}
+          </BentoCard>
+
+          {/* 2. Streak Card — 4 cols */}
+          <BentoCard accent={C.amber} style={{ gridColumn: "span 4" }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "2.5rem", marginBottom: "4px" }}>
+                {streak.current >= 7 ? "🔥" : streak.current >= 3 ? "⚡" : "✨"}
+              </div>
+              <div style={{ color: C.textPrimary, fontWeight: 800, fontSize: "2.2rem", lineHeight: 1 }}>
+                {streak.current}
+              </div>
+              <div style={{ color: C.amber, fontWeight: 600, fontSize: "0.85rem", marginBottom: "8px" }}>
+                {t("student_dashboard.day_streak", "Day Streak")}
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", gap: "6px" }}>
+                {Array.from({ length: 7 }, (_, i) => (
+                  <div key={i} style={{
+                    width: "10px", height: "10px", borderRadius: "50%",
+                    background: i < (streak.current % 7 || (streak.current >= 7 ? 7 : streak.current))
+                      ? C.amber : "rgba(255,255,255,0.1)"
+                  }} />
+                ))}
+              </div>
+              <p style={{ color: C.textMuted, fontSize: "0.75rem", margin: "8px 0 0" }}>
+                {t("student_dashboard.best", "Best")}: {streak.longest} {t("student_dashboard.days", "days")}
+              </p>
+            </div>
+          </BentoCard>
+
+          {/* 3. Daily Challenge — 6 cols */}
+          <BentoCard accent={challengeColor} style={{ gridColumn: "span 6" }}>
+            <div style={{ marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{
+                background: `${challengeColor}22`, border: `1px solid ${challengeColor}44`,
+                color: challengeColor, padding: "3px 10px", borderRadius: "999px",
+                fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px"
+              }}>
+                {todayChallenge.categoryIcon} {todayChallenge.category.toUpperCase()}
+              </span>
+              <span style={{ color: C.textMuted, fontSize: "0.75rem", marginInlineStart: "auto" }}>
+                +{todayChallenge.xpReward} XP
+              </span>
+            </div>
+            <h3 style={{ color: C.textPrimary, fontSize: "1rem", fontWeight: 600, margin: "0 0 12px", lineHeight: 1.5 }}>
+              {getChallengeText(todayChallenge, lang, "question")}
+            </h3>
+            {!challengeDone ? (
+              <button
+                onClick={() => setChallengeDone(true)}
+                style={{
+                  background: `linear-gradient(135deg, ${challengeColor}, ${challengeColor}aa)`,
+                  border: "none", padding: "10px 20px", borderRadius: "10px",
+                  color: "white", fontWeight: 600, cursor: "pointer", fontSize: "0.9rem",
+                  width: "100%"
+                }}
+              >
+                {t("student_dashboard.see_hint", "Reveal Hint")} 💡
+              </button>
+            ) : (
+              <div style={{
+                background: `${challengeColor}11`, border: `1px solid ${challengeColor}33`,
+                borderRadius: "10px", padding: "12px",
+                color: C.textMuted, fontSize: "0.9rem", lineHeight: 1.6
+              }}>
+                💡 {getChallengeText(todayChallenge, lang, "hint")}
+              </div>
+            )}
+          </BentoCard>
+
+          {/* 4. Join with PIN — 6 cols */}
+          <BentoCard accent={C.cyan} style={{ gridColumn: "span 6" }}>
+            <div style={{ marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <Hash size={16} color={C.cyan} />
+              <span style={{ color: C.textPrimary, fontWeight: 600, fontSize: "0.95rem" }}>
+                {t("student_dashboard.join_title", "Join a Class Session")}
+              </span>
+            </div>
+            <form onSubmit={handleJoin} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <input
+                value={pinCode}
+                onChange={e => setPinCode(e.target.value.toUpperCase())}
+                placeholder={t("student_dashboard.pin_placeholder", "Enter PIN code e.g. AB12CD")}
+                maxLength={8}
+                style={{
+                  background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`,
+                  borderRadius: "10px", padding: "12px 14px", color: C.textPrimary,
+                  fontSize: "1rem", fontFamily: "'Orbitron', monospace", letterSpacing: "3px",
+                  outline: "none", width: "100%", boxSizing: "border-box"
+                }}
               />
-            )}
-          </div>
-        </header>
-
-        {/* GALAXY OF KNOWLEDGE BANNER */}
-        <div 
-          onClick={() => navigate('/explore')}
-          style={{ 
-            marginBottom: "2rem", background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)", 
-            padding: "2rem", borderRadius: "16px", border: "1px solid rgba(139, 92, 246, 0.5)", 
-            display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
-            boxShadow: "0 10px 30px rgba(139, 92, 246, 0.2)", position: "relative", overflow: "hidden",
-            transition: "transform 0.2s, box-shadow 0.2s"
-          }}
-          onMouseOver={(e) => { e.currentTarget.style.transform = "scale(1.01)"; e.currentTarget.style.boxShadow = "0 15px 40px rgba(139, 92, 246, 0.4)"; }}
-          onMouseOut={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 10px 30px rgba(139, 92, 246, 0.2)"; }}
-        >
-          {/* Background decoration */}
-          <div style={{ position: "absolute", top: "-50%", right: "-10%", width: "300px", height: "300px", background: "radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(0,0,0,0) 70%)", borderRadius: "50%", pointerEvents: "none" }}></div>
-          <Stars size={120} color="rgba(255,255,255,0.05)" style={{ position: "absolute", top: 10, left: 10, pointerEvents: "none" }} />
-
-          <div style={{ zIndex: 1 }}>
-            <h2 style={{ color: "white", margin: "0 0 10px 0", fontSize: "1.8rem", display: "flex", alignItems: "center", gap: "10px" }}>
-              <Rocket color="#c084fc" /> {t("student_dashboard.galaxy_title", "استكشف مجرة المعرفة")}
-            </h2>
-            <p style={{ color: "#cbd5e1", margin: 0, fontSize: "1rem", maxWidth: "600px", lineHeight: "1.5" }}>
-              {t("student_dashboard.galaxy_desc", "لا تنتظر كود الدرس! انطلق في رحلة فضائية مفتوحة واستكشف جميع النماذج ثلاثية الأبعاد في مختلف المواد الدراسية.")}
-            </p>
-          </div>
-          <div style={{ zIndex: 1 }}>
-            <button style={{ 
-              background: "linear-gradient(90deg, #8b5cf6, #d946ef)", border: "none", 
-              padding: "12px 24px", borderRadius: "30px", color: "white", fontWeight: "bold", 
-              fontSize: "1.1rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px",
-              boxShadow: "0 4px 15px rgba(217, 70, 239, 0.4)"
-            }}>
-              <Play size={18} fill="white" /> {t("student_dashboard.galaxy_btn", "ابدأ الرحلة")}
-            </button>
-          </div>
-        </div>
-
-        {/* STATS ROW */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
-          <div style={{ background: "#1e293b", padding: "1.5rem", borderRadius: "12px", border: "1px solid #334155", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div style={{ background: "#3b82f620", padding: "12px", borderRadius: "8px" }}><BookOpen size={28} color="#3b82f6" /></div>
-            <div>
-              <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: 0 }}>{t("student_dashboard.total_lessons", "Total Lessons")}</p>
-              <h3 style={{ color: "white", fontSize: "1.8rem", margin: 0 }}>{stats.total}</h3>
-            </div>
-          </div>
-          <div style={{ background: "#1e293b", padding: "1.5rem", borderRadius: "12px", border: "1px solid #334155", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div style={{ background: "#a855f720", padding: "12px", borderRadius: "8px" }}><Activity size={28} color="#a855f7" /></div>
-            <div>
-              <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: 0 }}>{t("student_dashboard.subjects", "Subjects")}</p>
-              <h3 style={{ color: "white", fontSize: "1.8rem", margin: 0 }}>{stats.subjects}</h3>
-            </div>
-          </div>
-          <div style={{ background: "#1e293b", padding: "1.5rem", borderRadius: "12px", border: "1px solid #334155", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div style={{ background: "#10b98120", padding: "12px", borderRadius: "8px" }}><Calendar size={28} color="#10b981" /></div>
-            <div>
-              <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: 0 }}>{t("student_dashboard.days_active", "Days Active")}</p>
-              <h3 style={{ color: "white", fontSize: "1.8rem", margin: 0 }}>{stats.days}</h3>
-            </div>
-          </div>
-        </div>
-
-        {/* XP PROGRESS CARD */}
-        {profile && (
-          <div style={{ marginBottom: "2rem" }}>
-            <XPProgressWidget
-              points={profile.points}
-              level={profile.level}
-              badges={profile.badges}
-            />
-          </div>
-        )}
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
-          
-          {/* JOIN NEW SESSION (Left side or top on mobile) */}
-          <section style={{ background: "#1e293b", padding: "2rem", borderRadius: "12px", border: "1px solid #334155", height: "fit-content" }}>
-            <h2 style={{ color: "white", marginTop: 0, marginBottom: "1rem", display: "flex", alignItems: "center", gap: "8px" }}>
-              <Hash color="#38bdf8" /> {t("student_dashboard.join_new", "Join a New Lesson")}
-            </h2>
-            
-            {errorMsg && (
-              <div style={{ padding: "10px", background: "rgba(239, 68, 68, 0.2)", border: "1px solid #ef4444", borderRadius: "8px", color: "#fca5a5", marginBottom: "1rem", fontSize: "0.9rem" }}>
-                ⚠️ {errorMsg}
-              </div>
-            )}
-
-            <form onSubmit={handleJoin} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <div style={{ position: "relative" }}>
-                <Hash size={24} style={{ position: "absolute", right: "15px", top: "15px", color: "#9ca3af" }} />
-                <input
-                  required
-                  type="text"
-                  value={pinCode}
-                  onChange={(e) => setPinCode(e.target.value)}
-                  placeholder="ABC123"
-                  style={{
-                    width: "100%", padding: "16px 45px 16px 16px", borderRadius: "12px",
-                    background: "rgba(0,0,0,0.5)", border: "2px solid #38bdf8", color: "white",
-                    fontSize: "1.2rem", textAlign: "center", letterSpacing: "2px", textTransform: "uppercase"
-                  }}
-                />
-              </div>
+              {errorMsg && <p style={{ color: "#f87171", margin: 0, fontSize: "0.85rem" }}>{errorMsg}</p>}
               <button
                 type="submit"
                 disabled={loadingJoin || !pinCode.trim()}
                 style={{
-                  padding: "16px", borderRadius: "12px", background: "linear-gradient(90deg, #0ea5e9, #3b82f6)", 
-                  border: "none", color: "white", fontWeight: "bold", fontSize: "1.1rem", 
-                  cursor: (loadingJoin || !pinCode.trim()) ? "not-allowed" : "pointer",
-                  opacity: (loadingJoin || !pinCode.trim()) ? 0.7 : 1
+                  background: loadingJoin ? "rgba(6,182,212,0.3)" : "linear-gradient(135deg, #06b6d4, #0ea5e9)",
+                  border: "none", padding: "12px", borderRadius: "10px",
+                  color: "white", fontWeight: 700, cursor: loadingJoin ? "not-allowed" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "8px"
                 }}
               >
-                {loadingJoin ? "..." : t("student_dashboard.join_new", "Join Lesson")}
+                <Play size={16} fill="white" />
+                {loadingJoin ? t("student_dashboard.joining", "Joining...") : t("student_dashboard.join_btn", "Join Now")}
               </button>
             </form>
-          </section>
+          </BentoCard>
 
-          {/* RECENT SESSIONS (Right side) */}
-          <section>
-            <h2 style={{ color: "white", marginTop: 0, marginBottom: "1rem" }}>
-              {t("student_dashboard.recent_lessons", "Recent Lessons")}
-            </h2>
-            {loadingData ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                <Skeleton height="80px" borderRadius="10px" />
-                <Skeleton height="80px" borderRadius="10px" />
-                <Skeleton height="80px" borderRadius="10px" />
+          {/* 5. Open Sandbox — 4 cols */}
+          <BentoCard accent={C.emerald} style={{ gridColumn: "span 4" }} onClick={() => navigate("/sandbox")}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
+              <div style={{
+                width: "48px", height: "48px", borderRadius: "14px",
+                background: `${C.emerald}22`, border: `1px solid ${C.emerald}44`,
+                display: "flex", alignItems: "center", justifyContent: "center"
+              }}>
+                <FlaskConical size={24} color={C.emerald} />
               </div>
-            ) : recentSessions.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                {recentSessions.map((session, idx) => (
-                  <div key={idx} style={{ background: "rgba(255,255,255,0.05)", padding: "1.2rem", borderRadius: "10px", border: "1px solid #334155", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <h4 style={{ color: "white", margin: "0 0 4px 0", fontSize: "1.1rem" }}>{session.title || "Lesson"}</h4>
-                      <p style={{ color: "#94a3b8", margin: 0, fontSize: "0.85rem" }}>
-                        {session.subject} • {new Date(session.joined_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    {session.lesson_id && (
-                       <Link 
-                         to={`/lesson/${session.lesson_id}`} 
-                         style={{ background: "#38bdf820", color: "#38bdf8", padding: "8px 16px", borderRadius: "20px", textDecoration: "none", display: "flex", alignItems: "center", gap: "8px", fontWeight: "bold", fontSize: "0.9rem" }}
-                       >
-                         <Play size={16} /> Revisit
-                       </Link>
-                     )}
+              <div>
+                <h3 style={{ color: C.textPrimary, margin: "0 0 6px", fontSize: "1rem", fontWeight: 700 }}>
+                  {t("student_dashboard.sandbox_title", "Open Sandbox")}
+                </h3>
+                <p style={{ color: C.textMuted, margin: 0, fontSize: "0.85rem", lineHeight: 1.5 }}>
+                  {t("student_dashboard.sandbox_desc", "Freely explore 3D models across all subjects. No PIN needed.")}
+                </p>
+              </div>
+              <div style={{ marginTop: "auto", display: "flex", alignItems: "center", gap: "4px", color: C.emerald, fontSize: "0.85rem", fontWeight: 600 }}>
+                {t("student_dashboard.explore", "Explore")} <ChevronRight size={16} />
+              </div>
+            </div>
+          </BentoCard>
+
+          {/* 6. Browse Library — 4 cols */}
+          <BentoCard accent={C.indigo} style={{ gridColumn: "span 4" }} onClick={() => navigate("/sandbox")}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{
+                width: "48px", height: "48px", borderRadius: "14px",
+                background: `${C.indigo}22`, border: `1px solid ${C.indigo}44`,
+                display: "flex", alignItems: "center", justifyContent: "center"
+              }}>
+                <BookOpen size={24} color={C.indigo} />
+              </div>
+              <div>
+                <h3 style={{ color: C.textPrimary, margin: "0 0 6px", fontSize: "1rem", fontWeight: 700 }}>
+                  {t("student_dashboard.library_title", "3D Library")}
+                </h3>
+                <p style={{ color: C.textMuted, margin: 0, fontSize: "0.85rem", lineHeight: 1.5 }}>
+                  {t("student_dashboard.library_desc", "Browse all interactive 3D models across every subject.")}
+                </p>
+              </div>
+              <div style={{ color: C.textMuted, fontSize: "0.8rem" }}>
+                📚 {t("student_dashboard.models_count", "120+ models available")}
+              </div>
+            </div>
+          </BentoCard>
+
+          {/* 7. Skills / AI tracker — 4 cols */}
+          <BentoCard accent="#a855f7" style={{ gridColumn: "span 4" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{
+                width: "48px", height: "48px", borderRadius: "14px",
+                background: "#a855f722", border: "1px solid #a855f744",
+                display: "flex", alignItems: "center", justifyContent: "center"
+              }}>
+                <Brain size={24} color="#a855f7" />
+              </div>
+              <div>
+                <h3 style={{ color: C.textPrimary, margin: "0 0 6px", fontSize: "1rem", fontWeight: 700 }}>
+                  {t("student_dashboard.skills_title", "Your Growth Stats")}
+                </h3>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                {[
+                  { label: t("student_dashboard.total_lessons", "Lessons"), val: stats.total, icon: "📖" },
+                  { label: t("student_dashboard.subjects", "Subjects"), val: stats.subjects, icon: "🔬" },
+                  { label: t("student_dashboard.days_active", "Active Days"), val: stats.days, icon: "📅" },
+                  { label: t("student_dashboard.streak", "Streak"), val: streak.current, icon: "🔥" },
+                ].map(s => (
+                  <div key={s.label} style={{
+                    background: "rgba(255,255,255,0.03)", borderRadius: "12px",
+                    padding: "10px", border: `1px solid ${C.border}`, textAlign: "center"
+                  }}>
+                    <div style={{ fontSize: "1.4rem" }}>{s.icon}</div>
+                    <div style={{ color: C.textPrimary, fontWeight: 800, fontSize: "1.2rem" }}>{s.val}</div>
+                    <div style={{ color: C.textMuted, fontSize: "0.7rem" }}>{s.label}</div>
                   </div>
                 ))}
               </div>
+            </div>
+          </BentoCard>
+
+          {/* 8. Recent Sessions — 12 cols full width */}
+          <BentoCard style={{ gridColumn: "span 12" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h3 style={{ color: C.textPrimary, margin: 0, fontSize: "1rem", fontWeight: 700 }}>
+                📋 {t("student_dashboard.recent", "Recent Sessions")}
+              </h3>
+            </div>
+            {loadingData ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {[1, 2, 3].map(i => <Skeleton key={i} width="100%" height="54px" borderRadius="10px" />)}
+              </div>
+            ) : recentSessions.length === 0 ? (
+              <p style={{ color: C.textMuted, textAlign: "center", padding: "2rem 0", margin: 0 }}>
+                {t("student_dashboard.no_sessions", "No sessions yet. Join a class or explore the Sandbox!")}
+              </p>
             ) : (
-              <div style={{ background: "rgba(255,255,255,0.03)", padding: "2rem", borderRadius: "10px", border: "1px dashed #475569", textAlign: "center", color: "#94a3b8" }}>
-                {t("student_dashboard.no_history", "You haven't attended any lessons yet")}
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {recentSessions.map((s, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      background: "rgba(255,255,255,0.02)", border: `1px solid ${C.border}`,
+                      borderRadius: "12px", padding: "12px 16px"
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <div style={{
+                        width: "36px", height: "36px", borderRadius: "10px",
+                        background: `${C.indigo}22`, display: "flex", alignItems: "center", justifyContent: "center"
+                      }}>
+                        <BookOpen size={16} color={C.indigo} />
+                      </div>
+                      <div>
+                        <div style={{ color: C.textPrimary, fontWeight: 600, fontSize: "0.9rem" }}>{s.title}</div>
+                        <div style={{ color: C.textMuted, fontSize: "0.78rem" }}>{s.subject}</div>
+                      </div>
+                    </div>
+                    <Link
+                      to={`/lesson/${s.lesson_id || s.model_key}`}
+                      style={{
+                        background: `${C.indigo}22`, border: `1px solid ${C.indigo}44`,
+                        color: "#a5b4fc", padding: "6px 12px", borderRadius: "8px",
+                        textDecoration: "none", fontSize: "0.8rem", fontWeight: 600,
+                        display: "flex", alignItems: "center", gap: "4px"
+                      }}
+                    >
+                      <Play size={12} fill="#a5b4fc" /> {t("student_dashboard.revisit", "Revisit")}
+                    </Link>
+                  </motion.div>
+                ))}
               </div>
             )}
-          </section>
+          </BentoCard>
 
         </div>
       </main>

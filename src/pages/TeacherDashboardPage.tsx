@@ -5,7 +5,7 @@ import {
   Atom, Calculator, Book, Globe, Languages, Settings, 
   Star, Palette, FlaskConical, Microscope, Layers, User, 
   ChevronLeft, Search, Copy, Send, LayoutDashboard,
-  ImagePlus, Cuboid, BarChart3, Zap, Rocket, Stars, Play
+  ImagePlus, Cuboid, BarChart3, Zap
 } from "lucide-react";
 import { Suspense, lazy } from "react";
 import { Canvas } from "@react-three/fiber";
@@ -347,42 +347,6 @@ function Step0Hub({ onStartWizard, profile, isPro }: { onStartWizard: () => void
             </h3>
           </div>
         ))}
-      </div>
-
-      {/* GALAXY EXPLORER BANNER */}
-      <div 
-        onClick={() => window.location.href = '/explore'}
-        style={{ 
-          marginTop: "1.5rem", marginBottom: "1.5rem", background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)", 
-          padding: "1.5rem 2rem", borderRadius: "16px", border: "1px solid rgba(139, 92, 246, 0.5)", 
-          display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
-          boxShadow: "0 10px 30px rgba(139, 92, 246, 0.2)", position: "relative", overflow: "hidden",
-          transition: "transform 0.2s, box-shadow 0.2s"
-        }}
-        onMouseOver={(e) => { e.currentTarget.style.transform = "scale(1.01)"; e.currentTarget.style.boxShadow = "0 15px 40px rgba(139, 92, 246, 0.4)"; }}
-        onMouseOut={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 10px 30px rgba(139, 92, 246, 0.2)"; }}
-      >
-        <div style={{ position: "absolute", top: "-50%", right: "-10%", width: "200px", height: "200px", background: "radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(0,0,0,0) 70%)", borderRadius: "50%", pointerEvents: "none" }}></div>
-        <Stars size={80} color="rgba(255,255,255,0.05)" style={{ position: "absolute", top: 10, left: 10, pointerEvents: "none" }} />
-
-        <div style={{ zIndex: 1 }}>
-          <h2 style={{ color: "white", margin: "0 0 8px 0", fontSize: "1.4rem", display: "flex", alignItems: "center", gap: "8px" }}>
-            <Rocket color="#c084fc" size={24} /> استكشف مجرة المعرفة (Galaxy of Knowledge)
-          </h2>
-          <p style={{ color: "#cbd5e1", margin: 0, fontSize: "0.95rem", maxWidth: "600px" }}>
-            معاينة البيئة التعليمية المفتوحة التي يستكشفها الطلاب. تصفح جميع النماذج ثلاثية الأبعاد التفاعلية في فضاء واحد.
-          </p>
-        </div>
-        <div style={{ zIndex: 1 }}>
-          <button style={{ 
-            background: "linear-gradient(90deg, #8b5cf6, #d946ef)", border: "none", 
-            padding: "10px 20px", borderRadius: "30px", color: "white", fontWeight: "bold", 
-            fontSize: "1rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px",
-            boxShadow: "0 4px 15px rgba(217, 70, 239, 0.4)"
-          }}>
-            <Play size={16} fill="white" /> عرض المجرة
-          </button>
-        </div>
       </div>
 
       <div className="quick-actions-row">

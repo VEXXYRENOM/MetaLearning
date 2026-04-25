@@ -8,6 +8,7 @@ export const XP_REWARDS = {
   QUIZ_ATTEMPT:      10,  // participated
   ALL_HOTSPOTS:      75,  // explored every hotspot in a lesson
   HOTSPOT_SINGLE:     5,  // explored one hotspot
+  DAILY_CHECKIN:      5,  // daily login bonus
 } as const;
 
 // ─── Level thresholds ──────────────────────────────────────────
@@ -46,6 +47,10 @@ export const BADGES = {
   LEVEL_10:       { id: "level_10",       icon: "⭐", label: "Level 10 Hero"  },
   LEVEL_25:       { id: "level_25",       icon: "🏆", label: "Champion"       },
   PERFECT_SCORE:  { id: "perfect_score",  icon: "💯", label: "Perfect Score"  },
+  STREAK_3:       { id: "streak_3",       icon: "🔥", label: "3-Day Streak"   },
+  STREAK_7:       { id: "streak_7",       icon: "⚡", label: "Week Warrior"   },
+  STREAK_14:      { id: "streak_14",      icon: "💎", label: "Two Weeks"      },
+  STREAK_30:      { id: "streak_30",      icon: "🏆", label: "Month Master"   },
 } as const;
 
 // ─── Core award function ────────────────────────────────────────
