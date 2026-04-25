@@ -32,9 +32,9 @@ export function useClassroomSync({
   const lastBroadcastRef = useRef<number>(0);
   const [isConnected, setIsConnected] = useState(false);
 
-  // Dynamic throttle: teachers broadcast at 12fps, students
+  // Dynamic throttle: teachers broadcast at 10fps, students
   // receive passively so no throttle needed on their side
-  const THROTTLE_MS = role === "teacher" ? 80 : Infinity;
+  const THROTTLE_MS = role === "teacher" ? 100 : Infinity;
 
   useEffect(() => {
     // Do NOT connect if sync is disabled or no sessionId

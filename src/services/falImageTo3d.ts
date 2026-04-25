@@ -11,6 +11,10 @@ import { supabase } from './supabaseClient';
 export const LOCAL_PROXY_ENDPOINT = "/api/fal/generate-3d";
 
 export interface FalResponse {
+  cached?: boolean;
+  request_id?: string;
+  status_url?: string;
+  prompt_hash?: string;
   "3d_model_url"?: string;
   glb_url?: string;
   model_url?: string;
@@ -91,7 +95,40 @@ export async function falGenerate3DFromImage(
     throw new Error(`Fal.ai API error (${res.status}): ${text}`);
   }
 
-  const json = (await res.json()) as FalResponse;
+  let json = (await res.json()) as FalResponse;
+
+  if (json.cached) {
+    onProgress?.(100, "SUCCEEDED", "تم تحميل المجسم من الذاكرة المؤقتة بنجاح!");
+    return (json.glb_url || json["3d_model_url"]) as string;
+  }
+
+  if (json.request_id && json.status_url) {
+    onProgress?.(60, "QUEUED", "الطلب في قائمة الانتظار... جاري التحضير...");
+    
+    // Polling loop
+    let isCompleted = false;
+    while (!isCompleted) {
+      await new Promise(r => setTimeout(r, 2000)); // Poll every 2s
+      
+      const statusRes = await fetch(`/api/fal/status?status_url=${encodeURIComponent(json.status_url)}&prompt_hash=${json.prompt_hash}`, {
+        headers
+      });
+
+      if (!statusRes.ok) throw new Error(`Status check failed: ${statusRes.status}`);
+      
+      const statusData = await statusRes.json();
+      
+      if (statusData.status === 'COMPLETED') {
+        isCompleted = true;
+        json = statusData.payload as FalResponse;
+        onProgress?.(100, "SUCCEEDED", "تم الانتهاء بنجاح!");
+      } else if (statusData.status === 'IN_PROGRESS') {
+        onProgress?.(80, "PROCESSING", "البيانات وصلت! الذكاء الاصطناعي يقوم بالنحت الآن (Fal.ai)...");
+      } else if (statusData.status === 'FAILED') {
+        throw new Error(`Fal.ai processing failed: ${statusData.error || 'Unknown error'}`);
+      }
+    }
+  }
 
   const modelUrl = json.model_url
     ?? json.url
@@ -104,7 +141,6 @@ export async function falGenerate3DFromImage(
     throw new Error("لم يتم العثور على رابط المجسم في استجابة Fal.ai");
   }
 
-  onProgress?.(100, "SUCCEEDED", "تم الانتهاء بنجاح!");
   return modelUrl as string;
 }
 

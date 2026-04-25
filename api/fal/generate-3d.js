@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const ALLOWED_ORIGINS = [
@@ -97,52 +98,68 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'Unauthorized: invalid client secret' });
     }
   }
-
-  // ── Rate Limiting (Supabase-backed, persistent across cold starts) ───────
-  // نستخدم userId من الـ header إذا أرسله العميل (authenticated user)
-  // وإلا نستخدم الـ IP كمعرف مجهول
-  const clientIp = (req.headers['x-forwarded-for']?.split(',')[0]?.trim()
-    ?? req.socket?.remoteAddress
-    ?? 'unknown').replace(/[^a-zA-Z0-9.:_-]/g, '');
-
-  const headerUserId = req.headers['x-user-id'];
-  const userId = headerUserId || `ip:${clientIp}`;
-  const userPlan = await getPlanFromDB(headerUserId);
-
-  let rateLimitResult;
-  try {
-    rateLimitResult = await checkAndIncrementUsage(userId, userPlan);
-  } catch (rlError) {
-    console.error('[RateLimit] Fatal error, allowing request:', rlError);
-    rateLimitResult = { allowed: true, remaining: 1, count: 1 };
-  }
-
-  res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining);
-  res.setHeader('X-RateLimit-Used', rateLimitResult.count);
-
-  if (!rateLimitResult.allowed) {
-    return res.status(429).json({
-      error: 'لقد تجاوزت الحد اليومي للتوليد. قم بالترقية للـ Pro للحصول على 50 طلب يومياً.',
-      errorEn: 'Daily generation limit exceeded. Upgrade to Pro for 50 requests/day.',
-      retryAfter: '24h',
-      plan: userPlan,
-    });
-  }
-
-  // ── Proxy to Fal.ai ───────────────────────────────────────────────────
   try {
     const { image_url } = req.body;
     if (!image_url) {
       return res.status(400).json({ error: 'image_url is required' });
     }
 
+    // --- 1. Caching Check ---
+    const promptHash = crypto.createHash('md5').update(image_url).digest('hex');
+    const supabaseAdmin = getSupabaseAdmin();
+    const { data: cachedAsset } = await supabaseAdmin
+      .from('generated_assets')
+      .select('glb_url')
+      .eq('prompt_hash', promptHash)
+      .single();
+    
+    if (cachedAsset && cachedAsset.glb_url) {
+      console.log(`[Cache Hit] Returning cached GLB for hash: ${promptHash}`);
+      return res.status(200).json({
+        cached: true,
+        glb_url: cachedAsset.glb_url,
+        "3d_model_url": cachedAsset.glb_url
+      });
+    }
+
+    // --- 2. Rate Limiting (Only if not cached) ---
+    const clientIp = (req.headers['x-forwarded-for']?.split(',')[0]?.trim()
+      ?? req.socket?.remoteAddress
+      ?? 'unknown').replace(/[^a-zA-Z0-9.:_-]/g, '');
+
+    const headerUserId = req.headers['x-user-id'];
+    const userId = headerUserId || `ip:${clientIp}`;
+    const userPlan = await getPlanFromDB(headerUserId);
+
+    let rateLimitResult;
+    try {
+      rateLimitResult = await checkAndIncrementUsage(userId, userPlan);
+    } catch (rlError) {
+      console.error('[RateLimit] Fatal error, allowing request:', rlError);
+      rateLimitResult = { allowed: true, remaining: 1, count: 1 };
+    }
+
+    res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining);
+    res.setHeader('X-RateLimit-Used', rateLimitResult.count);
+
+    if (!rateLimitResult.allowed) {
+      return res.status(429).json({
+        error: 'لقد تجاوزت الحد اليومي للتوليد. قم بالترقية للـ Pro للحصول على 50 طلب يومياً.',
+        errorEn: 'Daily generation limit exceeded. Upgrade to Pro for 50 requests/day.',
+        retryAfter: '24h',
+        plan: userPlan,
+      });
+    }
+
+    // --- 3. Proxy to Fal.ai Queue API ---
     const falApiKey = process.env.FAL_API_KEY;
     if (!falApiKey) {
       console.error('[Config] FAL_API_KEY not set in Vercel environment.');
       return res.status(500).json({ error: 'Server misconfiguration: FAL_API_KEY missing' });
     }
 
-    const falResponse = await fetch('https://fal.run/fal-ai/stable-fast-3d', {
+    // Using queue.fal.run instead of fal.run for async submission
+    const falResponse = await fetch('https://queue.fal.run/fal-ai/stable-fast-3d', {
       method: 'POST',
       headers: {
         'Authorization': falApiKey,
@@ -158,7 +175,12 @@ export default async function handler(req, res) {
     }
 
     const data = await falResponse.json();
-    return res.status(200).json(data);
+    // data contains { request_id, response_url, status_url, cancel_url }
+    return res.status(200).json({
+      request_id: data.request_id,
+      prompt_hash: promptHash, // Send hash to client so it can pass it to status endpoint
+      status_url: data.status_url
+    });
 
   } catch (error) {
     console.error('[Proxy] Unexpected error:', error);
