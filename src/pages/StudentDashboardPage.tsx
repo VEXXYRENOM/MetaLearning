@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../services/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
-import { UserCircle, Calendar, BookOpen, Activity, Hash, Play } from "lucide-react";
+import { UserCircle, Calendar, BookOpen, Activity, Hash, Play, Rocket, Stars } from "lucide-react";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { OnboardingWizard } from "../components/OnboardingWizard";
 import { Skeleton } from "../components/Skeleton";
@@ -172,6 +172,43 @@ export function StudentDashboardPage() {
             )}
           </div>
         </header>
+
+        {/* GALAXY OF KNOWLEDGE BANNER */}
+        <div 
+          onClick={() => navigate('/explore')}
+          style={{ 
+            marginBottom: "2rem", background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)", 
+            padding: "2rem", borderRadius: "16px", border: "1px solid rgba(139, 92, 246, 0.5)", 
+            display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+            boxShadow: "0 10px 30px rgba(139, 92, 246, 0.2)", position: "relative", overflow: "hidden",
+            transition: "transform 0.2s, box-shadow 0.2s"
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.transform = "scale(1.01)"; e.currentTarget.style.boxShadow = "0 15px 40px rgba(139, 92, 246, 0.4)"; }}
+          onMouseOut={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 10px 30px rgba(139, 92, 246, 0.2)"; }}
+        >
+          {/* Background decoration */}
+          <div style={{ position: "absolute", top: "-50%", right: "-10%", width: "300px", height: "300px", background: "radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(0,0,0,0) 70%)", borderRadius: "50%", pointerEvents: "none" }}></div>
+          <Stars size={120} color="rgba(255,255,255,0.05)" style={{ position: "absolute", top: 10, left: 10, pointerEvents: "none" }} />
+
+          <div style={{ zIndex: 1 }}>
+            <h2 style={{ color: "white", margin: "0 0 10px 0", fontSize: "1.8rem", display: "flex", alignItems: "center", gap: "10px" }}>
+              <Rocket color="#c084fc" /> {t("student_dashboard.galaxy_title", "استكشف مجرة المعرفة")}
+            </h2>
+            <p style={{ color: "#cbd5e1", margin: 0, fontSize: "1rem", maxWidth: "600px", lineHeight: "1.5" }}>
+              {t("student_dashboard.galaxy_desc", "لا تنتظر كود الدرس! انطلق في رحلة فضائية مفتوحة واستكشف جميع النماذج ثلاثية الأبعاد في مختلف المواد الدراسية.")}
+            </p>
+          </div>
+          <div style={{ zIndex: 1 }}>
+            <button style={{ 
+              background: "linear-gradient(90deg, #8b5cf6, #d946ef)", border: "none", 
+              padding: "12px 24px", borderRadius: "30px", color: "white", fontWeight: "bold", 
+              fontSize: "1.1rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px",
+              boxShadow: "0 4px 15px rgba(217, 70, 239, 0.4)"
+            }}>
+              <Play size={18} fill="white" /> {t("student_dashboard.galaxy_btn", "ابدأ الرحلة")}
+            </button>
+          </div>
+        </div>
 
         {/* STATS ROW */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>

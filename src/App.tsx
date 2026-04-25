@@ -22,6 +22,7 @@ const LessonPage            = lazy(() => import("./pages/LessonPage").then(m => 
 const TeacherDashboardPage  = lazy(() => import("./pages/TeacherDashboardPage").then(m => ({ default: m.TeacherDashboardPage })));
 const TeacherAnalyticsPage  = lazy(() => import("./pages/TeacherAnalyticsPage").then(m => ({ default: m.TeacherAnalyticsPage })));
 const StudentDashboardPage  = lazy(() => import("./pages/StudentDashboardPage").then(m => ({ default: m.StudentDashboardPage })));
+const GalaxyExplorePage     = lazy(() => import("./pages/GalaxyExplorePage").then(m => ({ default: m.GalaxyExplorePage })));
 const PricingPage           = lazy(() => import("./pages/PricingPage").then(m => ({ default: m.PricingPage })));
 const LeaderboardPage       = lazy(() => import("./pages/LeaderboardPage").then(m => ({ default: m.LeaderboardPage })));
 const AIGenerationHubPage   = lazy(() => import("./pages/AIGenerationHubPage").then(m => ({ default: m.AIGenerationHubPage })));
@@ -64,6 +65,7 @@ function AnimatedRoutes() {
         <Route path="/privacy" element={<Suspense fallback={<PageSkeleton />}><PageTransition><PrivacyPolicyPage /></PageTransition></Suspense>} />
         <Route path="/terms" element={<Suspense fallback={<PageSkeleton />}><PageTransition><TermsOfServicePage /></PageTransition></Suspense>} />
         <Route path="/leaderboard" element={<Suspense fallback={<PageSkeleton />}><PageTransition><LeaderboardPage /></PageTransition></Suspense>} />
+        <Route path="/explore" element={<Suspense fallback={<PageSkeleton />}><PageTransition><GalaxyExplorePage /></PageTransition></Suspense>} />
         <Route path="/lesson/:lessonId" element={<Suspense fallback={<PageSkeleton />}><PageTransition variant="fade"><LessonPage /></PageTransition></Suspense>} />
 
         {/* ── Teacher ─────────────────────────────────────────── */}
