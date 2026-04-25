@@ -2,14 +2,10 @@ import React, { useState, useMemo, useRef, Suspense, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
-  Stars,
   CameraControls,
   Html,
-  Float,
-  PerformanceMonitor,
-  Sphere
+  PerformanceMonitor
 } from "@react-three/drei";
-import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { useTranslation } from "react-i18next";
 import { Rocket, Play, Info, ArrowLeft, Loader2 } from "lucide-react";
@@ -63,23 +59,22 @@ function Planet({ lesson, position, color, onSelect, isSelected }: { lesson: Les
 
   return (
     <group position={position}>
-        <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-          <mesh
-            ref={meshRef}
-            onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = "pointer"; }}
-            onPointerOut={(e) => { e.stopPropagation(); setHovered(false); document.body.style.cursor = "auto"; }}
-            onClick={(e) => { e.stopPropagation(); onSelect(lesson, position); }}
-          >
-            <sphereGeometry args={[isSelected ? 1.5 : 1, 32, 32]} />
-            <meshStandardMaterial 
-              color={hovered || isSelected ? "#ffffff" : color} 
-              emissive={color}
-              emissiveIntensity={hovered || isSelected ? 2 : 0.5}
-              roughness={0.2}
-              metalness={0.8}
-            />
-          </mesh>
-        </Float>
+        <mesh
+          ref={meshRef}
+          scale={isSelected ? 1.5 : 1}
+          onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = "pointer"; }}
+          onPointerOut={(e) => { e.stopPropagation(); setHovered(false); document.body.style.cursor = "auto"; }}
+          onClick={(e) => { e.stopPropagation(); onSelect(lesson, position); }}
+        >
+          <sphereGeometry args={[1, 32, 32]} />
+          <meshStandardMaterial 
+            color={hovered || isSelected ? "#ffffff" : color} 
+            emissive={color}
+            emissiveIntensity={hovered || isSelected ? 2 : 0.5}
+            roughness={0.2}
+            metalness={0.8}
+          />
+        </mesh>
       
       {/* Label (Visible on hover or if it's the only one selected) */}
       {(hovered || isSelected) && (
@@ -109,7 +104,6 @@ function SubjectStar({ subject, index, position, onFocus }: { subject: string, i
   return (
     <group>
       {/* Central Star */}
-      <Float speed={1} rotationIntensity={0.2} floatIntensity={0.2}>
         <mesh 
           position={position}
           onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = "pointer"; }}
@@ -119,11 +113,11 @@ function SubjectStar({ subject, index, position, onFocus }: { subject: string, i
           <sphereGeometry args={[4, 64, 64]} />
           <meshBasicMaterial color={color} />
           {/* Glowing Aura */}
-          <Sphere args={[4.5, 32, 32]}>
+          <mesh>
+            <sphereGeometry args={[4.5, 32, 32]} />
             <meshBasicMaterial color={color} transparent opacity={hovered ? 0.4 : 0.15} side={THREE.BackSide} />
-          </Sphere>
+          </mesh>
         </mesh>
-      </Float>
 
       {/* Subject Title */}
       <Html position={[position.x, position.y + 6, position.z]} center style={{ pointerEvents: "none" }}>
@@ -180,21 +174,18 @@ function GalaxyScene({ onSelectLesson }: { onSelectLesson: (lesson: LessonDef) =
 
   // Performance scaling
   const [dpr, setDpr] = useState(1);
-  const [enableBloom, setEnableBloom] = useState(true);
 
   return (
     <>
       <PerformanceMonitor 
-        onDecline={() => { setDpr(1); setEnableBloom(false); }}
-        onIncline={() => { setDpr(2); setEnableBloom(true); }}
+        onDecline={() => { setDpr(1); }}
+        onIncline={() => { setDpr(2); }}
       />
       
       <CameraControls ref={controlsRef} maxDistance={100} minDistance={5} />
       
       <ambientLight intensity={0.2} />
       <directionalLight position={[10, 10, 10]} intensity={1} />
-
-      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
 
       {subjects.map((sub, i) => (
         <SubjectStar 
@@ -233,11 +224,6 @@ function GalaxyScene({ onSelectLesson }: { onSelectLesson: (lesson: LessonDef) =
         });
       })}
 
-      {enableBloom && (
-        <EffectComposer multisampling={0}>
-          <Bloom luminanceThreshold={1} mipmapBlur intensity={1.5} />
-        </EffectComposer>
-      )}
     </>
   );
 }
