@@ -1,7 +1,6 @@
-import { useRef, useState, Suspense, useCallback } from "react";
+import { useRef, useState, Suspense, useCallback, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
-import { Physics, usePlane, useSphere } from "@react-three/cannon";
 import * as THREE from "three";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -10,11 +9,10 @@ import { LabSidebar } from "../components/lab/LabSidebar";
 import { LabElement, getReaction, Reaction } from "../lib/labElements";
 
 // ─── Types ───────────────────────────────────────────────────
-interface SpawnedElement {
-  uid: string;
-  elementId: string;
-  element: LabElement;
-  position: [number, number, number];
+interface BeakerState {
+  contents: LabElement[];
+  volume: number; // 0.0 to 1.0
+  color: string;
 }
 
 interface Particle {
@@ -24,172 +22,260 @@ interface Particle {
   life: number;
   maxLife: number;
   color: string;
+  size: number;
 }
 
-// ─── Static Lab Floor ─────────────────────────────────────────
-function LabFloor() {
-  const [ref] = usePlane<THREE.Mesh>(() => ({
-    rotation: [-Math.PI / 2, 0, 0],
-    position: [0, -1.5, 0],
-    type: "Static",
-  }));
+// ─── Static Lab Floor & Bench ─────────────────────────────────
+function LabEnvironment() {
   return (
-    <mesh ref={ref} receiveShadow>
-      <planeGeometry args={[20, 20]} />
-      <meshStandardMaterial
-        color="#0f172a"
-        roughness={0.8}
-        metalness={0.2}
+    <group>
+      {/* Floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
+        <planeGeometry args={[20, 20]} />
+        <meshStandardMaterial color="#0f172a" roughness={0.8} metalness={0.2} transparent opacity={0.6} />
+      </mesh>
+      {/* Bench */}
+      <mesh position={[0, -1.2, 0]} receiveShadow castShadow>
+        <boxGeometry args={[8, 0.15, 4]} />
+        <meshStandardMaterial color="#1e293b" roughness={0.5} metalness={0.3} />
+      </mesh>
+    </group>
+  );
+}
+
+// ─── Liquid Mesh ──────────────────────────────────────────────
+function LiquidMesh({ volume, targetColor }: { volume: number; targetColor: string }) {
+  const matRef = useRef<THREE.MeshPhysicalMaterial>(null!);
+  const colorObj = useRef(new THREE.Color(targetColor));
+
+  // Ensure volume stays within bounds [0.01, 1] (0.01 so it's not totally invisible when empty)
+  const safeVolume = Math.max(0.01, Math.min(1.0, volume));
+  
+  // The beaker interior is ~0.9 units high. 
+  const liquidHeight = safeVolume * 0.9;
+  // Base position is -0.95 (bottom of beaker). 
+  const yPos = -0.95 + (liquidHeight / 2);
+
+  useFrame(() => {
+    if (matRef.current) {
+      colorObj.current.set(targetColor);
+      matRef.current.color.lerp(colorObj.current, 0.05);
+    }
+  });
+
+  return (
+    <mesh position={[0, yPos, 0]}>
+      <cylinderGeometry args={[0.34, 0.34, liquidHeight, 32]} />
+      <meshPhysicalMaterial
+        ref={matRef}
+        color={targetColor}
         transparent
-        opacity={0.6}
+        opacity={volume > 0 ? 0.85 : 0}
+        roughness={0.1}
+        transmission={0.6}
+        thickness={0.5}
       />
     </mesh>
   );
 }
 
-// ─── Lab Bench (static box) ───────────────────────────────────
-function LabBench() {
+// ─── Central Beaker ──────────────────────────────────────────
+function CentralBeaker({ beakerState }: { beakerState: BeakerState }) {
   return (
-    <mesh position={[0, -1.2, 0]} receiveShadow castShadow>
-      <boxGeometry args={[8, 0.15, 4]} />
-      <meshStandardMaterial color="#1e293b" roughness={0.5} metalness={0.3} />
-    </mesh>
-  );
-}
+    <group position={[0, -0.65, 0]}>
+      {/* Liquid inside */}
+      <LiquidMesh volume={beakerState.volume} targetColor={beakerState.color} />
 
-// ─── Beaker (static — glass look) ────────────────────────────
-function Beaker({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      {/* cylinder body */}
+      {/* Glass Body */}
       <mesh castShadow>
-        <cylinderGeometry args={[0.4, 0.35, 1.0, 24, 1, true]} />
+        <cylinderGeometry args={[0.4, 0.35, 1.0, 32, 1, true]} />
         <meshPhysicalMaterial
-          color="#e0f2fe" transparent opacity={0.25}
-          roughness={0} metalness={0} transmission={0.9} thickness={0.5}
+          color="#ffffff" transparent opacity={0.15}
+          roughness={0.05} metalness={0.1} transmission={0.95} thickness={0.1}
           side={THREE.DoubleSide}
         />
       </mesh>
-      {/* bottom */}
+      
+      {/* Glass Bottom */}
       <mesh position={[0, -0.5, 0]}>
-        <cylinderGeometry args={[0.35, 0.35, 0.05, 24]} />
-        <meshPhysicalMaterial color="#e0f2fe" transparent opacity={0.3} roughness={0} />
+        <cylinderGeometry args={[0.35, 0.35, 0.05, 32]} />
+        <meshPhysicalMaterial color="#ffffff" transparent opacity={0.2} roughness={0.1} />
       </mesh>
-      {/* label */}
-      <Html center position={[0, -0.9, 0]} style={{ pointerEvents: "none" }}>
-        <span style={{ color: "#94a3b8", fontSize: "0.7rem", fontFamily: "Inter, sans-serif",
-          whiteSpace: "nowrap", textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}>🧪 Beaker</span>
+      
+      {/* Rim */}
+      <mesh position={[0, 0.5, 0]}>
+        <torusGeometry args={[0.4, 0.02, 16, 32]} />
+        <meshPhysicalMaterial color="#ffffff" transparent opacity={0.3} roughness={0.1} />
+      </mesh>
+
+      {/* Label */}
+      <Html center position={[0, -0.2, 0.36]} style={{ pointerEvents: "none" }}>
+        <div style={{
+          background: "rgba(255,255,255,0.8)", padding: "2px 8px", borderRadius: "4px",
+          color: "#0f172a", fontSize: "0.6rem", fontWeight: "bold", border: "1px solid #cbd5e1"
+        }}>
+          500ml
+        </div>
       </Html>
     </group>
   );
 }
 
-// ─── Physics Sphere (dropped element) ────────────────────────
-function PhysicsSphere({
-  item, onCollide,
-}: {
-  item: SpawnedElement;
-  onCollide: (uid: string, otherUid: string) => void;
-}) {
-  const el = item.element;
-  const colorRef = useRef(new THREE.Color(el.color));
-  const matRef = useRef<THREE.MeshStandardMaterial>(null!);
-  const [reacted, setReacted] = useState(false);
+// ─── Pouring Bottle Animation ────────────────────────────────
+function PouringBottle({ element, onFinish }: { element: LabElement, onFinish: () => void }) {
+  const groupRef = useRef<THREE.Group>(null!);
+  const [pouring, setPouring] = useState(false);
+  const streamRef = useRef<THREE.Mesh>(null!);
 
-  const [ref] = useSphere<THREE.Mesh>(() => ({
-    mass: el.mass,
-    position: item.position,
-    args: [el.radius],
-    restitution: 0.4,
-    friction: 0.6,
-    linearDamping: 0.3,
-    onCollide: (e) => {
-      const otherId = (e.body as any)?.__uid;
-      if (otherId && !reacted) onCollide(item.uid, otherId);
-    },
-  }));
-
-  useFrame(() => {
-    if (matRef.current) {
-      matRef.current.color.lerp(colorRef.current, 0.05);
+  useFrame((state, delta) => {
+    if (!groupRef.current) return;
+    
+    // Animate bottle tilting
+    if (groupRef.current.rotation.z > -Math.PI / 2.5) {
+      groupRef.current.rotation.z -= delta * 3;
+    } else if (!pouring) {
+      setPouring(true);
+      // Pour for 1.5 seconds, then finish
+      setTimeout(onFinish, 1500);
     }
   });
 
   return (
-    <mesh ref={ref} castShadow>
-      <icosahedronGeometry args={[el.radius, 2]} />
-      <meshStandardMaterial
-        ref={matRef}
-        color={el.color}
-        emissive={el.emissive}
-        emissiveIntensity={0.25}
-        metalness={el.metalness}
-        roughness={el.roughness}
-      />
-      <Html center distanceFactor={6} style={{ pointerEvents: "none" }}>
-        <span style={{
-          color: "white", fontSize: "0.65rem", fontWeight: 700,
-          fontFamily: "Inter, sans-serif", textShadow: "0 1px 4px rgba(0,0,0,0.9)",
-          background: "rgba(0,0,0,0.5)", padding: "1px 5px", borderRadius: "4px",
-          whiteSpace: "nowrap"
-        }}>{el.id}</span>
+    <group ref={groupRef} position={[1.2, 1.5, 0]}>
+      {/* The Bottle */}
+      <mesh position={[0, 0, 0]}>
+        <cylinderGeometry args={[0.2, 0.25, 0.8, 16]} />
+        <meshPhysicalMaterial color="#e2e8f0" transmission={0.9} opacity={0.5} transparent roughness={0.1} />
+      </mesh>
+      {/* Bottle Neck */}
+      <mesh position={[0, 0.5, 0]}>
+        <cylinderGeometry args={[0.08, 0.2, 0.3, 16]} />
+        <meshPhysicalMaterial color="#e2e8f0" transmission={0.9} opacity={0.5} transparent roughness={0.1} />
+      </mesh>
+      {/* Liquid inside bottle */}
+      <mesh position={[0, -0.1, 0]}>
+        <cylinderGeometry args={[0.18, 0.23, 0.6, 16]} />
+        <meshStandardMaterial color={element.color} transparent opacity={0.9} />
+      </mesh>
+      
+      {/* Label */}
+      <Html center position={[0, 0, 0.26]} style={{ pointerEvents: "none" }}>
+        <div style={{ background: element.color, color: "white", padding: "2px 6px", borderRadius: "2px", fontSize: "0.5rem", fontWeight: "bold" }}>
+          {element.id}
+        </div>
       </Html>
-    </mesh>
+
+      {/* Pouring Stream (visible when tilted) */}
+      <mesh ref={streamRef} position={[-0.8, 0.6, 0]} rotation={[0, 0, Math.PI / 2.5]} visible={pouring}>
+        <cylinderGeometry args={[0.02, 0.04, 2.0, 8]} />
+        <meshStandardMaterial color={element.color} transparent opacity={0.8} />
+      </mesh>
+    </group>
   );
 }
 
-// ─── Particle System ─────────────────────────────────────────
-function ParticleSystem({ particles }: { particles: Particle[] }) {
+// ─── Particle System (Reactions) ─────────────────────────────
+function ReactionParticles({ active, reaction }: { active: boolean, reaction: Reaction | null }) {
   const pointsRef = useRef<THREE.Points>(null!);
   const geoRef = useRef<THREE.BufferGeometry>(null!);
+  const particles = useRef<Particle[]>([]);
 
-  useFrame(() => {
-    if (!geoRef.current || particles.length === 0) return;
-    const positions = new Float32Array(particles.length * 3);
-    particles.forEach((p, i) => {
-      positions[i * 3]     = p.pos.x;
-      positions[i * 3 + 1] = p.pos.y;
-      positions[i * 3 + 2] = p.pos.z;
-    });
-    geoRef.current.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geoRef.current.attributes.position.needsUpdate = true;
+  useFrame((state, delta) => {
+    if (!geoRef.current) return;
+
+    // Spawn new particles if active
+    if (active && reaction) {
+      for (let i = 0; i < (reaction.hasExplosion ? 5 : 2); i++) {
+        particles.current.push({
+          id: Math.random(),
+          pos: new THREE.Vector3((Math.random() - 0.5) * 0.4, -0.5, (Math.random() - 0.5) * 0.4),
+          vel: new THREE.Vector3(
+            (Math.random() - 0.5) * (reaction.hasExplosion ? 3 : 0.5),
+            2 + Math.random() * (reaction.hasExplosion ? 5 : 2),
+            (Math.random() - 0.5) * (reaction.hasExplosion ? 3 : 0.5)
+          ),
+          life: 0,
+          maxLife: 1 + Math.random(),
+          color: reaction.smokeColor,
+          size: reaction.hasBubbles ? 0.05 : 0.15,
+        });
+      }
+    }
+
+    // Update particles
+    const positions: number[] = [];
+    const sizes: number[] = [];
+    
+    for (let i = particles.current.length - 1; i >= 0; i--) {
+      const p = particles.current[i];
+      p.life += delta;
+      if (p.life >= p.maxLife) {
+        particles.current.splice(i, 1);
+        continue;
+      }
+      
+      p.pos.addScaledVector(p.vel, delta);
+      // Add gravity/drag
+      p.vel.y -= delta * 2;
+      p.vel.x *= 0.95;
+      p.vel.z *= 0.95;
+
+      positions.push(p.pos.x, p.pos.y, p.pos.z);
+      // Fade out size based on life
+      sizes.push(p.size * (1 - p.life / p.maxLife));
+    }
+
+    geoRef.current.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geoRef.current.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
   });
 
-  if (particles.length === 0) return null;
   return (
     <points ref={pointsRef}>
       <bufferGeometry ref={geoRef} />
-      <pointsMaterial size={0.12} color="#ff6600" vertexColors={false}
-        transparent opacity={0.8} sizeAttenuation />
+      {/* ShaderMaterial is better for variable sizes, but PointsMaterial is simpler.
+          Since we want individual sizes, we use a basic shader. */}
+      <shaderMaterial
+        transparent
+        depthWrite={false}
+        uniforms={{
+          uColor: { value: new THREE.Color(reaction?.smokeColor || "#ffffff") }
+        }}
+        vertexShader={`
+          attribute float size;
+          void main() {
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            gl_PointSize = size * (300.0 / -mvPosition.z);
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `}
+        fragmentShader={`
+          uniform vec3 uColor;
+          void main() {
+            vec2 xy = gl_PointCoord.xy - vec2(0.5);
+            float ll = length(xy);
+            if(ll > 0.5) discard;
+            gl_FragColor = vec4(uColor, (0.5 - ll) * 2.0);
+          }
+        `}
+      />
     </points>
   );
 }
 
-// ─── Drop Zone overlay (invisible DOM plane to capture drops) ─
-function DropHandler({
-  onDrop,
-}: {
-  onDrop: (worldPos: [number, number, number]) => void;
-}) {
-  const { camera, gl } = useThree();
+// ─── Drop Zone overlay ────────────────────────────────────────
+function DropHandler({ onDrop }: { onDrop: () => void }) {
+  const { gl } = useThree();
 
   const handleDrop = useCallback((e: DragEvent) => {
     e.preventDefault();
-    const rect = gl.domElement.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
-    const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
-    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1.5); // drop at y=1.5
-    const target = new THREE.Vector3();
-    raycaster.ray.intersectPlane(plane, target);
-    if (target) onDrop([target.x, target.y, target.z]);
-  }, [camera, gl, onDrop]);
+    // In this simplified version, dropping anywhere in the canvas triggers the pour.
+    // We assume the user wants to pour into the central beaker.
+    onDrop();
+  }, [onDrop]);
 
-  // attach listener to canvas
   useFrame(() => {
-    gl.domElement.ondragover  = (e) => e.preventDefault();
-    gl.domElement.ondrop      = handleDrop as any;
+    gl.domElement.ondragover = (e) => e.preventDefault();
+    gl.domElement.ondrop = handleDrop as any;
   });
 
   return null;
@@ -201,76 +287,70 @@ export function InteractiveLabPage() {
   const isRTL = i18n.language.startsWith("ar");
   const navigate = useNavigate();
 
-  const [spawned, setSpawned] = useState<SpawnedElement[]>([]);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const [reaction, setReaction] = useState<Reaction | null>(null);
-  const [reactionLabel, setReactionLabel] = useState("");
   const dragElementRef = useRef<LabElement | null>(null);
-  const uidCounter = useRef(0);
 
-  // Track spawned IDs by uid for collision matching
-  const uidMap = useRef<Record<string, string>>({}); // uid → elementId
+  const [beaker, setBeaker] = useState<BeakerState>({ contents: [], volume: 0, color: "#ffffff" });
+  const [pouring, setPouring] = useState<LabElement | null>(null);
+  
+  const [activeReaction, setActiveReaction] = useState<Reaction | null>(null);
+  const [reactionLabel, setReactionLabel] = useState("");
 
   function handleDragStart(el: LabElement) {
     dragElementRef.current = el;
   }
 
-  function handleDrop(worldPos: [number, number, number]) {
+  function handleDrop() {
     const el = dragElementRef.current;
-    if (!el) return;
-    if (el.mass === 0) {
-      // Equipment — static, place on bench
-      const uid = `e_${uidCounter.current++}`;
-      setSpawned(prev => [...prev, { uid, elementId: el.id, element: el, position: [worldPos[0], -0.7, worldPos[2]] }]);
-    } else {
-      const uid = `e_${uidCounter.current++}`;
-      uidMap.current[uid] = el.id;
-      setSpawned(prev => [...prev, { uid, elementId: el.id, element: el, position: [worldPos[0], worldPos[1] + 2, worldPos[2]] }]);
-    }
+    if (!el || pouring) return;
+    
+    // Start pouring animation
+    setPouring(el);
     dragElementRef.current = null;
   }
 
-  function handleCollide(uidA: string, uidB: string) {
-    const idA = uidMap.current[uidA];
-    const idB = uidMap.current[uidB];
-    if (!idA || !idB) return;
-    const r = getReaction(idA, idB);
-    if (!r) return;
+  function handlePourFinish() {
+    if (!pouring) return;
+    
+    // Add to beaker contents
+    setBeaker(prev => {
+      const newContents = [...prev.contents, pouring];
+      let newColor = pouring.color;
+      let newVolume = Math.min(1.0, prev.volume + 0.2); // Each pour adds 20% volume
+      
+      // Check for reactions with existing contents
+      let triggeredReaction: Reaction | null = null;
+      for (const existing of prev.contents) {
+        const r = getReaction(existing.id, pouring.id);
+        if (r) {
+          triggeredReaction = r;
+          break;
+        }
+      }
 
-    // Show reaction info
-    setReaction(r);
-    setReactionLabel(i18n.language.startsWith("ar") ? r.labelAr : r.labelEn);
+      if (triggeredReaction) {
+        newColor = triggeredReaction.resultColor;
+        setActiveReaction(triggeredReaction);
+        setReactionLabel(isRTL ? triggeredReaction.labelAr : triggeredReaction.labelEn);
+        
+        // Stop reaction particles after a few seconds
+        setTimeout(() => setActiveReaction(null), 3000);
+      } else if (prev.contents.length > 0) {
+        // If no reaction, just mix the colors simply (average)
+        const c1 = new THREE.Color(prev.color);
+        const c2 = new THREE.Color(pouring.color);
+        newColor = "#" + c1.lerp(c2, 0.5).getHexString();
+      }
 
-    // Trigger particles burst at midpoint of the two objects
-    const srcItem = spawned.find(s => s.uid === uidA);
-    if (srcItem) {
-      const center = srcItem.position;
-      const newParticles: Particle[] = Array.from({ length: 60 }, (_, i) => ({
-        id: Date.now() + i,
-        pos: new THREE.Vector3(center[0], center[1], center[2]),
-        vel: new THREE.Vector3(
-          (Math.random() - 0.5) * (r.hasExplosion ? 4 : 1),
-          Math.random() * (r.hasExplosion ? 5 : 2),
-          (Math.random() - 0.5) * (r.hasExplosion ? 4 : 1)
-        ),
-        life: 1,
-        maxLife: 1,
-        color: r.smokeColor,
-      }));
-      setParticles(newParticles);
-      setTimeout(() => setParticles([]), 2000);
-    }
+      return { contents: newContents, volume: newVolume, color: newColor };
+    });
 
-    // Auto-clear reaction label
-    setTimeout(() => setReaction(null), 5000);
+    setPouring(null);
   }
 
   function resetLab() {
-    setSpawned([]);
-    setParticles([]);
-    setReaction(null);
-    uidMap.current = {};
-    uidCounter.current = 0;
+    setBeaker({ contents: [], volume: 0, color: "#ffffff" });
+    setPouring(null);
+    setActiveReaction(null);
   }
 
   return (
@@ -296,7 +376,7 @@ export function InteractiveLabPage() {
             ⚗️ {t("lab.title", "Interactive Physics & Chemistry Lab")}
           </h1>
           <p style={{ color: "#64748b", margin: 0, fontSize: "0.78rem" }}>
-            {t("lab.subtitle", "Drag elements from the sidebar into the scene to trigger reactions")}
+            {t("lab.subtitle", "Drag bottles into the scene to pour liquids into the beaker")}
           </p>
         </div>
         <button onClick={resetLab} style={{
@@ -305,7 +385,7 @@ export function InteractiveLabPage() {
           cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
           fontSize: "0.82rem", fontWeight: 600
         }}>
-          <RotateCcw size={14} /> {t("lab.reset", "Reset")}
+          <RotateCcw size={14} /> {t("lab.reset", "Empty Beaker")}
         </button>
       </header>
 
@@ -318,92 +398,85 @@ export function InteractiveLabPage() {
         <div style={{ flex: 1, position: "relative" }}>
           <Canvas
             shadows
-            camera={{ position: [0, 3, 8], fov: 50 }}
+            camera={{ position: [0, 2, 6], fov: 45 }}
             dpr={[1, 2]}
             gl={{ antialias: true, preserveDrawingBuffer: true }}
             style={{ background: "radial-gradient(ellipse at center, #0f172a 0%, #020617 100%)" }}
           >
             <Suspense fallback={null}>
               {/* Lighting */}
-              <ambientLight intensity={0.4} />
-              <directionalLight position={[5, 8, 5]} intensity={1.5} castShadow
-                shadow-mapSize={[1024, 1024]} />
-              <pointLight position={[-3, 3, -3]} intensity={0.6} color="#6366f1" />
+              <ambientLight intensity={0.5} />
+              <directionalLight position={[5, 8, 5]} intensity={1.5} castShadow shadow-mapSize={[1024, 1024]} />
+              <pointLight position={[-3, 3, -3]} intensity={0.8} color="#6366f1" />
 
-              {/* Grid helper */}
               <gridHelper args={[10, 20, "#1e293b", "#1e293b"]} position={[0, -1.42, 0]} />
+              
+              <LabEnvironment />
+              
+              {/* Central Beaker */}
+              <CentralBeaker beakerState={beaker} />
 
-              {/* Physics World */}
-              <Physics gravity={[0, -9.81, 0]} iterations={10} broadphase="SAP">
-                <LabFloor />
-                <LabBench />
-                {/* Default beaker on bench */}
-                <Beaker position={[0, -0.65, 0]} />
-                <Beaker position={[2, -0.65, 0]} />
+              {/* Pouring Animation */}
+              {pouring && <PouringBottle element={pouring} onFinish={handlePourFinish} />}
 
-                {/* Spawned elements */}
-                {spawned.map(item => (
-                  <PhysicsSphere
-                    key={item.uid}
-                    item={item}
-                    onCollide={handleCollide}
-                  />
-                ))}
-              </Physics>
-
-              {/* Particles */}
-              <ParticleSystem particles={particles} />
+              {/* Reaction VFX */}
+              <ReactionParticles active={activeReaction !== null} reaction={activeReaction} />
 
               {/* Drop handler */}
               <DropHandler onDrop={handleDrop} />
 
-              <OrbitControls enablePan={false} minDistance={4} maxDistance={16} />
+              <OrbitControls enablePan={false} minDistance={3} maxDistance={10} target={[0, 0, 0]} />
             </Suspense>
           </Canvas>
 
           {/* Reaction overlay */}
-          {reaction && (
+          {activeReaction && (
             <div style={{
               position: "absolute", bottom: "20px", left: "50%",
               transform: "translateX(-50%)",
               background: "rgba(15,23,42,0.95)", backdropFilter: "blur(12px)",
-              border: `1px solid ${reaction.resultColor}55`,
+              border: `1px solid ${activeReaction.resultColor}55`,
               borderRadius: "14px", padding: "14px 20px",
               maxWidth: "500px", textAlign: "center",
-              boxShadow: `0 8px 32px ${reaction.resultColor}33`,
+              boxShadow: `0 8px 32px ${activeReaction.resultColor}33`,
               zIndex: 10,
+              animation: "slideUp 0.3s ease-out forwards",
             }}>
-              <div style={{ fontSize: "1.4rem", marginBottom: "6px" }}>
-                {reaction.hasExplosion ? "💥" : reaction.hasBubbles ? "🫧" : "⚗️"}
+              <div style={{ fontSize: "1.5rem", marginBottom: "6px" }}>
+                {activeReaction.hasExplosion ? "💥" : activeReaction.hasBubbles ? "🫧" : "⚗️"}
               </div>
-              <div style={{ color: reaction.resultColor, fontWeight: 700, fontSize: "0.9rem", marginBottom: "4px" }}>
-                {reaction.effect.toUpperCase()} REACTION
+              <div style={{ color: activeReaction.resultColor, fontWeight: 700, fontSize: "0.95rem", marginBottom: "4px" }}>
+                REACTION TRIGGERED!
               </div>
-              <div style={{ color: "#cbd5e1", fontSize: "0.82rem", lineHeight: 1.5 }}>
+              <div style={{ color: "#cbd5e1", fontSize: "0.85rem", lineHeight: 1.5 }}>
                 {reactionLabel}
               </div>
               <div style={{ marginTop: "8px", display: "flex", justifyContent: "center", gap: "8px", fontSize: "0.75rem" }}>
-                {reaction.hasSmoke && <span style={{ color: "#94a3b8" }}>💨 Smoke</span>}
-                {reaction.hasBubbles && <span style={{ color: "#38bdf8" }}>🫧 Bubbles</span>}
-                {reaction.hasExplosion && <span style={{ color: "#f97316" }}>🔥 Heat: {reaction.heat}°</span>}
-                <span style={{ color: "#a5b4fc" }}>+{reaction.xpReward} XP</span>
+                {activeReaction.hasSmoke && <span style={{ color: "#94a3b8" }}>💨 Smoke generated</span>}
+                {activeReaction.hasExplosion && <span style={{ color: "#f97316" }}>🔥 High Heat</span>}
               </div>
             </div>
           )}
 
-          {/* Empty state */}
-          {spawned.length === 0 && (
+          {/* Empty state hint */}
+          {beaker.contents.length === 0 && !pouring && (
             <div style={{
-              position: "absolute", top: "50%", left: "50%",
+              position: "absolute", top: "20%", left: "50%",
               transform: "translate(-50%, -50%)",
               textAlign: "center", pointerEvents: "none",
             }}>
-              <div style={{ fontSize: "3rem", marginBottom: "12px" }}>⚗️</div>
-              <p style={{ color: "#475569", fontSize: "0.95rem" }}>
-                {t("lab.empty", "Drag an element from the sidebar to start")}
+              <p style={{ color: "#64748b", fontSize: "0.9rem", background: "rgba(2,6,23,0.5)", padding: "8px 16px", borderRadius: "20px" }}>
+                Drag a chemical bottle onto the canvas to pour it
               </p>
             </div>
           )}
+
+          <style>{`
+            @keyframes slideUp {
+              from { opacity: 0; transform: translate(-50%, 20px); }
+              to { opacity: 1; transform: translate(-50%, 0); }
+            }
+          `}</style>
         </div>
       </div>
     </div>

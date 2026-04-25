@@ -42,9 +42,8 @@ export function LabSidebar({ onDragStart }: LabSidebarProps) {
         ))}
       </div>
 
-      {/* Instruction */}
       <p style={{ margin: "10px 12px 6px", color: C.muted, fontSize: "0.72rem", lineHeight: 1.4 }}>
-        Drag items into the scene to begin experiments
+        Drag bottles into the scene to pour liquids
       </p>
 
       {/* Element cards */}
