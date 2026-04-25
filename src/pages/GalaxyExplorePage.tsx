@@ -8,7 +8,6 @@ import {
   Text,
   Float,
   PerformanceMonitor,
-  Trail,
   Sphere
 } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
@@ -65,7 +64,6 @@ function Planet({ lesson, position, color, onSelect, isSelected }: { lesson: Les
 
   return (
     <group position={position}>
-      <Trail width={0.5} length={4} color={new THREE.Color(color)} attenuation={(t) => t * t}>
         <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
           <mesh
             ref={meshRef}
@@ -83,7 +81,6 @@ function Planet({ lesson, position, color, onSelect, isSelected }: { lesson: Les
             />
           </mesh>
         </Float>
-      </Trail>
       
       {/* Label (Visible on hover or if it's the only one selected) */}
       {(hovered || isSelected) && (
@@ -108,17 +105,7 @@ function SubjectStar({ subject, index, position, onFocus }: { subject: string, i
   const lessons = useMemo(() => LESSONS.filter(l => l.subjectAr === subject), [subject]);
   const [hovered, setHovered] = useState(false);
 
-  // Generate orbit positions for planets around this star
-  const planets = useMemo(() => {
-    return lessons.map((lesson, i) => {
-      const angle = (i / lessons.length) * Math.PI * 2;
-      const radius = 8 + (i % 3) * 2; // Orbit distance
-      const x = position.x + Math.cos(angle) * radius;
-      const z = position.z + Math.sin(angle) * radius;
-      const y = position.y + (Math.random() - 0.5) * 4; // Slight vertical variation
-      return { lesson, position: new THREE.Vector3(x, y, z) };
-    });
-  }, [lessons, position]);
+  // Orbiting planets are now handled by GalaxyScene to ensure global state selection works smoothly.
 
   return (
     <group>
@@ -152,17 +139,6 @@ function SubjectStar({ subject, index, position, onFocus }: { subject: string, i
         {subject}
       </Text>
 
-      {/* Orbiting Planets */}
-      {planets.map((p, i) => (
-        <Planet 
-          key={p.lesson.id} 
-          lesson={p.lesson} 
-          position={p.position} 
-          color={color}
-          onSelect={(l, pos) => onFocus(pos)} // Zoom to planet on click
-          isSelected={false} // Selection UI handled globally
-        />
-      ))}
     </group>
   );
 }
