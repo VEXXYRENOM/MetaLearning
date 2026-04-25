@@ -144,6 +144,8 @@ export function LessonPage() {
   const [resolvedLesson, setResolvedLesson] = useState(() => getLesson(lessonId));
   const [dbLoading, setDbLoading] = useState(false);
   const [cachedGlbUrl, setCachedGlbUrl] = useState<string | null>(null);
+  // Prevents the old procedural model from flashing before the cache check resolves
+  const [cacheChecked, setCacheChecked] = useState(false);
 
   // If lessonId is a Supabase UUID, fetch model_key from DB to resolve the preset
   useEffect(() => {
@@ -166,19 +168,26 @@ export function LessonPage() {
 
   // Check generated_assets cache for pre-baked GLB versions of this lesson
   useEffect(() => {
-    if (!resolvedLesson?.id) return;
+    if (!resolvedLesson?.id) {
+      // No preset to check — render procedural immediately
+      setCacheChecked(true);
+      return;
+    }
     (async () => {
       try {
         const { data } = await supabase
           .from('generated_assets')
           .select('glb_url')
           .eq('prompt_hash', resolvedLesson.id)
-          .maybeSingle(); // ← maybeSingle: returns null on cache miss, no 406 error
+          .maybeSingle();
         if (data?.glb_url) {
           setCachedGlbUrl(data.glb_url);
         }
       } catch {
         // Ignore errors silently
+      } finally {
+        // Always mark as checked so canvas can render
+        setCacheChecked(true);
       }
     })();
   }, [resolvedLesson?.id]);
@@ -421,7 +430,8 @@ export function LessonPage() {
 
   // If we have a cached GLB, completely disable the procedural components logic
   const isProceduralLesson = isProcedural(lesson.kind) && !cachedGlbUrl;
-  const showCanvas = isProceduralLesson || Boolean(effectiveGltfUrl) || Boolean(cachedGlbUrl);
+  // Don't show canvas until cache check completes (prevents flash of old model)
+  const showCanvas = cacheChecked && (isProceduralLesson || Boolean(effectiveGltfUrl) || Boolean(cachedGlbUrl));
   const isHeart = lesson.kind === "procedural-heart" && !cachedGlbUrl;
   const ProceduralComponent = PROCEDURAL_COMPONENTS[lesson.kind] || null;
 
