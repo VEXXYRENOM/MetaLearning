@@ -153,7 +153,7 @@ export function LessonPage() {
         .from("lessons")
         .select("model_key")
         .eq("id", lessonId)
-        .single()
+        .maybeSingle()  // ← maybeSingle avoids 406 when row not found
         .then(({ data }) => {
           if (data?.model_key) {
             const found = getLesson(data.model_key);
@@ -173,12 +173,12 @@ export function LessonPage() {
           .from('generated_assets')
           .select('glb_url')
           .eq('prompt_hash', resolvedLesson.id)
-          .single();
+          .maybeSingle(); // ← maybeSingle: returns null on cache miss, no 406 error
         if (data?.glb_url) {
           setCachedGlbUrl(data.glb_url);
         }
       } catch {
-        // Ignore cache misses silently
+        // Ignore errors silently
       }
     })();
   }, [resolvedLesson?.id]);
