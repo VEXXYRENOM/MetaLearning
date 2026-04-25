@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, RotateCcw, Droplet } from "lucide-react";
 import { LabSidebar } from "../components/lab/LabSidebar";
+import { LabAnalyticsHUD } from "../components/lab/LabAnalyticsHUD";
 import { 
   LabElement, 
   ReactionStoichiometry, 
@@ -617,6 +618,9 @@ export function InteractiveLabPage() {
   const [isBoiling, setIsBoiling] = useState(false);
 
   const currentVolumeML = calculateTotalVolume(beaker.substances);
+  
+  const [tempHistory, setTempHistory] = useState<{ time: number, temp: number }[]>([]);
+  const timeRef = useRef(0);
 
   // Thermodynamics Engine Loop
   useEffect(() => {
@@ -659,6 +663,15 @@ export function InteractiveLabPage() {
         setIsBoiling(boiling);
         tempRef.current = Math.max(25, newTemp);
       }
+      
+      // Update Temperature History for HUD
+      timeRef.current += 0.5;
+      setTempHistory(prev => {
+        const next = [...prev, { time: timeRef.current, temp: tempRef.current }];
+        if (next.length > 40) return next.slice(next.length - 40); // Keep last 20 seconds (40 ticks)
+        return next;
+      });
+      
     }, 500);
 
     return () => clearInterval(interval);
@@ -766,6 +779,7 @@ export function InteractiveLabPage() {
 
         {/* 3D Scene */}
         <div style={{ flex: 1, position: "relative" }}>
+          <LabAnalyticsHUD tempHistory={tempHistory} substances={beaker.substances} />
           <Canvas
             shadows
             camera={{ position: [0, 2, 6], fov: 45 }}
