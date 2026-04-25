@@ -242,6 +242,7 @@ export function QuizEditor({ lessonId, onClose }: { lessonId: string, onClose: (
           <Save size={18} /> {saving ? "Saving..." : "Save Quiz"}
         </button>
       </div>
+      </div>
     </div>
   );
 }
