@@ -435,7 +435,7 @@ function Step0Hub({ onStartWizard, profile, isPro }: { onStartWizard: () => void
                   </div>
                 )}
 
-                <Link to={`/lesson/${l.model_key || l.id}`} className="gallery-thumb-link" style={{ display: 'block', height: '120px' }}>
+                <Link to={`/lesson/${l.id}`} className="gallery-thumb-link" style={{ display: 'block', height: '120px' }}>
                   <div className="gallery-thumb" style={{ height: '100%' }}>
                     <Cuboid size={30} className="text-white opacity-80" />
                   </div>

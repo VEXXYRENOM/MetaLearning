@@ -42,6 +42,7 @@ export function StudentDashboardPage() {
             joined_at,
             sessions (
               id,
+              lesson_id,
               lessons (
                 title,
                 subject,
@@ -61,11 +62,13 @@ export function StudentDashboardPage() {
           .map(j => {
             const session = j.sessions as unknown as {
               id: string;
+              lesson_id: string;
               lessons: { title: string; subject: string; model_key: string } | null;
             } | null;
             return {
               joined_at: j.joined_at,
               session_id: session?.id,
+              lesson_id: session?.lesson_id,
               title: session?.lessons?.title,
               subject: session?.lessons?.subject,
               model_key: session?.lessons?.model_key,
@@ -272,14 +275,14 @@ export function StudentDashboardPage() {
                         {session.subject} • {new Date(session.joined_at).toLocaleDateString()}
                       </p>
                     </div>
-                    {session.model_key && (
+                    {session.lesson_id && (
                        <Link 
-                         to={`/lesson/${session.model_key}`} 
+                         to={`/lesson/${session.lesson_id}`} 
                          style={{ background: "#38bdf820", color: "#38bdf8", padding: "8px 16px", borderRadius: "20px", textDecoration: "none", display: "flex", alignItems: "center", gap: "8px", fontWeight: "bold", fontSize: "0.9rem" }}
                        >
                          <Play size={16} /> Revisit
                        </Link>
-                    )}
+                     )}
                   </div>
                 ))}
               </div>
