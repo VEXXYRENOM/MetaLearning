@@ -82,6 +82,46 @@ export const LAB_ELEMENTS: LabElement[] = [
     descriptionAr: "المذيب الكوني",
   },
   {
+    id: "K", name: "Potassium", nameAr: "بوتاسيوم", nameFr: "Potassium",
+    emoji: "🟣", category: "element", state: "s",
+    molarMass: 39.10, density: 0.86,
+    color: "#c084fc", emissive: "#9333ea",
+    description: "Highly reactive alkali metal (Lilac flame)",
+    descriptionAr: "معدن قلوي شديد التفاعل (لهب أرجواني)",
+  },
+  {
+    id: "Zn", name: "Zinc", nameAr: "زنك", nameFr: "Zinc",
+    emoji: "🪙", category: "element", state: "s",
+    molarMass: 65.38, density: 7.14,
+    color: "#94a3b8", emissive: "#64748b",
+    description: "Transition metal, reacts with acids",
+    descriptionAr: "معدن انتقالي، يتفاعل مع الأحماض",
+  },
+  {
+    id: "CaCO3", name: "Calcium Carbonate", nameAr: "كربونات الكالسيوم", nameFr: "Carbonate de calcium",
+    emoji: "🪨", category: "compound", state: "s",
+    molarMass: 100.09, density: 2.71,
+    color: "#f8fafc", emissive: "#e2e8f0",
+    description: "Chalk/Limestone. Produces CO2 with acids",
+    descriptionAr: "طبشور/حجر جيري. ينتج ثاني أكسيد الكربون مع الأحماض",
+  },
+  {
+    id: "CuSO4", name: "Copper(II) Sulfate", nameAr: "كبريتات النحاس", nameFr: "Sulfate de cuivre",
+    emoji: "🔷", category: "compound", state: "aq",
+    molarMass: 159.61, density: 1.15,
+    color: "#3b82f6", emissive: "#2563eb",
+    description: "Bright blue solution",
+    descriptionAr: "محلول أزرق ساطع",
+  },
+  {
+    id: "H2SO4", name: "Sulfuric Acid (1M)", nameAr: "حمض الكبريتيك", nameFr: "Acide sulfurique",
+    emoji: "🧪", category: "compound", state: "aq",
+    molarMass: 98.08, density: 1.06,
+    color: "#fef08a", emissive: "#ca8a04",
+    description: "Strong mineral acid",
+    descriptionAr: "حمض معدني قوي",
+  },
+  {
     id: "HCl", name: "Hydrochloric Acid (1M)", nameAr: "حمض كلوريدريك", nameFr: "Acide chlorhydrique",
     emoji: "🟡", category: "compound", state: "aq",
     molarMass: 36.46, density: 1.02, // approx 1M density
@@ -122,6 +162,46 @@ export const LAB_ELEMENTS: LabElement[] = [
     description: "Salt dissolved in water",
     descriptionAr: "ملح مذاب في الماء",
   },
+  {
+    id: "KOH", name: "Potassium Hydroxide", nameAr: "هيدروكسيد البوتاسيوم", nameFr: "Hydroxyde de potassium",
+    emoji: "🧪", category: "compound", state: "aq",
+    molarMass: 56.11, density: 1.05,
+    color: "#e9d5ff", emissive: "#d8b4e2",
+    description: "Strong base from Potassium reaction",
+    descriptionAr: "قاعدة قوية ناتجة عن تفاعل البوتاسيوم",
+  },
+  {
+    id: "CO2", name: "Carbon Dioxide Gas", nameAr: "غاز ثاني أكسيد الكربون", nameFr: "Dioxyde de carbone",
+    emoji: "🫧", category: "compound", state: "g",
+    molarMass: 44.01,
+    color: "#ffffff", emissive: "#ffffff",
+    description: "Invisible gas bubbles",
+    descriptionAr: "فقاعات غاز غير مرئية",
+  },
+  {
+    id: "CaCl2", name: "Calcium Chloride", nameAr: "كلوريد الكالسيوم", nameFr: "Chlorure de calcium",
+    emoji: "🧪", category: "compound", state: "aq",
+    molarMass: 110.98, density: 1.10,
+    color: "#f1f5f9", emissive: "#e2e8f0",
+    description: "Dissolved calcium salt",
+    descriptionAr: "ملح كالسيوم مذاب",
+  },
+  {
+    id: "ZnCl2", name: "Zinc Chloride", nameAr: "كلوريد الزنك", nameFr: "Chlorure de zinc",
+    emoji: "🧪", category: "compound", state: "aq",
+    molarMass: 136.30, density: 1.15,
+    color: "#f8fafc", emissive: "#e2e8f0",
+    description: "Dissolved zinc salt",
+    descriptionAr: "ملح زنك مذاب",
+  },
+  {
+    id: "FeSO4", name: "Iron(II) Sulfate", nameAr: "كبريتات الحديد", nameFr: "Sulfate de fer",
+    emoji: "🧪", category: "compound", state: "aq",
+    molarMass: 151.91, density: 1.08,
+    color: "#86efac", emissive: "#4ade80",
+    description: "Pale green solution",
+    descriptionAr: "محلول أخضر شاحب",
+  },
 ];
 
 // ─── Balanced Chemical Equations ──────────────────────────────
@@ -149,6 +229,54 @@ export const STOICHIOMETRIC_REACTIONS: ReactionStoichiometry[] = [
     heat: 20, xpReward: 20,
     labelEn: "HCl(aq) + NaOH(aq) → NaCl(aq) + H₂O(l) (Neutralization)",
     labelAr: "حمض + قاعدة → ملح + ماء (تعادل)",
+  },
+  {
+    // 2K + 2H2O -> 2KOH + H2
+    reactants: { "K": 2, "H2O": 2 },
+    products: { "KOH": 2, "H2": 1 },
+    effect: "explosion",
+    resultColor: "#d8b4e2",
+    smokeColor: "#c084fc",
+    hasSmoke: true, hasBubbles: true, hasExplosion: true,
+    heat: 100, xpReward: 40,
+    labelEn: "2K(s) + 2H₂O(l) → 2KOH(aq) + H₂(g) (Violent Lilac Explosion!)",
+    labelAr: "البوتاسيوم يتفاعل مع الماء → هيدروكسيد البوتاسيوم + هيدروجين (انفجار بنفسجي!)",
+  },
+  {
+    // Zn + 2HCl -> ZnCl2 + H2
+    reactants: { "Zn": 1, "HCl": 2 },
+    products: { "ZnCl2": 1, "H2": 1 },
+    effect: "dissolution",
+    resultColor: "#f1f5f9",
+    smokeColor: "#cbd5e1",
+    hasSmoke: false, hasBubbles: true, hasExplosion: false,
+    heat: 30, xpReward: 25,
+    labelEn: "Zn(s) + 2HCl(aq) → ZnCl₂(aq) + H₂(g) (Vigorous Bubbling)",
+    labelAr: "الزنك يتفاعل مع الحمض → كلوريد الزنك + غاز الهيدروجين (فقاعات قوية)",
+  },
+  {
+    // CaCO3 + 2HCl -> CaCl2 + H2O + CO2
+    reactants: { "CaCO3": 1, "HCl": 2 },
+    products: { "CaCl2": 1, "H2O": 1, "CO2": 1 },
+    effect: "dissolution",
+    resultColor: "#f8fafc",
+    smokeColor: "#ffffff",
+    hasSmoke: false, hasBubbles: true, hasExplosion: false,
+    heat: 10, xpReward: 25,
+    labelEn: "CaCO₃(s) + 2HCl(aq) → CaCl₂(aq) + H₂O(l) + CO₂(g)",
+    labelAr: "كربونات الكالسيوم + الحمض → كلوريد الكالسيوم + ماء + غاز CO2",
+  },
+  {
+    // Fe + CuSO4 -> FeSO4 + Cu
+    reactants: { "Fe": 1, "CuSO4": 1 },
+    products: { "FeSO4": 1, "Cu": 1 },
+    effect: "oxidation",
+    resultColor: "#86efac", // turns from blue to pale green
+    smokeColor: "#4ade80",
+    hasSmoke: false, hasBubbles: false, hasExplosion: false,
+    heat: 20, xpReward: 35,
+    labelEn: "Fe(s) + CuSO₄(aq) → FeSO₄(aq) + Cu(s) (Single Replacement)",
+    labelAr: "الحديد يحل محل النحاس في المحلول (تغير اللون من أزرق إلى أخضر)",
   },
 ];
 
