@@ -5,7 +5,6 @@ import {
   Stars,
   CameraControls,
   Html,
-  Text,
   Float,
   PerformanceMonitor,
   Sphere
@@ -127,17 +126,22 @@ function SubjectStar({ subject, index, position, onFocus }: { subject: string, i
       </Float>
 
       {/* Subject Title */}
-      <Text
-        position={[position.x, position.y + 6, position.z]}
-        fontSize={2}
-        color="white"
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.1}
-        outlineColor={color}
-      >
-        {subject}
-      </Text>
+      <Html position={[position.x, position.y + 6, position.z]} center style={{ pointerEvents: "none" }}>
+        <div style={{
+          color: color,
+          fontSize: "1.5rem",
+          fontWeight: "bold",
+          textShadow: "0 0 10px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)",
+          whiteSpace: "nowrap",
+          background: "rgba(15, 23, 42, 0.6)",
+          padding: "4px 12px",
+          borderRadius: "8px",
+          border: `1px solid ${color}`,
+          backdropFilter: "blur(4px)"
+        }}>
+          {subject}
+        </div>
+      </Html>
 
     </group>
   );
