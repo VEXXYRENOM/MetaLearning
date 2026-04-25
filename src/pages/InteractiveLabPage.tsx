@@ -53,8 +53,8 @@ function LiquidMesh({ volume, targetColor }: { volume: number; targetColor: stri
   
   // The beaker interior is ~0.9 units high. 
   const liquidHeight = safeVolume * 0.9;
-  // Base position is -0.95 (bottom of beaker). 
-  const yPos = -0.95 + (liquidHeight / 2);
+  // Base position is -0.48 (just above the bottom of the beaker at -0.5). 
+  const yPos = -0.48 + (liquidHeight / 2);
 
   useFrame(() => {
     if (matRef.current) {
@@ -81,8 +81,10 @@ function LiquidMesh({ volume, targetColor }: { volume: number; targetColor: stri
 
 // ─── Central Beaker ──────────────────────────────────────────
 function CentralBeaker({ beakerState }: { beakerState: BeakerState }) {
+  // Top of bench is -1.125. Beaker bottom is locally -0.5.
+  // Group position Y should be -1.125 + 0.5 = -0.625
   return (
-    <group position={[0, -0.65, 0]}>
+    <group position={[0, -0.625, 0]}>
       {/* Liquid inside */}
       <LiquidMesh volume={beakerState.volume} targetColor={beakerState.color} />
 
