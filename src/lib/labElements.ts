@@ -145,6 +145,14 @@ export const LAB_ELEMENTS: LabElement[] = [
     description: "Oxidizer — decomposes releasing oxygen",
     descriptionAr: "عامل مؤكسد — يتحلل محرراً الأكسجين",
   },
+  // Equipment
+  {
+    id: "BunsenBurner", name: "Bunsen Burner", nameAr: "موقد بنزن", nameFr: "Bec Bunsen",
+    emoji: "🔥", category: "equipment", state: "s",
+    molarMass: 1, color: "#94a3b8", emissive: "#000000",
+    description: "Heating device to accelerate reactions",
+    descriptionAr: "جهاز تسخين لتسريع التفاعلات الكيميائية",
+  },
   // We need products too, even if not draggable, they exist in the beaker.
   {
     id: "H2", name: "Hydrogen Gas", nameAr: "غاز الهيدروجين", nameFr: "Gaz Hydrogène",

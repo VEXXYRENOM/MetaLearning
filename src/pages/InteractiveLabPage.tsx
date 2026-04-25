@@ -1,6 +1,7 @@
 import { useRef, useState, Suspense, useCallback } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -146,6 +147,115 @@ function LabEnvironment() {
         <boxGeometry args={[8, 0.15, 4]} />
         <meshStandardMaterial color="#1e293b" roughness={0.5} metalness={0.3} />
       </mesh>
+    </group>
+  );
+}
+
+// ─── Bunsen Burner ────────────────────────────────────────────
+function BunsenBurner3D({ isOn, onClick }: { isOn: boolean, onClick: () => void }) {
+  const pointsRef = useRef<THREE.Points>(null!);
+  const geoRef = useRef<THREE.BufferGeometry>(null!);
+  const particles = useRef<Particle[]>([]);
+
+  useFrame((state, delta) => {
+    if (!geoRef.current) return;
+
+    if (isOn) {
+      for (let i = 0; i < 4; i++) {
+        particles.current.push({
+          id: Math.random(),
+          pos: new THREE.Vector3((Math.random() - 0.5) * 0.06, 0.4, (Math.random() - 0.5) * 0.06),
+          vel: new THREE.Vector3((Math.random() - 0.5) * 0.1, 0.5 + Math.random() * 0.5, (Math.random() - 0.5) * 0.1),
+          life: 0,
+          maxLife: 0.2 + Math.random() * 0.3,
+          color: Math.random() > 0.4 ? "#38bdf8" : "#fbbf24", // Blue core, orange tips
+          size: 0.06,
+        });
+      }
+    }
+
+    const positions: number[] = [];
+    const sizes: number[] = [];
+    
+    for (let i = particles.current.length - 1; i >= 0; i--) {
+      const p = particles.current[i];
+      p.life += delta;
+      if (p.life >= p.maxLife) {
+        particles.current.splice(i, 1);
+        continue;
+      }
+      p.pos.addScaledVector(p.vel, delta);
+      positions.push(p.pos.x, p.pos.y, p.pos.z);
+      sizes.push(p.size * (1 - p.life / p.maxLife));
+    }
+
+    geoRef.current.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geoRef.current.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+  });
+
+  return (
+    <group 
+      position={[0, -1.125, 0]} 
+      onClick={(e) => { e.stopPropagation(); onClick(); }} 
+      onPointerOver={() => document.body.style.cursor = "pointer"}
+      onPointerOut={() => document.body.style.cursor = "auto"}
+    >
+      {/* Base */}
+      <mesh position={[0, 0.05, 0]} castShadow>
+        <cylinderGeometry args={[0.2, 0.25, 0.1, 32]} />
+        <meshStandardMaterial color="#334155" metalness={0.7} roughness={0.3} />
+      </mesh>
+      {/* Tube */}
+      <mesh position={[0, 0.25, 0]} castShadow>
+        <cylinderGeometry args={[0.06, 0.06, 0.3, 16]} />
+        <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.1} />
+      </mesh>
+      {/* Valve/Knob */}
+      <mesh position={[0.1, 0.15, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.04, 0.04, 0.15, 16]} />
+        <meshStandardMaterial color="#fbbf24" metalness={0.8} roughness={0.2} />
+      </mesh>
+
+      {/* Glow Light */}
+      {isOn && <pointLight position={[0, 0.5, 0]} color="#38bdf8" intensity={3} distance={2} />}
+
+      {/* Fire Particles */}
+      <points ref={pointsRef}>
+        <bufferGeometry ref={geoRef} />
+        <shaderMaterial
+          transparent depthWrite={false} blending={THREE.AdditiveBlending}
+          uniforms={{ uColor: { value: new THREE.Color("#60a5fa") } }}
+          vertexShader={`
+            attribute float size;
+            void main() {
+              vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+              gl_PointSize = size * (300.0 / -mvPosition.z);
+              gl_Position = projectionMatrix * mvPosition;
+            }
+          `}
+          fragmentShader={`
+            uniform vec3 uColor;
+            void main() {
+              vec2 xy = gl_PointCoord.xy - vec2(0.5);
+              float ll = length(xy);
+              if(ll > 0.5) discard;
+              // High intensity center for bloom
+              gl_FragColor = vec4(uColor * 2.0, (0.5 - ll) * 2.0);
+            }
+          `}
+        />
+      </points>
+
+      {/* Interactive Label */}
+      <Html center position={[0, 0.2, 0.3]} style={{ pointerEvents: "none" }}>
+        <div style={{
+          background: isOn ? "rgba(239,68,68,0.9)" : "rgba(100,116,139,0.9)",
+          color: "white", padding: "2px 6px", borderRadius: "4px",
+          fontSize: "0.55rem", fontWeight: "bold", opacity: 0.8
+        }}>
+          {isOn ? "🔥 ON" : "OFF"}
+        </div>
+      </Html>
     </group>
   );
 }
@@ -474,6 +584,9 @@ export function InteractiveLabPage() {
   const [activeReaction, setActiveReaction] = useState<ReactionStoichiometry | null>(null);
   const [reactionLabel, setReactionLabel] = useState("");
 
+  // Burner State
+  const [burnerState, setBurnerState] = useState<{ placed: boolean, on: boolean }>({ placed: false, on: false });
+
   const currentVolumeML = calculateTotalVolume(beaker.substances);
 
   function handleDragStart(el: LabElement) {
@@ -484,6 +597,14 @@ export function InteractiveLabPage() {
     const el = dragElementRef.current;
     if (!el || pouring || pendingPour) return;
     
+    if (el.category === "equipment") {
+      if (el.id === "BunsenBurner") {
+         setBurnerState({ placed: true, on: false });
+      }
+      dragElementRef.current = null;
+      return;
+    }
+
     // Show Volume Modal instead of pouring instantly
     setPendingPour(el);
     dragElementRef.current = null;
@@ -585,6 +706,15 @@ export function InteractiveLabPage() {
               <gridHelper args={[10, 20, "#1e293b", "#1e293b"]} position={[0, -1.42, 0]} />
               
               <LabEnvironment />
+              
+              {/* Conditional Burner */}
+              {burnerState.placed && (
+                <BunsenBurner3D 
+                  isOn={burnerState.on} 
+                  onClick={() => setBurnerState(s => ({ ...s, on: !s.on }))} 
+                />
+              )}
+
               <CentralBeaker beakerState={beaker} volumeML={currentVolumeML} />
 
               {pouring && <PouringBottle element={pouring.element} onFinish={handlePourFinish} />}
@@ -592,6 +722,11 @@ export function InteractiveLabPage() {
 
               <DropHandler onDrop={handleDrop} />
               <OrbitControls enablePan={false} minDistance={3} maxDistance={10} target={[0, 0, 0]} />
+              
+              {/* High-End Post Processing */}
+              <EffectComposer>
+                <Bloom luminanceThreshold={1.0} luminanceSmoothing={0.5} intensity={1.5} />
+              </EffectComposer>
             </Suspense>
           </Canvas>
 
