@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, RotateCcw, Droplet } from "lucide-react";
 import { LabSidebar } from "../components/lab/LabSidebar";
 import { LabAnalyticsHUD } from "../components/lab/LabAnalyticsHUD";
+import { LabReportOverlay, ReactionLogItem } from "../components/lab/LabReportOverlay";
 import { 
   LabElement, 
   ReactionStoichiometry, 
@@ -605,12 +606,13 @@ export function InteractiveLabPage() {
   
   // Pending pour state
   const [pendingPour, setPendingPour] = useState<LabElement | null>(null);
-  
-  // Active pouring animation state
   const [pouring, setPouring] = useState<{ element: LabElement, amount: number } | null>(null);
   
+  // Reaction and Logging State
   const [activeReaction, setActiveReaction] = useState<ReactionStoichiometry | null>(null);
   const [reactionLabel, setReactionLabel] = useState("");
+  const [logs, setLogs] = useState<ReactionLogItem[]>([]);
+  const [showReport, setShowReport] = useState(false);
 
   // Burner State
   const [burnerState, setBurnerState] = useState<{ placed: boolean, on: boolean }>({ placed: false, on: false });
@@ -644,6 +646,17 @@ export function InteractiveLabPage() {
         const h2oIndex = beaker.substances.findIndex(s => s.elementId === "H2O");
         if (h2oIndex !== -1 && newTemp >= 100) {
           newTemp = 100;
+          
+          if (!isBoiling) {
+            setLogs(prev => [...prev, {
+              id: Math.random().toString(),
+              time: new Date(),
+              type: "boil",
+              message: "Water reached boiling point (100°C).",
+              details: "Phase change initiated: H₂O(l) → H₂O(g)"
+            }]);
+          }
+
           boiling = true;
           // Evaporate water: Q = mLv (Lv = 2260 J/g for water) -> 1000 J = 0.44g evaporated per tick
           if (burnerState.on) {
@@ -701,6 +714,15 @@ export function InteractiveLabPage() {
   function handleModalConfirm(amount: number) {
     if (!pendingPour) return;
     setPouring({ element: pendingPour, amount });
+    
+    // Log the pour
+    setLogs(prev => [...prev, {
+      id: Math.random().toString(),
+      time: new Date(),
+      type: "pour",
+      message: `Added ${amount} ${pendingPour.state === "l" || pendingPour.state === "aq" ? 'mL' : 'g'} of ${pendingPour.name}`,
+    }]);
+
     setPendingPour(null);
   }
 
@@ -721,6 +743,16 @@ export function InteractiveLabPage() {
       newColor = reactionTriggered.resultColor;
       setActiveReaction(reactionTriggered);
       setReactionLabel(isRTL ? reactionTriggered.labelAr : reactionTriggered.labelEn);
+      
+      // Log the reaction
+      setLogs(prev => [...prev, {
+        id: Math.random().toString(),
+        time: new Date(),
+        type: "reaction",
+        message: `Reaction Triggered: ${reactionTriggered.effect}`,
+        details: reactionTriggered.labelEn
+      }]);
+
       setTimeout(() => setActiveReaction(null), 4000);
     }
 
@@ -761,14 +793,25 @@ export function InteractiveLabPage() {
             {t("lab.subtitle", "Stoichiometric Precision Mode. Enter exact quantities to pour.")}
           </p>
         </div>
-        <button onClick={resetLab} style={{
-          background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)",
-          color: "#f87171", padding: "8px 14px", borderRadius: "10px",
-          cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
-          fontSize: "0.82rem", fontWeight: 600
-        }}>
-          <RotateCcw size={14} /> {t("lab.reset", "Empty Beaker")}
-        </button>
+        
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button onClick={() => setShowReport(true)} style={{
+            background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.3)",
+            color: "#60a5fa", padding: "8px 14px", borderRadius: "10px",
+            cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
+            fontSize: "0.82rem", fontWeight: 600
+          }}>
+            📋 {t("lab.report", "Generate Report")}
+          </button>
+          <button onClick={resetLab} style={{
+            background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)",
+            color: "#f87171", padding: "8px 14px", borderRadius: "10px",
+            cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
+            fontSize: "0.82rem", fontWeight: 600
+          }}>
+            <RotateCcw size={14} /> {t("lab.reset", "Empty Beaker")}
+          </button>
+        </div>
       </header>
 
       {/* Body */}
@@ -852,6 +895,15 @@ export function InteractiveLabPage() {
                 {reactionLabel}
               </div>
             </div>
+          )}
+
+          {/* Lab Report Modal */}
+          {showReport && (
+            <LabReportOverlay 
+              logs={logs} 
+              finalSubstances={beaker.substances} 
+              onClose={() => setShowReport(false)} 
+            />
           )}
 
           {/* Empty state hint */}
