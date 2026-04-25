@@ -382,9 +382,9 @@ export function StudentDashboardPage() {
             </form>
           </BentoCard>
 
-          {/* 5. Open Sandbox — 4 cols */}
-          <BentoCard accent={C.emerald} style={{ gridColumn: "span 4" }} onClick={() => navigate("/sandbox")}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
+          {/* 5. Interactive Lab Placeholder — 4 cols */}
+          <BentoCard accent={C.emerald} style={{ gridColumn: "span 4" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", height: "100%", opacity: 0.7 }}>
               <div style={{
                 width: "48px", height: "48px", borderRadius: "14px",
                 background: `${C.emerald}22`, border: `1px solid ${C.emerald}44`,
@@ -394,14 +394,14 @@ export function StudentDashboardPage() {
               </div>
               <div>
                 <h3 style={{ color: C.textPrimary, margin: "0 0 6px", fontSize: "1rem", fontWeight: 700 }}>
-                  {t("student_dashboard.sandbox_title", "Open Sandbox")}
+                  {t("student_dashboard.interactive_lab_title", "Interactive Lab")}
                 </h3>
                 <p style={{ color: C.textMuted, margin: 0, fontSize: "0.85rem", lineHeight: 1.5 }}>
-                  {t("student_dashboard.sandbox_desc", "Freely explore 3D models across all subjects. No PIN needed.")}
+                  {t("student_dashboard.interactive_lab_desc", "Physics & Chemistry engine coming soon. Prepare for real-time reactions!")}
                 </p>
               </div>
               <div style={{ marginTop: "auto", display: "flex", alignItems: "center", gap: "4px", color: C.emerald, fontSize: "0.85rem", fontWeight: 600 }}>
-                {t("student_dashboard.explore", "Explore")} <ChevronRight size={16} />
+                {t("student_dashboard.coming_soon", "Coming Soon")} <Zap size={16} />
               </div>
             </div>
           </BentoCard>
