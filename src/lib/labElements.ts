@@ -17,6 +17,8 @@ export interface LabElement {
   state: MatterState;
   molarMass: number;      // g/mol
   density?: number;       // g/mL (required for liquids/aq to convert volume to mass)
+  boilingPoint?: number;  // °C
+  specificHeat?: number;  // J/(g·°C)
   color: string;          // base 3D material color
   emissive: string;       // glow color
   description: string;
@@ -34,6 +36,7 @@ export interface ReactionStoichiometry {
   hasExplosion: boolean;
   heat: number;
   xpReward: number;
+  activationTemp?: number; // °C required to trigger the reaction
   labelEn: string;
   labelAr: string;
 }
@@ -76,7 +79,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "H2O", name: "Water", nameAr: "ماء", nameFr: "Eau",
     emoji: "💧", category: "compound", state: "l",
-    molarMass: 18.015, density: 1.0,
+    molarMass: 18.015, density: 1.0, boilingPoint: 100, specificHeat: 4.18,
     color: "#38bdf8", emissive: "#0284c7",
     description: "Universal solvent",
     descriptionAr: "المذيب الكوني",
@@ -271,6 +274,7 @@ export const STOICHIOMETRIC_REACTIONS: ReactionStoichiometry[] = [
     smokeColor: "#ffffff",
     hasSmoke: false, hasBubbles: true, hasExplosion: false,
     heat: 10, xpReward: 25,
+    activationTemp: 40, // Needs mild heating to react quickly
     labelEn: "CaCO₃(s) + 2HCl(aq) → CaCl₂(aq) + H₂O(l) + CO₂(g)",
     labelAr: "كربونات الكالسيوم + الحمض → كلوريد الكالسيوم + ماء + غاز CO2",
   },

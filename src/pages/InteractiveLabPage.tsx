@@ -1,4 +1,4 @@
-import { useRef, useState, Suspense, useCallback } from "react";
+import { useRef, useState, Suspense, useCallback, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
@@ -38,6 +38,7 @@ interface Particle {
 // ─── Stoichiometry Engine ────────────────────────────────────
 function processReaction(
   currentSubstances: BeakerSubstance[], 
+  currentTemp: number,
   pouredElement: LabElement, 
   pouredAmount: number // in grams
 ): { newSubstances: BeakerSubstance[], reactionTriggered: ReactionStoichiometry | null } {
@@ -52,6 +53,8 @@ function processReaction(
 
   // Check against all known reactions
   for (const reaction of STOICHIOMETRIC_REACTIONS) {
+    if (reaction.activationTemp && currentTemp < reaction.activationTemp) continue;
+
     const isPouredReactant = reaction.reactants[pouredElement.id] !== undefined;
     if (!isPouredReactant) continue;
 
@@ -261,7 +264,7 @@ function BunsenBurner3D({ isOn, onClick }: { isOn: boolean, onClick: () => void 
 }
 
 // ─── Liquid Mesh ──────────────────────────────────────────────
-function LiquidMesh({ volumeML, targetColor }: { volumeML: number; targetColor: string }) {
+function LiquidMesh({ volumeML, targetColor, isBoiling }: { volumeML: number; targetColor: string, isBoiling: boolean }) {
   const matRef = useRef<THREE.MeshPhysicalMaterial>(null!);
   const colorObj = useRef(new THREE.Color(targetColor));
 
@@ -271,10 +274,17 @@ function LiquidMesh({ volumeML, targetColor }: { volumeML: number; targetColor: 
   const liquidHeight = ratio * 0.9;
   const yPos = -0.48 + (liquidHeight / 2);
 
-  useFrame(() => {
+  useFrame((state) => {
     if (matRef.current) {
       colorObj.current.set(targetColor);
       matRef.current.color.lerp(colorObj.current, 0.05);
+      
+      // Simulate boiling bubbling by slightly modulating opacity/roughness
+      if (isBoiling) {
+        matRef.current.opacity = 0.8 + Math.sin(state.clock.elapsedTime * 15) * 0.1;
+      } else if (volumeML > 1) {
+        matRef.current.opacity = 0.85;
+      }
     }
   });
 
@@ -295,10 +305,18 @@ function LiquidMesh({ volumeML, targetColor }: { volumeML: number; targetColor: 
 }
 
 // ─── Central Beaker ──────────────────────────────────────────
-function CentralBeaker({ beakerState, volumeML }: { beakerState: BeakerState, volumeML: number }) {
+function CentralBeaker({ beakerState, volumeML, tempRef, isBoiling }: { beakerState: BeakerState, volumeML: number, tempRef: React.MutableRefObject<number>, isBoiling: boolean }) {
+  const tempLabelRef = useRef<HTMLDivElement>(null!);
+
+  useFrame(() => {
+    if (tempLabelRef.current) {
+      tempLabelRef.current.innerText = `${tempRef.current.toFixed(1)} °C`;
+    }
+  });
+
   return (
     <group position={[0, -0.625, 0]}>
-      <LiquidMesh volumeML={volumeML} targetColor={beakerState.color} />
+      <LiquidMesh volumeML={volumeML} targetColor={beakerState.color} isBoiling={isBoiling} />
 
       <mesh castShadow>
         <cylinderGeometry args={[0.4, 0.35, 1.0, 32, 1, true]} />
@@ -323,9 +341,18 @@ function CentralBeaker({ beakerState, volumeML }: { beakerState: BeakerState, vo
         <div style={{
           background: "rgba(255,255,255,0.8)", padding: "2px 8px", borderRadius: "4px",
           color: "#0f172a", fontSize: "0.6rem", fontWeight: "bold", border: "1px solid #cbd5e1",
-          textAlign: "center"
+          textAlign: "center", marginBottom: "4px"
         }}>
           {Math.round(volumeML)} / {MAX_BEAKER_VOLUME_ML} mL
+        </div>
+        <div 
+          ref={tempLabelRef}
+          style={{
+            background: "rgba(239,68,68,0.9)", padding: "2px 8px", borderRadius: "4px",
+            color: "white", fontSize: "0.6rem", fontWeight: "bold", border: "1px solid #b91c1c",
+            textAlign: "center", fontFamily: "monospace"
+          }}>
+          25.0 °C
         </div>
       </Html>
     </group>
@@ -586,8 +613,56 @@ export function InteractiveLabPage() {
 
   // Burner State
   const [burnerState, setBurnerState] = useState<{ placed: boolean, on: boolean }>({ placed: false, on: false });
+  const tempRef = useRef(25.0);
+  const [isBoiling, setIsBoiling] = useState(false);
 
   const currentVolumeML = calculateTotalVolume(beaker.substances);
+
+  // Thermodynamics Engine Loop
+  useEffect(() => {
+    const interval = setInterval(() => {
+      let tempDelta = 0;
+      const totalMass = beaker.substances.reduce((acc, s) => acc + s.mass, 0);
+      
+      if (burnerState.on && totalMass > 0) {
+        // Q = mcΔT. Assume burner gives 1000 J per 500ms tick. Assume specific heat c = 4.18 J/g°C
+        tempDelta = 1000 / (totalMass * 4.18);
+      } else if (tempRef.current > 25) {
+        // Natural cooling
+        tempDelta = -0.5;
+      }
+
+      if (tempDelta !== 0) {
+        let newTemp = tempRef.current + tempDelta;
+        let boiling = false;
+
+        // Phase change: Boiling Water
+        const h2oIndex = beaker.substances.findIndex(s => s.elementId === "H2O");
+        if (h2oIndex !== -1 && newTemp >= 100) {
+          newTemp = 100;
+          boiling = true;
+          // Evaporate water: Q = mLv (Lv = 2260 J/g for water) -> 1000 J = 0.44g evaporated per tick
+          if (burnerState.on) {
+            setBeaker(prev => {
+              const next = [...prev.substances];
+              const h2o = next.find(s => s.elementId === "H2O");
+              if (h2o) {
+                h2o.mass -= 0.44;
+                h2o.moles = h2o.mass / 18.015;
+                if (h2o.mass <= 0) next.splice(next.indexOf(h2o), 1);
+              }
+              return { ...prev, substances: next };
+            });
+          }
+        }
+        
+        setIsBoiling(boiling);
+        tempRef.current = Math.max(25, newTemp);
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [burnerState.on, beaker.substances]);
 
   function handleDragStart(el: LabElement) {
     dragElementRef.current = el;
@@ -625,7 +700,7 @@ export function InteractiveLabPage() {
     const massGrams = isLiquid ? pouring.amount * (pouredEl.density || 1.0) : pouring.amount;
 
     // Run Stoichiometry Engine
-    const { newSubstances, reactionTriggered } = processReaction(beaker.substances, pouredEl, massGrams);
+    const { newSubstances, reactionTriggered } = processReaction(beaker.substances, tempRef.current, pouredEl, massGrams);
 
     let newColor = calculateMixtureColor(newSubstances);
 
@@ -715,7 +790,7 @@ export function InteractiveLabPage() {
                 />
               )}
 
-              <CentralBeaker beakerState={beaker} volumeML={currentVolumeML} />
+              <CentralBeaker beakerState={beaker} volumeML={currentVolumeML} tempRef={tempRef} isBoiling={isBoiling} />
 
               {pouring && <PouringBottle element={pouring.element} onFinish={handlePourFinish} />}
               <ReactionParticles active={activeReaction !== null} reaction={activeReaction} />
