@@ -123,16 +123,15 @@ function CentralBeaker({ beakerState }: { beakerState: BeakerState }) {
 
 // ─── Pouring Bottle Animation ────────────────────────────────
 function PouringBottle({ element, onFinish }: { element: LabElement, onFinish: () => void }) {
-  const groupRef = useRef<THREE.Group>(null!);
+  const bottleRef = useRef<THREE.Group>(null!);
   const [pouring, setPouring] = useState(false);
-  const streamRef = useRef<THREE.Mesh>(null!);
 
   useFrame((state, delta) => {
-    if (!groupRef.current) return;
+    if (!bottleRef.current) return;
     
-    // Animate bottle tilting
-    if (groupRef.current.rotation.z > -Math.PI / 2.5) {
-      groupRef.current.rotation.z -= delta * 3;
+    // Animate bottle tilting (tilt LEFT so rotation.z becomes positive)
+    if (bottleRef.current.rotation.z < Math.PI / 2.5) {
+      bottleRef.current.rotation.z += delta * 3;
     } else if (!pouring) {
       setPouring(true);
       // Pour for 1.5 seconds, then finish
@@ -141,35 +140,39 @@ function PouringBottle({ element, onFinish }: { element: LabElement, onFinish: (
   });
 
   return (
-    <group ref={groupRef} position={[1.2, 1.5, 0]}>
-      {/* The Bottle */}
-      <mesh position={[0, 0, 0]}>
-        <cylinderGeometry args={[0.2, 0.25, 0.8, 16]} />
-        <meshPhysicalMaterial color="#e2e8f0" transmission={0.9} opacity={0.5} transparent roughness={0.1} />
-      </mesh>
-      {/* Bottle Neck */}
-      <mesh position={[0, 0.5, 0]}>
-        <cylinderGeometry args={[0.08, 0.2, 0.3, 16]} />
-        <meshPhysicalMaterial color="#e2e8f0" transmission={0.9} opacity={0.5} transparent roughness={0.1} />
-      </mesh>
-      {/* Liquid inside bottle */}
-      <mesh position={[0, -0.1, 0]}>
-        <cylinderGeometry args={[0.18, 0.23, 0.6, 16]} />
-        <meshStandardMaterial color={element.color} transparent opacity={0.9} />
-      </mesh>
-      
-      {/* Label */}
-      <Html center position={[0, 0, 0.26]} style={{ pointerEvents: "none" }}>
-        <div style={{ background: element.color, color: "white", padding: "2px 6px", borderRadius: "2px", fontSize: "0.5rem", fontWeight: "bold" }}>
-          {element.id}
-        </div>
-      </Html>
+    <group>
+      <group ref={bottleRef} position={[0.65, 1.5, 0]}>
+        {/* The Bottle */}
+        <mesh position={[0, 0, 0]}>
+          <cylinderGeometry args={[0.2, 0.25, 0.8, 16]} />
+          <meshPhysicalMaterial color="#e2e8f0" transmission={0.9} opacity={0.5} transparent roughness={0.1} />
+        </mesh>
+        {/* Bottle Neck */}
+        <mesh position={[0, 0.5, 0]}>
+          <cylinderGeometry args={[0.08, 0.2, 0.3, 16]} />
+          <meshPhysicalMaterial color="#e2e8f0" transmission={0.9} opacity={0.5} transparent roughness={0.1} />
+        </mesh>
+        {/* Liquid inside bottle */}
+        <mesh position={[0, -0.1, 0]}>
+          <cylinderGeometry args={[0.18, 0.23, 0.6, 16]} />
+          <meshStandardMaterial color={element.color} transparent opacity={0.9} />
+        </mesh>
+        
+        {/* Label */}
+        <Html center position={[0, 0, 0.26]} style={{ pointerEvents: "none" }}>
+          <div style={{ background: element.color, color: "white", padding: "2px 6px", borderRadius: "2px", fontSize: "0.5rem", fontWeight: "bold" }}>
+            {element.id}
+          </div>
+        </Html>
+      </group>
 
-      {/* Pouring Stream (visible when tilted) */}
-      <mesh ref={streamRef} position={[-0.8, 0.6, 0]} rotation={[0, 0, Math.PI / 2.5]} visible={pouring}>
-        <cylinderGeometry args={[0.02, 0.04, 2.0, 8]} />
-        <meshStandardMaterial color={element.color} transparent opacity={0.8} />
-      </mesh>
+      {/* Pouring Stream (detached from bottle rotation to go straight down) */}
+      {pouring && (
+        <mesh position={[0.03, 0.6, 0]}>
+          <cylinderGeometry args={[0.02, 0.05, 2.2, 8]} />
+          <meshStandardMaterial color={element.color} transparent opacity={0.8} />
+        </mesh>
+      )}
     </group>
   );
 }
