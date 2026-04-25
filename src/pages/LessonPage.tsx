@@ -805,15 +805,15 @@ export function LessonPage() {
                             <ProceduralComponent />
                           </group>
                         )}
-                        {!isProceduralLesson && effectiveGltfUrl && (lesson.kind === "gltf-artifact" || cachedGlbUrl) && (
+                        {!isProceduralLesson && effectiveGltfUrl && lesson.kind === "gltf-artifact" && !cachedGlbUrl && (
                           <group scale={[2.5, 2.5, 2.5]}>
                             <ArtifactGltfModel url={effectiveGltfUrl} modelScale={modelScale} />
                           </group>
                         )}
-                        {!isProceduralLesson && effectiveGltfUrl && lesson.kind !== "gltf-artifact" && !cachedGlbUrl && (
+                        {!isProceduralLesson && effectiveGltfUrl && (lesson.kind !== "gltf-artifact" || cachedGlbUrl) && (
                           <GltfScene
                             url={effectiveGltfUrl}
-                            modelScale={modelScale * 0.08}
+                            modelScale={cachedGlbUrl ? modelScale * 1.5 : modelScale * 0.08}
                             selectedName={selectedGltfName}
                             onSelectName={onGltfSelect}
                             xrayMode={xrayMode}
