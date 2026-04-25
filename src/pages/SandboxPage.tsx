@@ -208,7 +208,8 @@ export function SandboxPage() {
                 <Canvas
                   camera={{ position: [0, 0, 8], fov: 45 }}
                   style={{ background: "radial-gradient(ellipse at center, #0f172a 0%, #020617 100%)" }}
-                  gl={{ antialias: true, powerPreference: "default" }}
+                  dpr={[1, 2]}
+                  gl={{ antialias: true, preserveDrawingBuffer: true }}
                 >
                   <Suspense fallback={null}>
                     <ModelPreview lesson={displayLesson} />

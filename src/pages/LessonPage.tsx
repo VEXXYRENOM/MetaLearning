@@ -259,7 +259,7 @@ export function LessonPage() {
     lessonId: lessonId || "",
     studentId: profile?.id || "",
     sessionId: sessionId,
-    enabled: !isTeacher // Only track students
+    enabled: !isTeacher && isUUID(lessonId) // Only track students in real DB lessons
   });
   // ─────────────────────────────────────────────────────────────────────────
 
