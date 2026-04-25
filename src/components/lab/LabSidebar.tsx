@@ -48,7 +48,7 @@ export function LabSidebar({ onDragStart }: LabSidebarProps) {
 
       {/* Element cards */}
       <div style={{ flex: 1, overflowY: "auto", padding: "6px 8px", display: "flex", flexDirection: "column", gap: "6px" }}>
-        {items.map(el => (
+        {items.map((el: LabElement) => (
           <div
             key={el.id}
             draggable

@@ -1,17 +1,26 @@
-import { useRef, useState, Suspense, useCallback, useEffect } from "react";
+import { useRef, useState, Suspense, useCallback } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, RotateCcw, Info } from "lucide-react";
+import { ArrowLeft, RotateCcw, Droplet } from "lucide-react";
 import { LabSidebar } from "../components/lab/LabSidebar";
-import { LabElement, getReaction, Reaction } from "../lib/labElements";
+import { 
+  LabElement, 
+  ReactionStoichiometry, 
+  STOICHIOMETRIC_REACTIONS, 
+  BeakerSubstance, 
+  calculateTotalVolume, 
+  calculateMixtureColor, 
+  getElementById 
+} from "../lib/labElements";
+
+const MAX_BEAKER_VOLUME_ML = 500;
 
 // ─── Types ───────────────────────────────────────────────────
 interface BeakerState {
-  contents: LabElement[];
-  volume: number; // 0.0 to 1.0
+  substances: BeakerSubstance[];
   color: string;
 }
 
@@ -25,16 +34,114 @@ interface Particle {
   size: number;
 }
 
+// ─── Stoichiometry Engine ────────────────────────────────────
+function processReaction(
+  currentSubstances: BeakerSubstance[], 
+  pouredElement: LabElement, 
+  pouredAmount: number // in grams
+): { newSubstances: BeakerSubstance[], reactionTriggered: ReactionStoichiometry | null } {
+  
+  // Convert poured amount to moles
+  let pouredMoles = pouredAmount / pouredElement.molarMass;
+  let remainingPouredMoles = pouredMoles;
+  let triggeredReaction: ReactionStoichiometry | null = null;
+  
+  // Deep copy current substances
+  let newSubstances = currentSubstances.map(s => ({ ...s }));
+
+  // Check against all known reactions
+  for (const reaction of STOICHIOMETRIC_REACTIONS) {
+    const isPouredReactant = reaction.reactants[pouredElement.id] !== undefined;
+    if (!isPouredReactant) continue;
+
+    // Find if the other required reactants are in the beaker
+    // For simplicity, we assume bi-molecular reactions (2 reactants max)
+    const requiredReactants = Object.keys(reaction.reactants);
+    const otherReactantId = requiredReactants.find(id => id !== pouredElement.id);
+    
+    if (otherReactantId) {
+      const beakerReactantIndex = newSubstances.findIndex(s => s.elementId === otherReactantId);
+      if (beakerReactantIndex !== -1) {
+        const beakerReactant = newSubstances[beakerReactantIndex];
+        
+        // We have both reactants! Let's calculate limiting reactant
+        const coefPoured = reaction.reactants[pouredElement.id];
+        const coefBeaker = reaction.reactants[otherReactantId];
+
+        const molesPouredAvailable = remainingPouredMoles;
+        const molesBeakerAvailable = beakerReactant.moles;
+
+        // Limiting reactant check
+        const limitPoured = molesPouredAvailable / coefPoured;
+        const limitBeaker = molesBeakerAvailable / coefBeaker;
+        
+        const isPouredLimiting = limitPoured < limitBeaker;
+        const runs = isPouredLimiting ? limitPoured : limitBeaker;
+
+        // Consume reactants
+        remainingPouredMoles -= runs * coefPoured;
+        beakerReactant.moles -= runs * coefBeaker;
+        beakerReactant.mass = beakerReactant.moles * getElementById(otherReactantId)!.molarMass;
+
+        // If beaker reactant is completely consumed, remove it
+        if (beakerReactant.moles <= 0.001) {
+          newSubstances.splice(beakerReactantIndex, 1);
+        }
+
+        // Produce products
+        for (const [prodId, prodCoef] of Object.entries(reaction.products)) {
+          const molesProduced = runs * prodCoef;
+          const prodEl = getElementById(prodId);
+          if (!prodEl) continue;
+
+          // Gases escape, don't add to beaker (but they trigger VFX)
+          if (prodEl.state === "g") continue;
+
+          const existingProdIndex = newSubstances.findIndex(s => s.elementId === prodId);
+          if (existingProdIndex !== -1) {
+            newSubstances[existingProdIndex].moles += molesProduced;
+            newSubstances[existingProdIndex].mass += molesProduced * prodEl.molarMass;
+          } else {
+            newSubstances.push({
+              elementId: prodId,
+              moles: molesProduced,
+              mass: molesProduced * prodEl.molarMass
+            });
+          }
+        }
+
+        triggeredReaction = reaction;
+        break; // Stop after first successful reaction for simplicity
+      }
+    }
+  }
+
+  // If there's leftover poured reactant, add it to beaker
+  if (remainingPouredMoles > 0.001 && pouredElement.state !== "g") {
+    const existingIndex = newSubstances.findIndex(s => s.elementId === pouredElement.id);
+    if (existingIndex !== -1) {
+      newSubstances[existingIndex].moles += remainingPouredMoles;
+      newSubstances[existingIndex].mass += remainingPouredMoles * pouredElement.molarMass;
+    } else {
+      newSubstances.push({
+        elementId: pouredElement.id,
+        moles: remainingPouredMoles,
+        mass: remainingPouredMoles * pouredElement.molarMass
+      });
+    }
+  }
+
+  return { newSubstances, reactionTriggered: triggeredReaction };
+}
+
 // ─── Static Lab Floor & Bench ─────────────────────────────────
 function LabEnvironment() {
   return (
     <group>
-      {/* Floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
         <planeGeometry args={[20, 20]} />
         <meshStandardMaterial color="#0f172a" roughness={0.8} metalness={0.2} transparent opacity={0.6} />
       </mesh>
-      {/* Bench */}
       <mesh position={[0, -1.2, 0]} receiveShadow castShadow>
         <boxGeometry args={[8, 0.15, 4]} />
         <meshStandardMaterial color="#1e293b" roughness={0.5} metalness={0.3} />
@@ -44,16 +151,14 @@ function LabEnvironment() {
 }
 
 // ─── Liquid Mesh ──────────────────────────────────────────────
-function LiquidMesh({ volume, targetColor }: { volume: number; targetColor: string }) {
+function LiquidMesh({ volumeML, targetColor }: { volumeML: number; targetColor: string }) {
   const matRef = useRef<THREE.MeshPhysicalMaterial>(null!);
   const colorObj = useRef(new THREE.Color(targetColor));
 
-  // Ensure volume stays within bounds [0.01, 1] (0.01 so it's not totally invisible when empty)
-  const safeVolume = Math.max(0.01, Math.min(1.0, volume));
+  // Convert volumeML to 0.0 - 1.0 ratio based on MAX_BEAKER_VOLUME_ML
+  const ratio = Math.max(0.01, Math.min(1.0, volumeML / MAX_BEAKER_VOLUME_ML));
   
-  // The beaker interior is ~0.9 units high. 
-  const liquidHeight = safeVolume * 0.9;
-  // Base position is -0.48 (just above the bottom of the beaker at -0.5). 
+  const liquidHeight = ratio * 0.9;
   const yPos = -0.48 + (liquidHeight / 2);
 
   useFrame(() => {
@@ -70,7 +175,7 @@ function LiquidMesh({ volume, targetColor }: { volume: number; targetColor: stri
         ref={matRef}
         color={targetColor}
         transparent
-        opacity={volume > 0 ? 0.85 : 0}
+        opacity={volumeML > 1 ? 0.85 : 0}
         roughness={0.1}
         transmission={0.6}
         thickness={0.5}
@@ -80,15 +185,11 @@ function LiquidMesh({ volume, targetColor }: { volume: number; targetColor: stri
 }
 
 // ─── Central Beaker ──────────────────────────────────────────
-function CentralBeaker({ beakerState }: { beakerState: BeakerState }) {
-  // Top of bench is -1.125. Beaker bottom is locally -0.5.
-  // Group position Y should be -1.125 + 0.5 = -0.625
+function CentralBeaker({ beakerState, volumeML }: { beakerState: BeakerState, volumeML: number }) {
   return (
     <group position={[0, -0.625, 0]}>
-      {/* Liquid inside */}
-      <LiquidMesh volume={beakerState.volume} targetColor={beakerState.color} />
+      <LiquidMesh volumeML={volumeML} targetColor={beakerState.color} />
 
-      {/* Glass Body */}
       <mesh castShadow>
         <cylinderGeometry args={[0.4, 0.35, 1.0, 32, 1, true]} />
         <meshPhysicalMaterial
@@ -98,25 +199,23 @@ function CentralBeaker({ beakerState }: { beakerState: BeakerState }) {
         />
       </mesh>
       
-      {/* Glass Bottom */}
       <mesh position={[0, -0.5, 0]}>
         <cylinderGeometry args={[0.35, 0.35, 0.05, 32]} />
         <meshPhysicalMaterial color="#ffffff" transparent opacity={0.2} roughness={0.1} />
       </mesh>
       
-      {/* Rim */}
       <mesh position={[0, 0.5, 0]}>
         <torusGeometry args={[0.4, 0.02, 16, 32]} />
         <meshPhysicalMaterial color="#ffffff" transparent opacity={0.3} roughness={0.1} />
       </mesh>
 
-      {/* Label */}
       <Html center position={[0, -0.2, 0.36]} style={{ pointerEvents: "none" }}>
         <div style={{
           background: "rgba(255,255,255,0.8)", padding: "2px 8px", borderRadius: "4px",
-          color: "#0f172a", fontSize: "0.6rem", fontWeight: "bold", border: "1px solid #cbd5e1"
+          color: "#0f172a", fontSize: "0.6rem", fontWeight: "bold", border: "1px solid #cbd5e1",
+          textAlign: "center"
         }}>
-          500ml
+          {Math.round(volumeML)} / {MAX_BEAKER_VOLUME_ML} mL
         </div>
       </Html>
     </group>
@@ -131,36 +230,29 @@ function PouringBottle({ element, onFinish }: { element: LabElement, onFinish: (
   useFrame((state, delta) => {
     if (!bottleRef.current) return;
     
-    // Animate bottle tilting (tilt LEFT so rotation.z becomes positive)
     if (bottleRef.current.rotation.z < Math.PI / 2.5) {
       bottleRef.current.rotation.z += delta * 3;
     } else if (!pouring) {
       setPouring(true);
-      // Pour for 1.5 seconds, then finish
-      setTimeout(onFinish, 1500);
+      setTimeout(onFinish, 1500); // Pouring duration could be scaled by amount, kept constant for UX
     }
   });
 
   return (
     <group>
       <group ref={bottleRef} position={[0.65, 1.5, 0]}>
-        {/* The Bottle */}
         <mesh position={[0, 0, 0]}>
           <cylinderGeometry args={[0.2, 0.25, 0.8, 16]} />
           <meshPhysicalMaterial color="#e2e8f0" transmission={0.9} opacity={0.5} transparent roughness={0.1} />
         </mesh>
-        {/* Bottle Neck */}
         <mesh position={[0, 0.5, 0]}>
           <cylinderGeometry args={[0.08, 0.2, 0.3, 16]} />
           <meshPhysicalMaterial color="#e2e8f0" transmission={0.9} opacity={0.5} transparent roughness={0.1} />
         </mesh>
-        {/* Liquid inside bottle */}
         <mesh position={[0, -0.1, 0]}>
           <cylinderGeometry args={[0.18, 0.23, 0.6, 16]} />
           <meshStandardMaterial color={element.color} transparent opacity={0.9} />
         </mesh>
-        
-        {/* Label */}
         <Html center position={[0, 0, 0.26]} style={{ pointerEvents: "none" }}>
           <div style={{ background: element.color, color: "white", padding: "2px 6px", borderRadius: "2px", fontSize: "0.5rem", fontWeight: "bold" }}>
             {element.id}
@@ -168,7 +260,6 @@ function PouringBottle({ element, onFinish }: { element: LabElement, onFinish: (
         </Html>
       </group>
 
-      {/* Pouring Stream (detached from bottle rotation to go straight down) */}
       {pouring && (
         <mesh position={[0.03, 0.6, 0]}>
           <cylinderGeometry args={[0.02, 0.05, 2.2, 8]} />
@@ -180,7 +271,7 @@ function PouringBottle({ element, onFinish }: { element: LabElement, onFinish: (
 }
 
 // ─── Particle System (Reactions) ─────────────────────────────
-function ReactionParticles({ active, reaction }: { active: boolean, reaction: Reaction | null }) {
+function ReactionParticles({ active, reaction }: { active: boolean, reaction: ReactionStoichiometry | null }) {
   const pointsRef = useRef<THREE.Points>(null!);
   const geoRef = useRef<THREE.BufferGeometry>(null!);
   const particles = useRef<Particle[]>([]);
@@ -188,7 +279,6 @@ function ReactionParticles({ active, reaction }: { active: boolean, reaction: Re
   useFrame((state, delta) => {
     if (!geoRef.current) return;
 
-    // Spawn new particles if active
     if (active && reaction) {
       for (let i = 0; i < (reaction.hasExplosion ? 5 : 2); i++) {
         particles.current.push({
@@ -207,7 +297,6 @@ function ReactionParticles({ active, reaction }: { active: boolean, reaction: Re
       }
     }
 
-    // Update particles
     const positions: number[] = [];
     const sizes: number[] = [];
     
@@ -218,15 +307,12 @@ function ReactionParticles({ active, reaction }: { active: boolean, reaction: Re
         particles.current.splice(i, 1);
         continue;
       }
-      
       p.pos.addScaledVector(p.vel, delta);
-      // Add gravity/drag
       p.vel.y -= delta * 2;
       p.vel.x *= 0.95;
       p.vel.z *= 0.95;
 
       positions.push(p.pos.x, p.pos.y, p.pos.z);
-      // Fade out size based on life
       sizes.push(p.size * (1 - p.life / p.maxLife));
     }
 
@@ -237,14 +323,10 @@ function ReactionParticles({ active, reaction }: { active: boolean, reaction: Re
   return (
     <points ref={pointsRef}>
       <bufferGeometry ref={geoRef} />
-      {/* ShaderMaterial is better for variable sizes, but PointsMaterial is simpler.
-          Since we want individual sizes, we use a basic shader. */}
       <shaderMaterial
         transparent
         depthWrite={false}
-        uniforms={{
-          uColor: { value: new THREE.Color(reaction?.smokeColor || "#ffffff") }
-        }}
+        uniforms={{ uColor: { value: new THREE.Color(reaction?.smokeColor || "#ffffff") } }}
         vertexShader={`
           attribute float size;
           void main() {
@@ -270,11 +352,8 @@ function ReactionParticles({ active, reaction }: { active: boolean, reaction: Re
 // ─── Drop Zone overlay ────────────────────────────────────────
 function DropHandler({ onDrop }: { onDrop: () => void }) {
   const { gl } = useThree();
-
   const handleDrop = useCallback((e: DragEvent) => {
     e.preventDefault();
-    // In this simplified version, dropping anywhere in the canvas triggers the pour.
-    // We assume the user wants to pour into the central beaker.
     onDrop();
   }, [onDrop]);
 
@@ -282,8 +361,98 @@ function DropHandler({ onDrop }: { onDrop: () => void }) {
     gl.domElement.ondragover = (e) => e.preventDefault();
     gl.domElement.ondrop = handleDrop as any;
   });
-
   return null;
+}
+
+// ─── Volume Modal ─────────────────────────────────────────────
+function VolumeModal({ 
+  element, 
+  onConfirm, 
+  onCancel,
+  currentVolume
+}: { 
+  element: LabElement, 
+  onConfirm: (amount: number) => void, 
+  onCancel: () => void,
+  currentVolume: number
+}) {
+  const [amount, setAmount] = useState<string>("50");
+  const isLiquid = element.state === "l" || element.state === "aq";
+  const unit = isLiquid ? "mL" : "g";
+  const maxAmount = isLiquid ? MAX_BEAKER_VOLUME_ML - currentVolume : 100;
+
+  return (
+    <div style={{
+      position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+      background: "rgba(2,6,23,0.7)", backdropFilter: "blur(4px)",
+      display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100
+    }}>
+      <div style={{
+        background: "rgba(15,23,42,0.95)", border: "1px solid rgba(255,255,255,0.1)",
+        borderRadius: "16px", padding: "24px", width: "320px",
+        boxShadow: "0 20px 40px rgba(0,0,0,0.5)", fontFamily: "'Inter', sans-serif"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+          <div style={{ fontSize: "2rem" }}>{element.emoji}</div>
+          <div>
+            <h3 style={{ margin: 0, color: "white", fontSize: "1.1rem" }}>{element.name}</h3>
+            <span style={{ color: "#94a3b8", fontSize: "0.8rem" }}>Molar Mass: {element.molarMass} g/mol</span>
+          </div>
+        </div>
+
+        <label style={{ display: "block", color: "#cbd5e1", fontSize: "0.85rem", marginBottom: "8px" }}>
+          Amount to add ({unit}):
+        </label>
+        <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            max={maxAmount}
+            min={1}
+            autoFocus
+            style={{
+              flex: 1, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.2)",
+              color: "white", borderRadius: "8px", padding: "10px 14px", fontSize: "1rem"
+            }}
+          />
+          <div style={{ 
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "0 14px", color: "#64748b" 
+          }}>
+            {unit}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button onClick={onCancel} style={{
+            flex: 1, background: "transparent", border: "1px solid rgba(255,255,255,0.2)",
+            color: "white", padding: "10px", borderRadius: "8px", cursor: "pointer"
+          }}>
+            Cancel
+          </button>
+          <button 
+            onClick={() => {
+              const val = parseFloat(amount);
+              if (val > 0 && val <= maxAmount) onConfirm(val);
+            }} 
+            style={{
+              flex: 1, background: "#6366f1", border: "none",
+              color: "white", padding: "10px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold"
+            }}
+          >
+            Pour <Droplet size={14} style={{ display: "inline", verticalAlign: "middle" }} />
+          </button>
+        </div>
+        
+        {parseFloat(amount) > maxAmount && (
+          <p style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "10px", textAlign: "center" }}>
+            Exceeds beaker capacity! Max: {maxAmount.toFixed(1)} {unit}
+          </p>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // ─── Main Lab Page ────────────────────────────────────────────
@@ -294,11 +463,18 @@ export function InteractiveLabPage() {
 
   const dragElementRef = useRef<LabElement | null>(null);
 
-  const [beaker, setBeaker] = useState<BeakerState>({ contents: [], volume: 0, color: "#ffffff" });
-  const [pouring, setPouring] = useState<LabElement | null>(null);
+  const [beaker, setBeaker] = useState<BeakerState>({ substances: [], color: "#ffffff" });
   
-  const [activeReaction, setActiveReaction] = useState<Reaction | null>(null);
+  // Pending pour state
+  const [pendingPour, setPendingPour] = useState<LabElement | null>(null);
+  
+  // Active pouring animation state
+  const [pouring, setPouring] = useState<{ element: LabElement, amount: number } | null>(null);
+  
+  const [activeReaction, setActiveReaction] = useState<ReactionStoichiometry | null>(null);
   const [reactionLabel, setReactionLabel] = useState("");
+
+  const currentVolumeML = calculateTotalVolume(beaker.substances);
 
   function handleDragStart(el: LabElement) {
     dragElementRef.current = el;
@@ -306,55 +482,47 @@ export function InteractiveLabPage() {
 
   function handleDrop() {
     const el = dragElementRef.current;
-    if (!el || pouring) return;
+    if (!el || pouring || pendingPour) return;
     
-    // Start pouring animation
-    setPouring(el);
+    // Show Volume Modal instead of pouring instantly
+    setPendingPour(el);
     dragElementRef.current = null;
+  }
+
+  function handleModalConfirm(amount: number) {
+    if (!pendingPour) return;
+    setPouring({ element: pendingPour, amount });
+    setPendingPour(null);
   }
 
   function handlePourFinish() {
     if (!pouring) return;
     
-    // Add to beaker contents
-    setBeaker(prev => {
-      const newContents = [...prev.contents, pouring];
-      let newColor = pouring.color;
-      let newVolume = Math.min(1.0, prev.volume + 0.2); // Each pour adds 20% volume
-      
-      // Check for reactions with existing contents
-      let triggeredReaction: Reaction | null = null;
-      for (const existing of prev.contents) {
-        const r = getReaction(existing.id, pouring.id);
-        if (r) {
-          triggeredReaction = r;
-          break;
-        }
-      }
+    // Convert poured volume/mass to mass (grams) for the stoichiometry engine
+    const pouredEl = pouring.element;
+    const isLiquid = pouredEl.state === "l" || pouredEl.state === "aq";
+    const massGrams = isLiquid ? pouring.amount * (pouredEl.density || 1.0) : pouring.amount;
 
-      if (triggeredReaction) {
-        newColor = triggeredReaction.resultColor;
-        setActiveReaction(triggeredReaction);
-        setReactionLabel(isRTL ? triggeredReaction.labelAr : triggeredReaction.labelEn);
-        
-        // Stop reaction particles after a few seconds
-        setTimeout(() => setActiveReaction(null), 3000);
-      } else if (prev.contents.length > 0) {
-        // If no reaction, just mix the colors simply (average)
-        const c1 = new THREE.Color(prev.color);
-        const c2 = new THREE.Color(pouring.color);
-        newColor = "#" + c1.lerp(c2, 0.5).getHexString();
-      }
+    // Run Stoichiometry Engine
+    const { newSubstances, reactionTriggered } = processReaction(beaker.substances, pouredEl, massGrams);
 
-      return { contents: newContents, volume: newVolume, color: newColor };
-    });
+    let newColor = calculateMixtureColor(newSubstances);
 
+    if (reactionTriggered) {
+      newColor = reactionTriggered.resultColor;
+      setActiveReaction(reactionTriggered);
+      setReactionLabel(isRTL ? reactionTriggered.labelAr : reactionTriggered.labelEn);
+      setTimeout(() => setActiveReaction(null), 4000);
+    }
+
+    setBeaker({ substances: newSubstances, color: newColor });
     setPouring(null);
   }
 
   function resetLab() {
-    setBeaker({ contents: [], volume: 0, color: "#ffffff" });
+    setBeaker({ substances: [], color: "#ffffff" });
     setPouring(null);
+    setPendingPour(null);
     setActiveReaction(null);
   }
 
@@ -381,7 +549,7 @@ export function InteractiveLabPage() {
             ⚗️ {t("lab.title", "Interactive Physics & Chemistry Lab")}
           </h1>
           <p style={{ color: "#64748b", margin: 0, fontSize: "0.78rem" }}>
-            {t("lab.subtitle", "Drag bottles into the scene to pour liquids into the beaker")}
+            {t("lab.subtitle", "Stoichiometric Precision Mode. Enter exact quantities to pour.")}
           </p>
         </div>
         <button onClick={resetLab} style={{
@@ -395,7 +563,8 @@ export function InteractiveLabPage() {
       </header>
 
       {/* Body */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+      <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
+        
         {/* Sidebar */}
         <LabSidebar onDragStart={handleDragStart} />
 
@@ -409,7 +578,6 @@ export function InteractiveLabPage() {
             style={{ background: "radial-gradient(ellipse at center, #0f172a 0%, #020617 100%)" }}
           >
             <Suspense fallback={null}>
-              {/* Lighting */}
               <ambientLight intensity={0.5} />
               <directionalLight position={[5, 8, 5]} intensity={1.5} castShadow shadow-mapSize={[1024, 1024]} />
               <pointLight position={[-3, 3, -3]} intensity={0.8} color="#6366f1" />
@@ -417,22 +585,25 @@ export function InteractiveLabPage() {
               <gridHelper args={[10, 20, "#1e293b", "#1e293b"]} position={[0, -1.42, 0]} />
               
               <LabEnvironment />
-              
-              {/* Central Beaker */}
-              <CentralBeaker beakerState={beaker} />
+              <CentralBeaker beakerState={beaker} volumeML={currentVolumeML} />
 
-              {/* Pouring Animation */}
-              {pouring && <PouringBottle element={pouring} onFinish={handlePourFinish} />}
-
-              {/* Reaction VFX */}
+              {pouring && <PouringBottle element={pouring.element} onFinish={handlePourFinish} />}
               <ReactionParticles active={activeReaction !== null} reaction={activeReaction} />
 
-              {/* Drop handler */}
               <DropHandler onDrop={handleDrop} />
-
               <OrbitControls enablePan={false} minDistance={3} maxDistance={10} target={[0, 0, 0]} />
             </Suspense>
           </Canvas>
+
+          {/* Volume Selection Modal */}
+          {pendingPour && (
+            <VolumeModal 
+              element={pendingPour} 
+              currentVolume={currentVolumeML}
+              onConfirm={handleModalConfirm} 
+              onCancel={() => setPendingPour(null)} 
+            />
+          )}
 
           {/* Reaction overlay */}
           {activeReaction && (
@@ -451,20 +622,16 @@ export function InteractiveLabPage() {
                 {activeReaction.hasExplosion ? "💥" : activeReaction.hasBubbles ? "🫧" : "⚗️"}
               </div>
               <div style={{ color: activeReaction.resultColor, fontWeight: 700, fontSize: "0.95rem", marginBottom: "4px" }}>
-                REACTION TRIGGERED!
+                STOICHIOMETRIC REACTION!
               </div>
               <div style={{ color: "#cbd5e1", fontSize: "0.85rem", lineHeight: 1.5 }}>
                 {reactionLabel}
-              </div>
-              <div style={{ marginTop: "8px", display: "flex", justifyContent: "center", gap: "8px", fontSize: "0.75rem" }}>
-                {activeReaction.hasSmoke && <span style={{ color: "#94a3b8" }}>💨 Smoke generated</span>}
-                {activeReaction.hasExplosion && <span style={{ color: "#f97316" }}>🔥 High Heat</span>}
               </div>
             </div>
           )}
 
           {/* Empty state hint */}
-          {beaker.contents.length === 0 && !pouring && (
+          {beaker.substances.length === 0 && !pouring && !pendingPour && (
             <div style={{
               position: "absolute", top: "20%", left: "50%",
               transform: "translate(-50%, -50%)",
