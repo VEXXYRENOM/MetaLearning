@@ -63,7 +63,7 @@ export async function checkAndUpdateStreak(studentId: string): Promise<{
       .eq("id", studentId);
 
     // Award XP for daily check-in (5 XP)
-    await awardXP(studentId, "system", "daily_checkin", 5);
+    await awardXP(studentId, null, "daily_checkin", 5);
 
     // Show streak toast
     showToast({

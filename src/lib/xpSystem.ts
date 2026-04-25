@@ -62,7 +62,7 @@ interface AwardResult {
 
 export async function awardXP(
   studentId: string,
-  lessonId: string,
+  lessonId: string | null,
   reason: string,
   xp: number
 ): Promise<AwardResult | null> {
