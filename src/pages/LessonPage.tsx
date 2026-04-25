@@ -141,9 +141,9 @@ export function LessonPage() {
   const { profile } = useAuth();
   const isTeacher = profile?.role === "teacher";
 
-  // Start with direct lookup (works for preset IDs like "beating-heart")
   const [resolvedLesson, setResolvedLesson] = useState(() => getLesson(lessonId));
   const [dbLoading, setDbLoading] = useState(false);
+  const [cachedGlbUrl, setCachedGlbUrl] = useState<string | null>(null);
 
   // If lessonId is a Supabase UUID, fetch model_key from DB to resolve the preset
   useEffect(() => {
@@ -163,6 +163,25 @@ export function LessonPage() {
         });
     }
   }, [lessonId, resolvedLesson]);
+
+  // Check generated_assets cache for pre-baked GLB versions of this lesson
+  useEffect(() => {
+    if (!resolvedLesson?.id) return;
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from('generated_assets')
+          .select('glb_url')
+          .eq('prompt_hash', resolvedLesson.id)
+          .single();
+        if (data?.glb_url) {
+          setCachedGlbUrl(data.glb_url);
+        }
+      } catch {
+        // Ignore cache misses silently
+      }
+    })();
+  }, [resolvedLesson?.id]);
 
   // Use resolvedLesson everywhere (replaces the old `lesson` variable)
   const lesson = resolvedLesson;
@@ -398,11 +417,12 @@ export function LessonPage() {
 
   const gltfSource = (lesson.kind === "gltf-url" || lesson.kind === "gltf-artifact") ? lesson.gltfUrl : null;
   const effectiveGltfUrl =
-    lesson.kind === "gltf-upload" ? uploadUrl : gltfSource;
+    cachedGlbUrl || (lesson.kind === "gltf-upload" ? uploadUrl : gltfSource);
 
-  const isProceduralLesson = isProcedural(lesson.kind);
-  const showCanvas = isProceduralLesson || Boolean(effectiveGltfUrl);
-  const isHeart = lesson.kind === "procedural-heart";
+  // If we have a cached GLB, completely disable the procedural components logic
+  const isProceduralLesson = isProcedural(lesson.kind) && !cachedGlbUrl;
+  const showCanvas = isProceduralLesson || Boolean(effectiveGltfUrl) || Boolean(cachedGlbUrl);
+  const isHeart = lesson.kind === "procedural-heart" && !cachedGlbUrl;
   const ProceduralComponent = PROCEDURAL_COMPONENTS[lesson.kind] || null;
 
   return (
@@ -785,12 +805,12 @@ export function LessonPage() {
                             <ProceduralComponent />
                           </group>
                         )}
-                        {!isProceduralLesson && effectiveGltfUrl && lesson.kind === "gltf-artifact" && (
+                        {!isProceduralLesson && effectiveGltfUrl && (lesson.kind === "gltf-artifact" || cachedGlbUrl) && (
                           <group scale={[2.5, 2.5, 2.5]}>
                             <ArtifactGltfModel url={effectiveGltfUrl} modelScale={modelScale} />
                           </group>
                         )}
-                        {!isProceduralLesson && effectiveGltfUrl && lesson.kind !== "gltf-artifact" && (
+                        {!isProceduralLesson && effectiveGltfUrl && lesson.kind !== "gltf-artifact" && !cachedGlbUrl && (
                           <GltfScene
                             url={effectiveGltfUrl}
                             modelScale={modelScale * 0.08}
