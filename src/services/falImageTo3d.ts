@@ -105,12 +105,15 @@ export async function falGenerate3DFromImage(
   if (json.request_id && json.status_url) {
     onProgress?.(60, "QUEUED", "الطلب في قائمة الانتظار... جاري التحضير...");
     
+    const statusUrl = json.status_url;
+    const promptHash = json.prompt_hash || '';
+
     // Polling loop
     let isCompleted = false;
     while (!isCompleted) {
       await new Promise(r => setTimeout(r, 2000)); // Poll every 2s
       
-      const statusRes = await fetch(`/api/fal/status?status_url=${encodeURIComponent(json.status_url)}&prompt_hash=${json.prompt_hash}`, {
+      const statusRes = await fetch(`/api/fal/status?status_url=${encodeURIComponent(statusUrl)}&prompt_hash=${promptHash}`, {
         headers
       });
 
