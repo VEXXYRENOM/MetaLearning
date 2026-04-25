@@ -30,6 +30,10 @@ export function QuizOverlay({ lessonId, onClose, onComplete }: { lessonId: strin
   }, [lessonId]);
 
   const fetchQuiz = async () => {
+    if (!lessonId || lessonId.length < 20 || !lessonId.includes("-")) {
+      setLoading(false);
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from("quiz_questions")

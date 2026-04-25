@@ -31,7 +31,8 @@ export function useHotspots(lessonId: string | undefined, isTeacher: boolean) {
   const [placingMode, setPlacingMode] = useState(false);
 
   const loadHotspots = useCallback(async () => {
-    if (!lessonId) return;
+    // Only query DB if lessonId is a valid UUID
+    if (!lessonId || lessonId.length < 20 || !lessonId.includes("-")) return;
     const { data } = await supabase
       .from("hotspots")
       .select("*")
@@ -61,7 +62,8 @@ export function useHotspots(lessonId: string | undefined, isTeacher: boolean) {
       description: string,
       quizQuestion: string
     ) => {
-      if (!pendingPos || !lessonId) return;
+      // Only allow saving if lessonId is a valid UUID
+      if (!pendingPos || !lessonId || lessonId.length < 20 || !lessonId.includes("-")) return;
       const payload = {
         lesson_id: lessonId,
         teacher_id: teacherId,

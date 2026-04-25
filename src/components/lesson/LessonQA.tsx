@@ -29,6 +29,12 @@ export function LessonQA({ lessonId, studentId, isTeacher }: LessonQAProps) {
   const [isOpen, setIsOpen] = useState(false); // Slide-out panel state
 
   useEffect(() => {
+    // Only query DB if lessonId is a valid UUID
+    if (!lessonId || lessonId.length < 20 || !lessonId.includes("-")) {
+      setLoading(false);
+      return;
+    }
+
     fetchQuestions();
 
     // Subscribe to new questions
@@ -71,6 +77,10 @@ export function LessonQA({ lessonId, studentId, isTeacher }: LessonQAProps) {
   const handleAsk = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newQuestion.trim()) return;
+    if (!lessonId || lessonId.length < 20 || !lessonId.includes("-")) {
+      console.warn("Cannot ask questions on preset models.");
+      return;
+    }
     try {
       await supabase.from("lesson_questions").insert({
         lesson_id: lessonId,
