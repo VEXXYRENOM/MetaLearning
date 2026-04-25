@@ -23,6 +23,7 @@ const TeacherDashboardPage  = lazy(() => import("./pages/TeacherDashboardPage").
 const TeacherAnalyticsPage  = lazy(() => import("./pages/TeacherAnalyticsPage").then(m => ({ default: m.TeacherAnalyticsPage })));
 const StudentDashboardPage  = lazy(() => import("./pages/StudentDashboardPage").then(m => ({ default: m.StudentDashboardPage })));
 const SandboxPage           = lazy(() => import("./pages/SandboxPage").then(m => ({ default: m.SandboxPage })));
+const InteractiveLabPage    = lazy(() => import("./pages/InteractiveLabPage").then(m => ({ default: m.InteractiveLabPage })));
 const PricingPage           = lazy(() => import("./pages/PricingPage").then(m => ({ default: m.PricingPage })));
 const LeaderboardPage       = lazy(() => import("./pages/LeaderboardPage").then(m => ({ default: m.LeaderboardPage })));
 const AIGenerationHubPage   = lazy(() => import("./pages/AIGenerationHubPage").then(m => ({ default: m.AIGenerationHubPage })));
@@ -88,6 +89,11 @@ function AnimatedRoutes() {
         <Route path="/sandbox" element={
           <ProtectedRoute requiredRole="student">
             <Suspense fallback={<PageSkeleton />}><PageTransition variant="fade"><SandboxPage /></PageTransition></Suspense>
+          </ProtectedRoute>
+        } />
+        <Route path="/lab" element={
+          <ProtectedRoute requiredRole="student">
+            <Suspense fallback={<PageSkeleton />}><PageTransition variant="fade"><InteractiveLabPage /></PageTransition></Suspense>
           </ProtectedRoute>
         } />
 
