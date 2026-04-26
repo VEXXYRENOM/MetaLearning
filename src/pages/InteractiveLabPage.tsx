@@ -238,7 +238,10 @@ function BunsenBurner3D({ isOn, onClick }: { isOn: boolean, onClick: () => void 
 
       {/* Fire Particles */}
       <points ref={pointsRef}>
-        <bufferGeometry ref={geoRef} />
+        <bufferGeometry ref={geoRef}>
+          <bufferAttribute attach="attributes-position" count={1} array={new Float32Array([0,0,0])} itemSize={3} />
+          <bufferAttribute attach="attributes-size" count={1} array={new Float32Array([0])} itemSize={1} />
+        </bufferGeometry>
         <shaderMaterial
           transparent depthWrite={false} blending={THREE.AdditiveBlending}
           uniforms={{ uColor: { value: new THREE.Color("#60a5fa") } }}
@@ -485,7 +488,10 @@ function ReactionParticles({ active, reaction }: { active: boolean, reaction: Re
 
   return (
     <points ref={pointsRef}>
-      <bufferGeometry ref={geoRef} />
+      <bufferGeometry ref={geoRef}>
+        <bufferAttribute attach="attributes-position" count={1} array={new Float32Array([0,0,0])} itemSize={3} />
+        <bufferAttribute attach="attributes-size" count={1} array={new Float32Array([0])} itemSize={1} />
+      </bufferGeometry>
       <shaderMaterial
         transparent
         depthWrite={false}
