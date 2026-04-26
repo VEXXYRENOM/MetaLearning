@@ -861,7 +861,6 @@ export function InteractiveLabPage() {
             <Suspense fallback={null}>
               <ambientLight intensity={0.5} />
               <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
-              <Environment preset="studio" />
               
               {/* Workbench */}
               <pointLight position={[-3, 3, -3]} intensity={0.8} color="#6366f1" />
