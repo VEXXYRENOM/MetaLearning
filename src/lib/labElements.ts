@@ -39,6 +39,7 @@ export interface ReactionStoichiometry {
   activationTemp?: number; // °C required to trigger the reaction
   labelEn: string;
   labelAr: string;
+  requiresStirring?: boolean; // If true, reaction won't proceed without Glass Stirrer
 }
 
 // ─── Elements & Equipment ────────────────────────────────────
@@ -46,7 +47,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "Na", name: "Sodium", nameAr: "صوديوم", nameFr: "Sodium",
     emoji: "🔵", category: "element", state: "s",
-    molarMass: 22.99, density: 0.97,
+    molarMass: 22.99, density: 0.97, specificHeat: 1.23,
     color: "#7dd3fc", emissive: "#3b82f6",
     description: "Alkali metal — reacts violently with water",
     descriptionAr: "معدن قلوي — يتفاعل بعنف مع الماء",
@@ -54,7 +55,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "Mg", name: "Magnesium", nameAr: "مغنيسيوم", nameFr: "Magnésium",
     emoji: "⚪", category: "element", state: "s",
-    molarMass: 24.30, density: 1.74,
+    molarMass: 24.30, density: 1.74, specificHeat: 1.02,
     color: "#e2e8f0", emissive: "#94a3b8",
     description: "Burns with a brilliant white flame",
     descriptionAr: "يحترق بلهب أبيض ساطع",
@@ -62,7 +63,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "Fe", name: "Iron", nameAr: "حديد", nameFr: "Fer",
     emoji: "🟤", category: "element", state: "s",
-    molarMass: 55.85, density: 7.87,
+    molarMass: 55.85, density: 7.87, specificHeat: 0.45,
     color: "#78716c", emissive: "#44403c",
     description: "Common metal — rusts when exposed to oxygen",
     descriptionAr: "معدن شائع — يصدأ عند تعرضه للأكسجين",
@@ -70,7 +71,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "Cu", name: "Copper", nameAr: "نحاس", nameFr: "Cuivre",
     emoji: "🟠", category: "element", state: "s",
-    molarMass: 63.55, density: 8.96,
+    molarMass: 63.55, density: 8.96, specificHeat: 0.385,
     color: "#b45309", emissive: "#92400e",
     description: "Reddish metal — excellent conductor",
     descriptionAr: "معدن أحمر — موصل ممتاز للكهرباء",
@@ -87,7 +88,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "K", name: "Potassium", nameAr: "بوتاسيوم", nameFr: "Potassium",
     emoji: "🟣", category: "element", state: "s",
-    molarMass: 39.10, density: 0.86,
+    molarMass: 39.10, density: 0.86, specificHeat: 0.75,
     color: "#c084fc", emissive: "#9333ea",
     description: "Highly reactive alkali metal (Lilac flame)",
     descriptionAr: "معدن قلوي شديد التفاعل (لهب أرجواني)",
@@ -95,7 +96,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "Zn", name: "Zinc", nameAr: "زنك", nameFr: "Zinc",
     emoji: "🪙", category: "element", state: "s",
-    molarMass: 65.38, density: 7.14,
+    molarMass: 65.38, density: 7.14, specificHeat: 0.39,
     color: "#94a3b8", emissive: "#64748b",
     description: "Transition metal, reacts with acids",
     descriptionAr: "معدن انتقالي، يتفاعل مع الأحماض",
@@ -103,7 +104,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "CaCO3", name: "Calcium Carbonate", nameAr: "كربونات الكالسيوم", nameFr: "Carbonate de calcium",
     emoji: "🪨", category: "compound", state: "s",
-    molarMass: 100.09, density: 2.71,
+    molarMass: 100.09, density: 2.71, specificHeat: 0.82,
     color: "#f8fafc", emissive: "#e2e8f0",
     description: "Chalk/Limestone. Produces CO2 with acids",
     descriptionAr: "طبشور/حجر جيري. ينتج ثاني أكسيد الكربون مع الأحماض",
@@ -111,7 +112,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "CuSO4", name: "Copper(II) Sulfate", nameAr: "كبريتات النحاس", nameFr: "Sulfate de cuivre",
     emoji: "🔷", category: "compound", state: "aq",
-    molarMass: 159.61, density: 1.15,
+    molarMass: 159.61, density: 1.15, specificHeat: 4.18,
     color: "#3b82f6", emissive: "#2563eb",
     description: "Bright blue solution",
     descriptionAr: "محلول أزرق ساطع",
@@ -119,7 +120,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "H2SO4", name: "Sulfuric Acid (1M)", nameAr: "حمض الكبريتيك", nameFr: "Acide sulfurique",
     emoji: "🧪", category: "compound", state: "aq",
-    molarMass: 98.08, density: 1.06,
+    molarMass: 98.08, density: 1.06, specificHeat: 4.18,
     color: "#fef08a", emissive: "#ca8a04",
     description: "Strong mineral acid",
     descriptionAr: "حمض معدني قوي",
@@ -127,7 +128,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "HCl", name: "Hydrochloric Acid (1M)", nameAr: "حمض كلوريدريك", nameFr: "Acide chlorhydrique",
     emoji: "🟡", category: "compound", state: "aq",
-    molarMass: 36.46, density: 1.02, // approx 1M density
+    molarMass: 36.46, density: 1.02, specificHeat: 4.18, // approx 1M density
     color: "#fef08a", emissive: "#ca8a04",
     description: "Strong acid — dissolves many metals",
     descriptionAr: "حمض قوي — يذيب كثيراً من المعادن",
@@ -143,7 +144,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "H2O2", name: "Hydrogen Peroxide (30%)", nameAr: "فوق أكسيد الهيدروجين", nameFr: "Peroxyde d'hydrogène",
     emoji: "🔴", category: "compound", state: "aq",
-    molarMass: 34.01, density: 1.11,
+    molarMass: 34.01, density: 1.11, specificHeat: 4.18,
     color: "#fca5a5", emissive: "#ef4444",
     description: "Oxidizer — decomposes releasing oxygen",
     descriptionAr: "عامل مؤكسد — يتحلل محرراً الأكسجين",
@@ -155,6 +156,20 @@ export const LAB_ELEMENTS: LabElement[] = [
     molarMass: 1, color: "#94a3b8", emissive: "#000000",
     description: "Heating device to accelerate reactions",
     descriptionAr: "جهاز تسخين لتسريع التفاعلات الكيميائية",
+  },
+  {
+    id: "LitmusPaper", name: "Litmus Paper", nameAr: "ورقة عباد الشمس", nameFr: "Papier de tournesol",
+    emoji: "📜", category: "equipment", state: "s",
+    molarMass: 1, color: "#fcd34d", emissive: "#000000",
+    description: "pH indicator paper. Drops in to test acidity.",
+    descriptionAr: "ورقة مؤشر الحموضة. تسقط لاختبار الحموضة.",
+  },
+  {
+    id: "GlassStirrer", name: "Glass Stirrer", nameAr: "عصا زجاجية", nameFr: "Agitateur en verre",
+    emoji: "🪄", category: "equipment", state: "s",
+    molarMass: 1, color: "#e2e8f0", emissive: "#000000",
+    description: "Used to manually stir solutions.",
+    descriptionAr: "تستخدم لتقليب المحاليل يدوياً.",
   },
   // We need products too, even if not draggable, they exist in the beaker.
   {
@@ -168,7 +183,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "NaCl", name: "Salt Water", nameAr: "ماء مالح", nameFr: "Eau salée",
     emoji: "🧂", category: "compound", state: "aq",
-    molarMass: 58.44, density: 1.03,
+    molarMass: 58.44, density: 1.03, specificHeat: 3.9,
     color: "#ccfbf1", emissive: "#5eead4",
     description: "Salt dissolved in water",
     descriptionAr: "ملح مذاب في الماء",
@@ -176,7 +191,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "KOH", name: "Potassium Hydroxide", nameAr: "هيدروكسيد البوتاسيوم", nameFr: "Hydroxyde de potassium",
     emoji: "🧪", category: "compound", state: "aq",
-    molarMass: 56.11, density: 1.05,
+    molarMass: 56.11, density: 1.05, specificHeat: 4.18,
     color: "#e9d5ff", emissive: "#d8b4e2",
     description: "Strong base from Potassium reaction",
     descriptionAr: "قاعدة قوية ناتجة عن تفاعل البوتاسيوم",
@@ -192,7 +207,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "CaCl2", name: "Calcium Chloride", nameAr: "كلوريد الكالسيوم", nameFr: "Chlorure de calcium",
     emoji: "🧪", category: "compound", state: "aq",
-    molarMass: 110.98, density: 1.10,
+    molarMass: 110.98, density: 1.10, specificHeat: 4.18,
     color: "#f1f5f9", emissive: "#e2e8f0",
     description: "Dissolved calcium salt",
     descriptionAr: "ملح كالسيوم مذاب",
@@ -200,7 +215,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "ZnCl2", name: "Zinc Chloride", nameAr: "كلوريد الزنك", nameFr: "Chlorure de zinc",
     emoji: "🧪", category: "compound", state: "aq",
-    molarMass: 136.30, density: 1.15,
+    molarMass: 136.30, density: 1.15, specificHeat: 4.18,
     color: "#f8fafc", emissive: "#e2e8f0",
     description: "Dissolved zinc salt",
     descriptionAr: "ملح زنك مذاب",
@@ -208,7 +223,7 @@ export const LAB_ELEMENTS: LabElement[] = [
   {
     id: "FeSO4", name: "Iron(II) Sulfate", nameAr: "كبريتات الحديد", nameFr: "Sulfate de fer",
     emoji: "🧪", category: "compound", state: "aq",
-    molarMass: 151.91, density: 1.08,
+    molarMass: 151.91, density: 1.08, specificHeat: 4.18,
     color: "#86efac", emissive: "#4ade80",
     description: "Pale green solution",
     descriptionAr: "محلول أخضر شاحب",
@@ -275,6 +290,7 @@ export const STOICHIOMETRIC_REACTIONS: ReactionStoichiometry[] = [
     hasSmoke: false, hasBubbles: true, hasExplosion: false,
     heat: 10, xpReward: 25,
     activationTemp: 40, // Needs mild heating to react quickly
+    requiresStirring: true, // Needs stirring to dissolve faster
     labelEn: "CaCO₃(s) + 2HCl(aq) → CaCl₂(aq) + H₂O(l) + CO₂(g)",
     labelAr: "كربونات الكالسيوم + الحمض → كلوريد الكالسيوم + ماء + غاز CO2",
   },
@@ -287,6 +303,7 @@ export const STOICHIOMETRIC_REACTIONS: ReactionStoichiometry[] = [
     smokeColor: "#4ade80",
     hasSmoke: false, hasBubbles: false, hasExplosion: false,
     heat: 20, xpReward: 35,
+    requiresStirring: true, // Needs stirring to proceed
     labelEn: "Fe(s) + CuSO₄(aq) → FeSO₄(aq) + Cu(s) (Single Replacement)",
     labelAr: "الحديد يحل محل النحاس في المحلول (تغير اللون من أزرق إلى أخضر)",
   },

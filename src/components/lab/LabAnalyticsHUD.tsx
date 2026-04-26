@@ -38,7 +38,7 @@ export function LabAnalyticsHUD({ tempHistory, substances }: LabAnalyticsHUDProp
         </h3>
         <div style={{ width: "100%", height: "120px" }}>
           <LineChart width={260} height={120} data={tempHistory}>
-              <XAxis dataKey="time" hide />
+              <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} hide />
               <YAxis domain={[20, 120]} hide />
               <Tooltip 
                 contentStyle={{ background: "#0f172a", border: "none", borderRadius: "8px", fontSize: "0.75rem", color: "white" }} 

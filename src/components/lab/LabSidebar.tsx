@@ -37,7 +37,7 @@ export function LabSidebar({ onDragStart }: LabSidebarProps) {
             borderBottom: tab === t ? "2px solid #6366f1" : "2px solid transparent",
             textTransform: "capitalize", transition: "all 0.15s",
           }}>
-            {t === "elements" ? "⚗️ Elements" : "🔬 Equipment"}
+            {t === "elements" ? "⚗️ Elements" : "🔬 Lab Equipment"}
           </button>
         ))}
       </div>

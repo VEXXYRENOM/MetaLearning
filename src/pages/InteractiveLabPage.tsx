@@ -38,106 +38,60 @@ interface Particle {
 }
 
 // ─── Stoichiometry Engine ────────────────────────────────────
-function processReaction(
-  currentSubstances: BeakerSubstance[], 
+function evaluateBeakerReactions(
+  currentSubstances: BeakerSubstance[],
   currentTemp: number,
-  pouredElement: LabElement, 
-  pouredAmount: number // in grams
-): { newSubstances: BeakerSubstance[], reactionTriggered: ReactionStoichiometry | null } {
-  
-  // Convert poured amount to moles
-  let pouredMoles = pouredAmount / pouredElement.molarMass;
-  let remainingPouredMoles = pouredMoles;
-  let triggeredReaction: ReactionStoichiometry | null = null;
-  
-  // Deep copy current substances
+  isStirring: boolean
+): { newSubstances: BeakerSubstance[], reactionTriggered: ReactionStoichiometry | null, didReact: boolean } {
   let newSubstances = currentSubstances.map(s => ({ ...s }));
+  let reactionTriggered: ReactionStoichiometry | null = null;
+  let didReact = false;
 
-  // Check against all known reactions
   for (const reaction of STOICHIOMETRIC_REACTIONS) {
     if (reaction.activationTemp && currentTemp < reaction.activationTemp) continue;
+    if (reaction.requiresStirring && !isStirring) continue;
 
-    const isPouredReactant = reaction.reactants[pouredElement.id] !== undefined;
-    if (!isPouredReactant) continue;
+    const reqIds = Object.keys(reaction.reactants);
+    const presentReactants = reqIds.map(id => newSubstances.find(s => s.elementId === id));
 
-    // Find if the other required reactants are in the beaker
-    // For simplicity, we assume bi-molecular reactions (2 reactants max)
-    const requiredReactants = Object.keys(reaction.reactants);
-    const otherReactantId = requiredReactants.find(id => id !== pouredElement.id);
-    
-    if (otherReactantId) {
-      const beakerReactantIndex = newSubstances.findIndex(s => s.elementId === otherReactantId);
-      if (beakerReactantIndex !== -1) {
-        const beakerReactant = newSubstances[beakerReactantIndex];
-        
-        // We have both reactants! Let's calculate limiting reactant
-        const coefPoured = reaction.reactants[pouredElement.id];
-        const coefBeaker = reaction.reactants[otherReactantId];
+    if (presentReactants.every(s => s !== undefined && s.moles > 0.001)) {
+      let maxRuns = Infinity;
+      for (const reqId of reqIds) {
+        const sub = newSubstances.find(s => s.elementId === reqId)!;
+        const runs = sub.moles / reaction.reactants[reqId];
+        if (runs < maxRuns) maxRuns = runs;
+      }
 
-        const molesPouredAvailable = remainingPouredMoles;
-        const molesBeakerAvailable = beakerReactant.moles;
-
-        // Limiting reactant check
-        const limitPoured = molesPouredAvailable / coefPoured;
-        const limitBeaker = molesBeakerAvailable / coefBeaker;
-        
-        const isPouredLimiting = limitPoured < limitBeaker;
-        const runs = isPouredLimiting ? limitPoured : limitBeaker;
-
-        // Consume reactants
-        remainingPouredMoles -= runs * coefPoured;
-        beakerReactant.moles -= runs * coefBeaker;
-        beakerReactant.mass = beakerReactant.moles * getElementById(otherReactantId)!.molarMass;
-
-        // If beaker reactant is completely consumed, remove it
-        if (beakerReactant.moles <= 0.001) {
-          newSubstances.splice(beakerReactantIndex, 1);
+      if (maxRuns > 0.001) {
+        // Consume
+        for (const reqId of reqIds) {
+          const sub = newSubstances.find(s => s.elementId === reqId)!;
+          sub.moles -= maxRuns * reaction.reactants[reqId];
+          sub.mass = sub.moles * getElementById(reqId)!.molarMass;
         }
+        // Cleanup consumed
+        newSubstances = newSubstances.filter(s => s.moles > 0.001);
 
-        // Produce products
+        // Produce
         for (const [prodId, prodCoef] of Object.entries(reaction.products)) {
-          const molesProduced = runs * prodCoef;
+          const molesProduced = maxRuns * prodCoef;
           const prodEl = getElementById(prodId);
-          if (!prodEl) continue;
-
-          // Gases escape, don't add to beaker (but they trigger VFX)
-          if (prodEl.state === "g") continue;
-
-          const existingProdIndex = newSubstances.findIndex(s => s.elementId === prodId);
-          if (existingProdIndex !== -1) {
-            newSubstances[existingProdIndex].moles += molesProduced;
-            newSubstances[existingProdIndex].mass += molesProduced * prodEl.molarMass;
+          if (!prodEl || prodEl.state === "g") continue;
+          const existing = newSubstances.find(s => s.elementId === prodId);
+          if (existing) {
+            existing.moles += molesProduced;
+            existing.mass += molesProduced * prodEl.molarMass;
           } else {
-            newSubstances.push({
-              elementId: prodId,
-              moles: molesProduced,
-              mass: molesProduced * prodEl.molarMass
-            });
+            newSubstances.push({ elementId: prodId, moles: molesProduced, mass: molesProduced * prodEl.molarMass });
           }
         }
-
-        triggeredReaction = reaction;
-        break; // Stop after first successful reaction for simplicity
+        reactionTriggered = reaction;
+        didReact = true;
       }
     }
   }
 
-  // If there's leftover poured reactant, add it to beaker
-  if (remainingPouredMoles > 0.001 && pouredElement.state !== "g") {
-    const existingIndex = newSubstances.findIndex(s => s.elementId === pouredElement.id);
-    if (existingIndex !== -1) {
-      newSubstances[existingIndex].moles += remainingPouredMoles;
-      newSubstances[existingIndex].mass += remainingPouredMoles * pouredElement.molarMass;
-    } else {
-      newSubstances.push({
-        elementId: pouredElement.id,
-        moles: remainingPouredMoles,
-        mass: remainingPouredMoles * pouredElement.molarMass
-      });
-    }
-  }
-
-  return { newSubstances, reactionTriggered: triggeredReaction };
+  return { newSubstances, reactionTriggered, didReact };
 }
 
 // ─── Static Lab Floor & Bench ─────────────────────────────────
@@ -433,6 +387,46 @@ function PouringBottle({ element, onFinish }: { element: LabElement, onFinish: (
   );
 }
 
+// ─── Equipment Animations ─────────────────────────────────────
+function LitmusPaper3D({ active, color }: { active: boolean, color: string }) {
+  const paperRef = useRef<THREE.Mesh>(null!);
+  useFrame((state, delta) => {
+    if (paperRef.current) {
+      // Bob up and down slightly
+      paperRef.current.position.y = -0.1 + Math.sin(state.clock.elapsedTime * 2) * 0.05;
+    }
+  });
+
+  if (!active) return null;
+
+  return (
+    <mesh ref={paperRef} position={[0.1, -0.1, 0.1]} castShadow>
+      <boxGeometry args={[0.05, 0.4, 0.01]} />
+      <meshStandardMaterial color={color} roughness={0.9} />
+    </mesh>
+  );
+}
+
+function GlassStirrer3D({ active }: { active: boolean }) {
+  const stirrerRef = useRef<THREE.Mesh>(null!);
+  useFrame((state, delta) => {
+    if (stirrerRef.current && active) {
+      // Swirling animation
+      stirrerRef.current.rotation.y += delta * 10;
+      stirrerRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 15) * 0.1 + 0.2;
+    }
+  });
+
+  if (!active) return null;
+
+  return (
+    <mesh ref={stirrerRef} position={[0, -0.2, 0]} castShadow>
+      <cylinderGeometry args={[0.015, 0.015, 0.8, 8]} />
+      <meshPhysicalMaterial color="#ffffff" transmission={0.95} transparent opacity={0.6} roughness={0.05} />
+    </mesh>
+  );
+}
+
 // ─── Particle System (Reactions) ─────────────────────────────
 function ReactionParticles({ active, reaction }: { active: boolean, reaction: ReactionStoichiometry | null }) {
   const pointsRef = useRef<THREE.Points>(null!);
@@ -640,6 +634,9 @@ export function InteractiveLabPage() {
 
   const dragElementRef = useRef<LabElement | null>(null);
 
+  const [litmusState, setLitmusState] = useState<{ active: boolean, color: string }>({ active: false, color: "#fcd34d" });
+  const [isStirring, setIsStirring] = useState(false);
+
   const [beaker, setBeaker] = useState<BeakerState>({ substances: [], color: "#ffffff" });
   
   // Pending pour state
@@ -669,8 +666,14 @@ export function InteractiveLabPage() {
       const totalMass = beaker.substances.reduce((acc, s) => acc + s.mass, 0);
       
       if (burnerState.on && totalMass > 0) {
-        // Q = mcΔT. Assume burner gives 1000 J per 500ms tick. Assume specific heat c = 4.18 J/g°C
-        tempDelta = 1000 / (totalMass * 4.18);
+        let totalHeatCapacity = 0;
+        for (const s of beaker.substances) {
+          const el = getElementById(s.elementId);
+          const c = el?.specificHeat || 1.0;
+          totalHeatCapacity += s.mass * c;
+        }
+        // Q = mcΔT -> ΔT = Q / (mc). Assume burner gives 1000 J per 500ms tick.
+        tempDelta = 1000 / totalHeatCapacity;
       } else if (tempRef.current > 25) {
         // Natural cooling
         tempDelta = -0.5;
@@ -739,6 +742,38 @@ export function InteractiveLabPage() {
     if (el.category === "equipment") {
       if (el.id === "BunsenBurner") {
          setBurnerState({ placed: true, on: true });
+      } else if (el.id === "LitmusPaper") {
+         let hPlus = 0; let ohMinus = 0;
+         for (const sub of beaker.substances) {
+           if (sub.elementId === "HCl") hPlus += sub.moles;
+           if (sub.elementId === "H2SO4") hPlus += sub.moles * 2;
+           if (sub.elementId === "NaOH") ohMinus += sub.moles;
+           if (sub.elementId === "KOH") ohMinus += sub.moles;
+         }
+         let paperColor = "#fcd34d"; // neutral
+         if (hPlus > ohMinus) paperColor = "#ef4444"; // red
+         else if (ohMinus > hPlus) paperColor = "#3b82f6"; // blue
+         else if (hPlus > 0 && hPlus === ohMinus) paperColor = "#a855f7"; // purple for neutralized
+
+         setLitmusState({ active: true, color: paperColor });
+         setTimeout(() => setLitmusState(s => ({ ...s, active: false })), 4000);
+      } else if (el.id === "GlassStirrer") {
+         setIsStirring(true);
+         setTimeout(() => setIsStirring(false), 3000);
+         // Also trigger evaluation since stirring might cause a reaction
+         const { newSubstances, reactionTriggered } = evaluateBeakerReactions(beaker.substances, tempRef.current, true);
+         if (reactionTriggered) {
+            setBeaker({ substances: newSubstances, color: reactionTriggered.resultColor });
+            setActiveReaction(reactionTriggered);
+            setReactionLabel(isRTL ? reactionTriggered.labelAr : reactionTriggered.labelEn);
+            setLogs(prev => [...prev, {
+              id: Math.random().toString(), time: new Date(), type: "reaction",
+              message: `Reaction Triggered: ${reactionTriggered.effect}`, details: reactionTriggered.labelEn
+            }]);
+            setTimeout(() => setActiveReaction(null), 4000);
+         } else {
+            setBeaker(b => ({ ...b, substances: newSubstances }));
+         }
       }
       dragElementRef.current = null;
       return;
@@ -773,9 +808,20 @@ export function InteractiveLabPage() {
     const massGrams = isLiquid ? pouring.amount * (pouredEl.density || 1.0) : pouring.amount;
 
     // Run Stoichiometry Engine
-    const { newSubstances, reactionTriggered } = processReaction(beaker.substances, tempRef.current, pouredEl, massGrams);
+    // First add the poured substance to the beaker
+    let newSubstances = [...beaker.substances];
+    const existingIndex = newSubstances.findIndex(s => s.elementId === pouredEl.id);
+    const pouredMoles = massGrams / pouredEl.molarMass;
+    if (existingIndex !== -1) {
+      newSubstances[existingIndex].moles += pouredMoles;
+      newSubstances[existingIndex].mass += massGrams;
+    } else {
+      newSubstances.push({ elementId: pouredEl.id, moles: pouredMoles, mass: massGrams });
+    }
 
-    let newColor = calculateMixtureColor(newSubstances);
+    const { newSubstances: finalSubstances, reactionTriggered, didReact } = evaluateBeakerReactions(newSubstances, tempRef.current, isStirring);
+
+    let newColor = calculateMixtureColor(finalSubstances);
 
     if (reactionTriggered) {
       newColor = reactionTriggered.resultColor;
@@ -794,7 +840,7 @@ export function InteractiveLabPage() {
       setTimeout(() => setActiveReaction(null), 4000);
     }
 
-    setBeaker({ substances: newSubstances, color: newColor });
+    setBeaker({ substances: finalSubstances, color: newColor });
     setPouring(null);
   }
 
@@ -803,6 +849,11 @@ export function InteractiveLabPage() {
     setPouring(null);
     setPendingPour(null);
     setActiveReaction(null);
+    tempRef.current = 25.0;
+    setTempHistory([]);
+    setBurnerState({ placed: false, on: false });
+    setLitmusState({ active: false, color: "#fcd34d" });
+    setIsStirring(false);
   }
 
   return (
@@ -890,15 +941,18 @@ export function InteractiveLabPage() {
               <CentralBeaker beakerState={beaker} volumeML={currentVolumeML} tempRef={tempRef} isBoiling={isBoiling} />
 
               {pouring && <PouringBottle element={pouring.element} onFinish={handlePourFinish} />}
+              <LitmusPaper3D active={litmusState.active} color={litmusState.color} />
+              <GlassStirrer3D active={isStirring} />
+              
               <ReactionParticles active={activeReaction !== null} reaction={activeReaction} />
 
               <DropHandler onDrop={handleDrop} />
               <OrbitControls enablePan={false} minDistance={3} maxDistance={10} target={[0, 0, 0]} />
               
               {/* High-End Post Processing */}
-              {/* <EffectComposer>
+              <EffectComposer>
                 <Bloom luminanceThreshold={1.0} luminanceSmoothing={0.5} intensity={1.5} />
-              </EffectComposer> */}
+              </EffectComposer>
             </Suspense>
           </Canvas>
 
