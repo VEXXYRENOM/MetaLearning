@@ -9,6 +9,7 @@ import { ArrowLeft, RotateCcw, Droplet } from "lucide-react";
 import { LabSidebar } from "../components/lab/LabSidebar";
 import { LabAnalyticsHUD } from "../components/lab/LabAnalyticsHUD";
 import { LabReportOverlay, ReactionLogItem } from "../components/lab/LabReportOverlay";
+import { LabAIAssistant } from "../components/lab/LabAIAssistant";
 import { 
   LabElement, 
   ReactionStoichiometry, 
@@ -1014,6 +1015,17 @@ export function InteractiveLabPage() {
               </p>
             </div>
           )}
+
+          {/* Context-Aware AI Assistant */}
+          <LabAIAssistant
+            substances={beaker.substances}
+            temperature={tempRef.current}
+            isBoiling={isBoiling}
+            burnerOn={burnerState.on}
+            hasStirrer={isStirring}
+            litmusColor={litmusState.active ? litmusState.color : undefined}
+            isRTL={isRTL}
+          />
 
           <style>{`
             @keyframes slideUp {
