@@ -61,7 +61,22 @@ export default async function handler(req, res) {
       ? `Litmus paper test result: ${litmusColor === '#ef4444' ? 'RED (Acidic)' : litmusColor === '#3b82f6' ? 'BLUE (Basic)' : 'PURPLE (Neutral)'}.`
       : '';
 
-    const contextBlock = [beakerDesc, tempDesc, burnerDesc, stirrerDesc, litmusDesc]
+    // Calculate estimated pH from beaker contents
+    let phDesc = '';
+    if (substances && substances.length > 0) {
+      const hasAcid = substances.some(s => 
+        ['HCl', 'H2SO4', 'HNO3'].includes(s.elementId || s.name?.includes('Acid'))
+      );
+      const hasBase = substances.some(s => 
+        ['NaOH', 'KOH', 'Ca(OH)2'].includes(s.elementId || s.name?.includes('Hydroxide'))
+      );
+      if (hasAcid && !hasBase) phDesc = 'Solution is acidic (estimated pH < 7).';
+      else if (hasBase && !hasAcid) phDesc = 'Solution is basic (estimated pH > 7).';
+      else if (hasAcid && hasBase) phDesc = 'Mixed acid-base: pH depends on molar balance.';
+      else phDesc = 'Solution is neutral or weakly ionic (estimated pH ≈ 7).';
+    }
+
+    const contextBlock = [beakerDesc, tempDesc, burnerDesc, stirrerDesc, litmusDesc, phDesc]
       .filter(Boolean).join(' ');
 
     const fullPrompt = `${SYSTEM_PROMPT}
@@ -74,19 +89,28 @@ ${question}
 
 ## Your Response (max 3 sentences, same language as student):`;
 
-    // Call Pollinations text API (free, no key needed)
-    const pollinationsRes = await fetch('https://text.pollinations.ai/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: `Lab State: ${contextBlock}\n\nStudent: ${question}` }
-        ],
-        model: 'openai',
-        private: true,
-      }),
-    });
+    // Timeout: 8 seconds (Vercel default limit is 10s)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+    let pollinationsRes;
+    try {
+      pollinationsRes = await fetch('https://text.pollinations.ai/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: `Lab State: ${contextBlock}\n\nStudent: ${question}` }
+          ],
+          model: 'openai',
+          private: true,
+        }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!pollinationsRes.ok) {
       throw new Error(`Pollinations API error: ${pollinationsRes.status}`);

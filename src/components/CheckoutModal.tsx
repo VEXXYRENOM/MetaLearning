@@ -7,6 +7,8 @@ import { initializePaddle, Paddle } from "@paddle/paddle-js";
 
 interface CheckoutModalProps {
   tier: "pro" | "max";
+  priceId?: string;
+  isAnnual?: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -30,21 +32,30 @@ const TIER_CONFIG = {
   },
 };
 
-export function CheckoutModal({ tier, onClose, onSuccess }: CheckoutModalProps) {
+export function CheckoutModal({ tier, priceId, isAnnual, onClose, onSuccess }: CheckoutModalProps) {
   const cfg = TIER_CONFIG[tier];
   const [loading, setLoading] = useState(false);
   const [paddle, setPaddle] = useState<Paddle | undefined>();
 
   useEffect(() => {
+    let paddleInstance: Paddle | undefined;
+
     initializePaddle({
       environment: (import.meta.env.VITE_PADDLE_ENVIRONMENT as "sandbox" | "production") ?? "sandbox",
       token: import.meta.env.VITE_PADDLE_CLIENT_TOKEN || "",
-    }).then((paddleInstance) => {
-      if (paddleInstance) {
-        setPaddle(paddleInstance);
+    }).then((p) => {
+      paddleInstance = p;
+      if (p) {
+        setPaddle(p);
       }
     });
-  }, []);
+
+    // Cleanup: prevent multiple Paddle instances on re-renders
+    return () => {
+      paddleInstance = undefined;
+      setPaddle(undefined);
+    };
+  }, []); // ← Empty array: initialize ONCE only
 
   const handleCheckout = async () => {
     setLoading(true);
@@ -53,14 +64,14 @@ export function CheckoutModal({ tier, onClose, onSuccess }: CheckoutModalProps) 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Please log in to continue.");
 
-      const priceId = cfg.priceId;
-      if (!priceId) throw new Error("Paddle price ID is missing from environment variables.");
+      const activePriceId = priceId || cfg.priceId;
+      if (!activePriceId) throw new Error("Paddle price ID is missing from environment variables.");
 
       if (!paddle) throw new Error("Payment gateway is initializing. Please try again in a few seconds.");
 
       // Open Paddle Overlay Checkout
       paddle.Checkout.open({
-        items: [{ priceId, quantity: 1 }],
+        items: [{ priceId: activePriceId, quantity: 1 }],
         customer: {
           email: user.email!,
         },
@@ -141,10 +152,12 @@ export function CheckoutModal({ tier, onClose, onSuccess }: CheckoutModalProps) 
             display: "flex", justifyContent: "space-between", alignItems: "center"
           }}>
             <div>
-              <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.8rem" }}>MONTHLY SUBSCRIPTION</p>
+              <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.8rem" }}>{isAnnual ? "ANNUAL SUBSCRIPTION" : "MONTHLY SUBSCRIPTION"}</p>
               <p style={{ margin: 0, color: "white", fontWeight: 600 }}>MetaLearning {cfg.name}</p>
             </div>
-            <p style={{ margin: 0, color: cfg.color, fontWeight: "bold", fontSize: "1.4rem" }}>{cfg.price}</p>
+            <p style={{ margin: 0, color: cfg.color, fontWeight: "bold", fontSize: "1.4rem" }}>
+              {isAnnual ? `$${tier === 'pro' ? '91' : '141'}/yr` : cfg.price}
+            </p>
           </div>
 
           <p style={{ textAlign: "center", color: "#94a3b8", fontSize: "0.9rem", marginBottom: "2rem", lineHeight: 1.5 }}>

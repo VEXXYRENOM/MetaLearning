@@ -34,6 +34,9 @@ const PLANS = [
     id: "pro" as const,
     key: "pro",
     price_monthly: "9",
+    priceId_monthly: import.meta.env.VITE_PADDLE_PRO_PRICE_ID,
+    price_annual: "91",
+    priceId_annual: import.meta.env.VITE_PADDLE_PRO_ANNUAL_PRICE_ID,
     currency: "$",
     icon: <Zap size={28} />,
     color: "#06b6d4",
@@ -54,6 +57,9 @@ const PLANS = [
     id: "max" as const,
     key: "max",
     price_monthly: "14",
+    priceId_monthly: import.meta.env.VITE_PADDLE_MAX_PRICE_ID,
+    price_annual: "141",
+    priceId_annual: import.meta.env.VITE_PADDLE_MAX_ANNUAL_PRICE_ID,
     currency: "$",
     icon: <Crown size={28} />,
     color: "#f59e0b",
@@ -95,11 +101,16 @@ export function PricingPage() {
              : i18n.language.startsWith("es") ? "es"
              : "en";
 
-  const [checkoutTier, setCheckoutTier] = useState<Tier | null>(null);
+  const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
+  const isAnnual = billing === 'annual';
+  const [checkoutTier, setCheckoutTier] = useState<{ tier: Tier; priceId: string } | null>(null);
 
-  const handleUpgrade = (tier: Tier) => {
+  const handleUpgrade = (plan: typeof PLANS[0]) => {
     if (!user) { navigate("/auth"); return; }
-    setCheckoutTier(tier);
+    const priceId = isAnnual && (plan as any).priceId_annual
+      ? (plan as any).priceId_annual
+      : (plan as any).priceId_monthly;
+    setCheckoutTier({ tier: plan.id as Tier, priceId });
   };
 
   const handleSuccess = () => {
@@ -147,6 +158,40 @@ export function PricingPage() {
               {lang === "ar" ? "اختر الخطة التي تناسبك وابدأ تحويل التعليم!" : lang === "fr" ? "Choisissez le plan qui vous convient et transformez l'enseignement !" : lang === "es" ? "Elige el plan que se adapte a ti y transforma la educación." : "Choose the plan that fits you and start transforming education!"}
             </p>
           </motion.div>
+        </div>
+
+        {/* Billing Period Toggle */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          gap: "8px", marginBottom: "2.5rem",
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "50px", padding: "5px",
+          width: "fit-content", margin: "0 auto 2.5rem",
+        }}>
+          {(['monthly', 'annual'] as const).map(b => (
+            <button
+              key={b}
+              onClick={() => setBilling(b)}
+              style={{
+                padding: "8px 20px", borderRadius: "50px", cursor: "pointer",
+                border: "none", fontSize: "0.9rem", fontWeight: 600, transition: "all 0.2s",
+                background: billing === b
+                  ? "linear-gradient(135deg, #7c3aed, #3b82f6)"
+                  : "transparent",
+                color: billing === b ? "white" : "#64748b",
+                display: "flex", alignItems: "center", gap: "8px",
+              }}
+            >
+              {b === 'monthly' ? 'Monthly' : (
+                <>Annual <span style={{
+                  background: "#10b981", color: "white",
+                  fontSize: "0.65rem", fontWeight: 700,
+                  padding: "2px 7px", borderRadius: "10px",
+                }}>Save 16%</span></>
+              )}
+            </button>
+          ))}
         </div>
 
         {/* ── PRICING CARDS ───────────────────────────────────────────── */}
@@ -204,11 +249,19 @@ export function PricingPage() {
               {/* Price */}
               <div style={{ marginBottom: "1.75rem" }}>
                 <span style={{ fontSize: "2.5rem", fontWeight: 900, color: plan.id === "free" ? "#94a3b8" : plan.color }}>
-                  {plan.currency}{plan.price_monthly}
+                  {plan.currency}
+                  {isAnnual && (plan as any).price_annual
+                    ? (plan as any).price_annual
+                    : plan.price_monthly}
                 </span>
                 <span style={{ color: "#475569", fontSize: "0.85rem", marginLeft: "4px" }}>
-                  /{lang === "ar" ? "شهر" : lang === "fr" ? "mois" : lang === "es" ? "mes" : "month"}
+                  {isAnnual ? "/yr" : "/mo"}
                 </span>
+                {isAnnual && (plan as any).price_annual && plan.id !== 'free' && (
+                  <div style={{ color: "#10b981", fontSize: "0.75rem", marginTop: "3px" }}>
+                    vs ${parseInt(plan.price_monthly) * 12}/yr if monthly
+                  </div>
+                )}
               </div>
 
               {/* Features */}
@@ -237,7 +290,7 @@ export function PricingPage() {
                 <motion.button
                   whileHover={{ scale: 1.03, boxShadow: `0 12px 30px ${plan.glow}` }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => handleUpgrade(plan.id as Tier)}
+                  onClick={() => handleUpgrade(plan)}
                   style={{
                     width: "100%", padding: "13px", borderRadius: "12px",
                     background: plan.gradient, border: "none", color: "white",
@@ -296,7 +349,9 @@ export function PricingPage() {
       {/* Checkout Modal */}
       {checkoutTier && (
         <CheckoutModal
-          tier={checkoutTier}
+          tier={checkoutTier.tier}
+          priceId={checkoutTier.priceId}
+          isAnnual={isAnnual}
           onClose={() => setCheckoutTier(null)}
           onSuccess={handleSuccess}
         />

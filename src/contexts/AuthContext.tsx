@@ -87,11 +87,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await supabase.auth.signOut();
   };
 
+  // Check subscription tier AND expiry date (with 1-hour grace period)
+  const subscriptionActive = (() => {
+    const tier = profile?.subscription_tier;
+    const expiresAt = profile?.subscription_expires_at;
+    const isTierPaid = tier === "pro" || tier === "max";
+    if (!isTierPaid) return false;
+    // If no expiry date set, trust the tier field (legacy or lifetime)
+    if (!expiresAt) return true;
+    // Check expiry with 1-hour grace period to avoid edge cases at renewal
+    const expiryMs = new Date(expiresAt).getTime();
+    const nowMs = Date.now() - (60 * 60 * 1000); // subtract 1h = 1-hour grace
+    return expiryMs > nowMs;
+  })();
+
   const isPro =
-    profile?.subscription_tier === "pro"  ||
-    profile?.subscription_tier === "max"  ||
-    profile?.plan === "pro"               || // legacy fallback
-    profile?.plan === "school";              // legacy fallback
+    subscriptionActive         ||
+    profile?.plan === "pro"    || // legacy fallback (old plan field)
+    profile?.plan === "school";   // legacy fallback
 
   return (
     <AuthContext.Provider value={{ 
