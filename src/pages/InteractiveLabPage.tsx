@@ -915,9 +915,13 @@ export function InteractiveLabPage() {
           <Canvas
             shadows
             camera={{ position: [0, 1.2, 4.2], fov: 40 }}
-            dpr={[1, 2]}
-            gl={{ antialias: true, preserveDrawingBuffer: true }}
-            style={{ background: "radial-gradient(ellipse at center, #0f172a 0%, #020617 100%)" }}
+            dpr={[1, 1.5]}
+            gl={{ antialias: true, preserveDrawingBuffer: false, powerPreference: "high-performance" }}
+            style={{ background: "radial-gradient(ellipse at center, #0f172a 0%, #020617 100%)",
+              filter: activeReaction?.hasExplosion ? "drop-shadow(0 0 24px orange) brightness(1.15)" :
+                      activeReaction ? "drop-shadow(0 0 12px #a5f3fc) brightness(1.05)" : "none",
+              transition: "filter 0.4s ease"
+            }}
           >
             <Suspense fallback={null}>
               <ambientLight intensity={0.5} />
@@ -949,10 +953,8 @@ export function InteractiveLabPage() {
               <DropHandler onDrop={handleDrop} />
               <OrbitControls enablePan={false} minDistance={3} maxDistance={10} target={[0, 0, 0]} />
               
-              {/* High-End Post Processing */}
-              <EffectComposer>
-                <Bloom luminanceThreshold={1.0} luminanceSmoothing={0.5} intensity={1.5} />
-              </EffectComposer>
+              {/* Post Processing: EffectComposer/Bloom disabled — causes WebGL context loss on many devices.
+                   A lightweight CSS glow filter is applied to the canvas wrapper instead. */}
             </Suspense>
           </Canvas>
 
