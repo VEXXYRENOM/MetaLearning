@@ -30,9 +30,13 @@ interface Ball {
 // === MAIN GALTON BOARD COMPONENT ===
 export const StatisticsProbability3D = () => {
   const [quality, setQuality] = useState<Quality>(() => {
-    // Hardware detection check
-    const cores = typeof window !== 'undefined' ? (window.navigator.hardwareConcurrency || 4) : 4;
-    return cores >= 8 ? 'high' : cores >= 4 ? 'medium' : 'low';
+    // Mobile-safe hardware detection
+    const cores = typeof window !== 'undefined' ? (window.navigator.hardwareConcurrency || 2) : 2;
+    // Also check for mobile via screen width & pixel ratio
+    const isMobile = typeof window !== 'undefined' && 
+      (window.innerWidth < 768 || window.devicePixelRatio > 2);
+    if (isMobile || cores <= 2) return 'low';
+    return cores >= 8 ? 'medium' : 'low'; // Never auto-start on 'high' — user must opt-in
   });
   
   const totalBalls = quality === 'high' ? 600 : quality === 'medium' ? 300 : 100;

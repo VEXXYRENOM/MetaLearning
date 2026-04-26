@@ -57,7 +57,7 @@ import { supabase } from "../services/supabaseClient";
 type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export function TeacherDashboardPage() {
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, isPro } = useAuth();
   const [step, setStep] = useState<Step>(0); // 🚀 نبدأ من الـ Hub (Step 0)
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
@@ -71,7 +71,9 @@ export function TeacherDashboardPage() {
     }
   }, [profile]);
 
-  const isPro = profile?.plan === 'pro';
+  // isPro is derived from AuthContext (checks both subscription_tier AND legacy plan field)
+  // const isPro = profile?.plan === 'pro'; // ❌ WRONG: misses subscription_tier from Paddle
+  // isPro is now pulled from useAuth() above — covers all upgrade paths ✅
 
   const nextStep = () => {
     if (step < 6) setStep((prev: Step) => (prev + 1) as Step);
@@ -619,15 +621,21 @@ function Step3Input({ selectedSubject, lessonName, onChange, onNext }: any) {
 
   return (
     <div className="step-container center-content">
-      <h3 className="section-title">Lesson Setup & Specialization</h3>
+      <h3 className="section-title">
+        {isArabic ? "اختيار الدرس والنموذج" : "Lesson Setup & Specialization"}
+      </h3>
       <div className="input-group">
-        <label>Select a 3D module for your subject</label>
+        <label>
+          {isArabic ? "اختر نموذجاً ثلاثي الأبعاد لمادتك" : "Select a 3D module for your subject"}
+        </label>
         <select 
           value={lessonName} 
           onChange={e => onChange(e.target.value)} 
           className="large-input custom-select"
         >
-          <option value="" disabled>-- Click to select a ready 3D lesson --</option>
+          <option value="" disabled>
+            {isArabic ? "-- اضغط لاختيار درس جاهز --" : "-- Click to select a ready 3D lesson --"}
+          </option>
           {readyLessons.map(lesson => (
             <option key={lesson.id} value={lesson.titleAr}>
               {isArabic ? lesson.titleAr : (lesson.titleEn || lesson.titleAr)}
@@ -640,7 +648,9 @@ function Step3Input({ selectedSubject, lessonName, onChange, onNext }: any) {
         <div className="int-arrows">🔄<br/>Link & Sync</div>
         <div className="int-box min">Education Ministry <br/><small>Official Curricula</small></div>
       </div>
-      <button className="btn-primary large mt-6" onClick={onNext} disabled={!lessonName}>Continue Lesson Setup</button>
+      <button className="btn-primary large mt-6" onClick={onNext} disabled={!lessonName}>
+        {isArabic ? "متابعة إعداد الدرس" : "Continue Lesson Setup"}
+      </button>
     </div>
   );
 }
