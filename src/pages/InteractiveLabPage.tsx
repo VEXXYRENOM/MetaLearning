@@ -807,7 +807,7 @@ export function InteractiveLabPage() {
 
   return (
     <div dir={isRTL ? "rtl" : "ltr"}
-      style={{ minHeight: "100vh", background: "#020617", fontFamily: "'Inter', system-ui, sans-serif",
+      style={{ height: "100vh", overflow: "hidden", background: "#020617", fontFamily: "'Inter', system-ui, sans-serif",
         display: "flex", flexDirection: "column" }}>
 
       {/* Header */}

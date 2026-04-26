@@ -317,10 +317,9 @@ export function calculateTotalVolume(substances: BeakerSubstance[]): number {
   return substances.reduce((total, sub) => {
     const el = getElementById(sub.elementId);
     if (!el) return total;
-    if (el.state === "s") return total; // Assume solids take negligible volume for now, or use density
     if (el.state === "g") return total; // Gases escape
     // Calculate volume: V = m / d
-    const density = el.density || 1.0;
+    const density = el.density || (el.state === "s" ? 2.0 : 1.0);
     return total + (sub.mass / density);
   }, 0);
 }
