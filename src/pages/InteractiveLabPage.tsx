@@ -158,10 +158,11 @@ function LabEnvironment() {
 
 function BunsenBurner3D({ isOn, onClick }: { isOn: boolean, onClick: () => void }) {
   const pointsRef = useRef<THREE.Points>(null!);
+  const MAX_PARTICLES = 100;
   const [geo] = useState(() => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute([0,0,0], 3));
-    g.setAttribute("size", new THREE.Float32BufferAttribute([0], 1));
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(MAX_PARTICLES * 3), 3));
+    g.setAttribute("size", new THREE.BufferAttribute(new Float32Array(MAX_PARTICLES), 1));
     g.setDrawRange(0, 0);
     return g;
   });
@@ -183,8 +184,9 @@ function BunsenBurner3D({ isOn, onClick }: { isOn: boolean, onClick: () => void 
       }
     }
 
-    const positions: number[] = [];
-    const sizes: number[] = [];
+    const positions = geo.attributes.position.array as Float32Array;
+    const sizes = geo.attributes.size.array as Float32Array;
+    let count = 0;
     
     for (let i = particles.current.length - 1; i >= 0; i--) {
       const p = particles.current[i];
@@ -194,18 +196,21 @@ function BunsenBurner3D({ isOn, onClick }: { isOn: boolean, onClick: () => void 
         continue;
       }
       p.pos.addScaledVector(p.vel, delta);
-      positions.push(p.pos.x, p.pos.y, p.pos.z);
-      sizes.push(p.size * (1 - p.life / p.maxLife));
+      
+      if (count < MAX_PARTICLES) {
+        positions[count * 3] = p.pos.x;
+        positions[count * 3 + 1] = p.pos.y;
+        positions[count * 3 + 2] = p.pos.z;
+        sizes[count] = p.size * (1 - p.life / p.maxLife);
+        count++;
+      }
     }
 
-    if (positions.length === 0) {
-      geo.setDrawRange(0, 0);
-      return;
+    geo.setDrawRange(0, count);
+    if (count > 0) {
+      geo.attributes.position.needsUpdate = true;
+      geo.attributes.size.needsUpdate = true;
     }
-
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    geo.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
-    geo.setDrawRange(0, sizes.length);
   });
 
   return (
@@ -421,10 +426,11 @@ function PouringBottle({ element, onFinish }: { element: LabElement, onFinish: (
 // ─── Particle System (Reactions) ─────────────────────────────
 function ReactionParticles({ active, reaction }: { active: boolean, reaction: ReactionStoichiometry | null }) {
   const pointsRef = useRef<THREE.Points>(null!);
+  const MAX_PARTICLES = 500;
   const [geo] = useState(() => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute([0,0,0], 3));
-    g.setAttribute("size", new THREE.Float32BufferAttribute([0], 1));
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(MAX_PARTICLES * 3), 3));
+    g.setAttribute("size", new THREE.BufferAttribute(new Float32Array(MAX_PARTICLES), 1));
     g.setDrawRange(0, 0);
     return g;
   });
@@ -450,8 +456,9 @@ function ReactionParticles({ active, reaction }: { active: boolean, reaction: Re
       }
     }
 
-    const positions: number[] = [];
-    const sizes: number[] = [];
+    const positions = geo.attributes.position.array as Float32Array;
+    const sizes = geo.attributes.size.array as Float32Array;
+    let count = 0;
     
     for (let i = particles.current.length - 1; i >= 0; i--) {
       const p = particles.current[i];
@@ -465,18 +472,20 @@ function ReactionParticles({ active, reaction }: { active: boolean, reaction: Re
       p.vel.x *= 0.95;
       p.vel.z *= 0.95;
 
-      positions.push(p.pos.x, p.pos.y, p.pos.z);
-      sizes.push(p.size * (1 - p.life / p.maxLife));
+      if (count < MAX_PARTICLES) {
+        positions[count * 3] = p.pos.x;
+        positions[count * 3 + 1] = p.pos.y;
+        positions[count * 3 + 2] = p.pos.z;
+        sizes[count] = p.size * (1 - p.life / p.maxLife);
+        count++;
+      }
     }
 
-    if (positions.length === 0) {
-      geo.setDrawRange(0, 0);
-      return;
+    geo.setDrawRange(0, count);
+    if (count > 0) {
+      geo.attributes.position.needsUpdate = true;
+      geo.attributes.size.needsUpdate = true;
     }
-
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    geo.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
-    geo.setDrawRange(0, sizes.length);
   });
 
   return (

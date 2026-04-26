@@ -37,8 +37,7 @@ export function LabAnalyticsHUD({ tempHistory, substances }: LabAnalyticsHUDProp
           <span style={{ color: "#ef4444" }}>{tempHistory.length > 0 ? tempHistory[tempHistory.length - 1].temp.toFixed(1) : 25.0}°C</span>
         </h3>
         <div style={{ width: "100%", height: "120px" }}>
-          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-            <LineChart data={tempHistory}>
+          <LineChart width={260} height={120} data={tempHistory}>
               <XAxis dataKey="time" hide />
               <YAxis domain={[20, 120]} hide />
               <Tooltip 
@@ -49,7 +48,6 @@ export function LabAnalyticsHUD({ tempHistory, substances }: LabAnalyticsHUDProp
               />
               <Line type="monotone" dataKey="temp" stroke="#ef4444" strokeWidth={2} dot={false} isAnimationActive={false} />
             </LineChart>
-          </ResponsiveContainer>
         </div>
       </div>
 
@@ -65,8 +63,7 @@ export function LabAnalyticsHUD({ tempHistory, substances }: LabAnalyticsHUDProp
           </h3>
           <div style={{ display: "flex", alignItems: "center" }}>
             <div style={{ width: "100px", height: "100px" }}>
-              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-                <PieChart>
+              <PieChart width={100} height={100}>
                   <Pie
                     data={pieData}
                     innerRadius={30}
@@ -84,8 +81,7 @@ export function LabAnalyticsHUD({ tempHistory, substances }: LabAnalyticsHUDProp
                     contentStyle={{ background: "#0f172a", border: "none", borderRadius: "8px", fontSize: "0.75rem", color: "white" }} 
                     formatter={(value: any) => [`${Number(value).toFixed(1)}g`, "Mass"]}
                   />
-                </PieChart>
-              </ResponsiveContainer>
+              </PieChart>
             </div>
             
             <div style={{ flex: 1, paddingLeft: "16px", display: "flex", flexDirection: "column", gap: "6px" }}>
