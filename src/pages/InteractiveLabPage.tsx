@@ -156,14 +156,18 @@ function LabEnvironment() {
   );
 }
 
-// ─── Bunsen Burner ────────────────────────────────────────────
 function BunsenBurner3D({ isOn, onClick }: { isOn: boolean, onClick: () => void }) {
   const pointsRef = useRef<THREE.Points>(null!);
-  const geoRef = useRef<THREE.BufferGeometry>(null!);
+  const [geo] = useState(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute([0,0,0], 3));
+    g.setAttribute("size", new THREE.Float32BufferAttribute([0], 1));
+    g.setDrawRange(0, 0);
+    return g;
+  });
   const particles = useRef<Particle[]>([]);
 
   useFrame((state, delta) => {
-    if (!geoRef.current) return;
 
     if (isOn) {
       for (let i = 0; i < 4; i++) {
@@ -195,19 +199,13 @@ function BunsenBurner3D({ isOn, onClick }: { isOn: boolean, onClick: () => void 
     }
 
     if (positions.length === 0) {
-      if (geoRef.current.attributes.position) {
-        geoRef.current.setDrawRange(0, 0);
-      } else {
-        geoRef.current.setAttribute("position", new THREE.Float32BufferAttribute([0,0,0], 3));
-        geoRef.current.setAttribute("size", new THREE.Float32BufferAttribute([0], 1));
-        geoRef.current.setDrawRange(0, 0);
-      }
+      geo.setDrawRange(0, 0);
       return;
     }
 
-    geoRef.current.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    geoRef.current.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
-    geoRef.current.setDrawRange(0, sizes.length);
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+    geo.setDrawRange(0, sizes.length);
   });
 
   return (
@@ -237,11 +235,7 @@ function BunsenBurner3D({ isOn, onClick }: { isOn: boolean, onClick: () => void 
       {isOn && <pointLight position={[0, 0.5, 0]} color="#38bdf8" intensity={3} distance={2} />}
 
       {/* Fire Particles */}
-      <points ref={pointsRef}>
-        <bufferGeometry ref={geoRef}>
-          <bufferAttribute attach="attributes-position" count={1} array={new Float32Array([0,0,0])} itemSize={3} />
-          <bufferAttribute attach="attributes-size" count={1} array={new Float32Array([0])} itemSize={1} />
-        </bufferGeometry>
+      <points ref={pointsRef} geometry={geo}>
         <shaderMaterial
           transparent depthWrite={false} blending={THREE.AdditiveBlending}
           uniforms={{ uColor: { value: new THREE.Color("#60a5fa") } }}
@@ -427,11 +421,16 @@ function PouringBottle({ element, onFinish }: { element: LabElement, onFinish: (
 // ─── Particle System (Reactions) ─────────────────────────────
 function ReactionParticles({ active, reaction }: { active: boolean, reaction: ReactionStoichiometry | null }) {
   const pointsRef = useRef<THREE.Points>(null!);
-  const geoRef = useRef<THREE.BufferGeometry>(null!);
+  const [geo] = useState(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute([0,0,0], 3));
+    g.setAttribute("size", new THREE.Float32BufferAttribute([0], 1));
+    g.setDrawRange(0, 0);
+    return g;
+  });
   const particles = useRef<Particle[]>([]);
 
   useFrame((state, delta) => {
-    if (!geoRef.current) return;
 
     if (active && reaction) {
       for (let i = 0; i < (reaction.hasExplosion ? 5 : 2); i++) {
@@ -471,27 +470,17 @@ function ReactionParticles({ active, reaction }: { active: boolean, reaction: Re
     }
 
     if (positions.length === 0) {
-      if (geoRef.current.attributes.position) {
-        geoRef.current.setDrawRange(0, 0);
-      } else {
-        geoRef.current.setAttribute("position", new THREE.Float32BufferAttribute([0,0,0], 3));
-        geoRef.current.setAttribute("size", new THREE.Float32BufferAttribute([0], 1));
-        geoRef.current.setDrawRange(0, 0);
-      }
+      geo.setDrawRange(0, 0);
       return;
     }
 
-    geoRef.current.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    geoRef.current.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
-    geoRef.current.setDrawRange(0, sizes.length);
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+    geo.setDrawRange(0, sizes.length);
   });
 
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry ref={geoRef}>
-        <bufferAttribute attach="attributes-position" count={1} array={new Float32Array([0,0,0])} itemSize={3} />
-        <bufferAttribute attach="attributes-size" count={1} array={new Float32Array([0])} itemSize={1} />
-      </bufferGeometry>
+    <points ref={pointsRef} geometry={geo}>
       <shaderMaterial
         transparent
         depthWrite={false}
