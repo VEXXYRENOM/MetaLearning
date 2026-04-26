@@ -860,7 +860,10 @@ export function InteractiveLabPage() {
           >
             <Suspense fallback={null}>
               <ambientLight intensity={0.5} />
-              <directionalLight position={[5, 8, 5]} intensity={1.5} castShadow shadow-mapSize={[1024, 1024]} />
+              <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
+              <Environment preset="studio" />
+              
+              {/* Workbench */}
               <pointLight position={[-3, 3, -3]} intensity={0.8} color="#6366f1" />
 
               <gridHelper args={[10, 20, "#1e293b", "#1e293b"]} position={[0, -1.42, 0]} />
@@ -884,9 +887,9 @@ export function InteractiveLabPage() {
               <OrbitControls enablePan={false} minDistance={3} maxDistance={10} target={[0, 0, 0]} />
               
               {/* High-End Post Processing */}
-              <EffectComposer>
+              {/* <EffectComposer>
                 <Bloom luminanceThreshold={1.0} luminanceSmoothing={0.5} intensity={1.5} />
-              </EffectComposer>
+              </EffectComposer> */}
             </Suspense>
           </Canvas>
 
