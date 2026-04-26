@@ -239,6 +239,16 @@ function BunsenBurner3D({ isOn, onClick }: { isOn: boolean, onClick: () => void 
       {/* Glow Light */}
       {isOn && <pointLight position={[0, 0.5, 0]} color="#38bdf8" intensity={3} distance={2} />}
 
+      <Html position={[0.4, 0.2, 0]} center>
+        <div style={{
+          background: "rgba(15,23,42,0.8)", border: `1px solid ${isOn ? '#ef4444' : '#64748b'}`,
+          padding: "4px 8px", borderRadius: "6px", color: isOn ? '#ef4444' : '#94a3b8',
+          fontSize: "0.6rem", fontWeight: "bold", pointerEvents: "none", whiteSpace: "nowrap"
+        }}>
+          🔥 Heater: {isOn ? "ON" : "OFF"}
+        </div>
+      </Html>
+
       {/* Fire Particles */}
       <points ref={pointsRef} geometry={geo}>
         <shaderMaterial
@@ -728,7 +738,7 @@ export function InteractiveLabPage() {
     
     if (el.category === "equipment") {
       if (el.id === "BunsenBurner") {
-         setBurnerState({ placed: true, on: false });
+         setBurnerState({ placed: true, on: true });
       }
       dragElementRef.current = null;
       return;
@@ -853,7 +863,7 @@ export function InteractiveLabPage() {
           <LabAnalyticsHUD tempHistory={tempHistory} substances={beaker.substances} />
           <Canvas
             shadows
-            camera={{ position: [0, 2, 6], fov: 45 }}
+            camera={{ position: [0, 1.2, 4.2], fov: 40 }}
             dpr={[1, 2]}
             gl={{ antialias: true, preserveDrawingBuffer: true }}
             style={{ background: "radial-gradient(ellipse at center, #0f172a 0%, #020617 100%)" }}
