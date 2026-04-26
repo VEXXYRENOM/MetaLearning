@@ -194,8 +194,20 @@ function BunsenBurner3D({ isOn, onClick }: { isOn: boolean, onClick: () => void 
       sizes.push(p.size * (1 - p.life / p.maxLife));
     }
 
+    if (positions.length === 0) {
+      if (geoRef.current.attributes.position) {
+        geoRef.current.setDrawRange(0, 0);
+      } else {
+        geoRef.current.setAttribute("position", new THREE.Float32BufferAttribute([0,0,0], 3));
+        geoRef.current.setAttribute("size", new THREE.Float32BufferAttribute([0], 1));
+        geoRef.current.setDrawRange(0, 0);
+      }
+      return;
+    }
+
     geoRef.current.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
     geoRef.current.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+    geoRef.current.setDrawRange(0, sizes.length);
   });
 
   return (
@@ -455,8 +467,20 @@ function ReactionParticles({ active, reaction }: { active: boolean, reaction: Re
       sizes.push(p.size * (1 - p.life / p.maxLife));
     }
 
+    if (positions.length === 0) {
+      if (geoRef.current.attributes.position) {
+        geoRef.current.setDrawRange(0, 0);
+      } else {
+        geoRef.current.setAttribute("position", new THREE.Float32BufferAttribute([0,0,0], 3));
+        geoRef.current.setAttribute("size", new THREE.Float32BufferAttribute([0], 1));
+        geoRef.current.setDrawRange(0, 0);
+      }
+      return;
+    }
+
     geoRef.current.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
     geoRef.current.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+    geoRef.current.setDrawRange(0, sizes.length);
   });
 
   return (

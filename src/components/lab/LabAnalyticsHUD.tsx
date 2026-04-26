@@ -37,7 +37,7 @@ export function LabAnalyticsHUD({ tempHistory, substances }: LabAnalyticsHUDProp
           <span style={{ color: "#ef4444" }}>{tempHistory.length > 0 ? tempHistory[tempHistory.length - 1].temp.toFixed(1) : 25.0}°C</span>
         </h3>
         <div style={{ width: "100%", height: "120px" }}>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
             <LineChart data={tempHistory}>
               <XAxis dataKey="time" hide />
               <YAxis domain={[20, 120]} hide />
@@ -65,7 +65,7 @@ export function LabAnalyticsHUD({ tempHistory, substances }: LabAnalyticsHUDProp
           </h3>
           <div style={{ display: "flex", alignItems: "center" }}>
             <div style={{ width: "100px", height: "100px" }}>
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                 <PieChart>
                   <Pie
                     data={pieData}
