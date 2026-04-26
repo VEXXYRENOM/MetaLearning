@@ -23,7 +23,7 @@ MetaLearning يحوّل الفصول الدراسية العادية إلى تج
 |----------|---------|---------|----------------|
 | React 18 + TypeScript | Express.js | Fal.ai (Stable Fast 3D) | Vercel |
 | Three.js + R3F + Drei | Supabase (PostgreSQL) | Meshy (Fallback) | Supabase Auth |
-| i18next (AR/EN/FR) | Stripe Payments | HuggingFace (Fallback) | |
+| i18next (AR/EN/FR) | Paddle Payments | HuggingFace (Fallback) | |
 | Vite | Node.js Serverless | MediaPipe Hands | |
 
 ## الميزات الرئيسية
@@ -52,7 +52,7 @@ MetaLearning يحوّل الفصول الدراسية العادية إلى تج
 - Node.js 18+
 - حساب [Supabase](https://supabase.com) مجاني
 - حساب [Fal.ai](https://fal.ai) (للـ AI 3D generation)
-- حساب [Stripe](https://stripe.com) (للمدفوعات — اختياري للتطوير)
+- حساب [Paddle](https://paddle.com) (للمدفوعات — اختياري للتطوير)
 
 ### خطوات التثبيت
 
@@ -92,7 +92,7 @@ src/
 │   ├── TeacherDashboardPage.tsx  ← لوحة المعلم + wizard إنشاء الدرس
 │   ├── StudentDashboardPage.tsx  ← لوحة الطالب + تاريخ الدروس
 │   ├── LessonPage.tsx      ← عرض النموذج 3D + Hand Tracking
-│   └── PricingPage.tsx     ← صفحة الأسعار + Stripe Checkout
+│   └── PricingPage.tsx     ← صفحة الأسعار + Paddle Checkout
 │
 ├── components/
 │   ├── lesson/         ← 30+ نموذج 3D تعليمي (Heart, DNA, Atom...)
@@ -114,9 +114,8 @@ src/
 
 api/
 ├── fal/generate-3d.js  ← Vercel Function (مع Rate Limiting + CORS آمن)
-└── stripe/
-    ├── create-checkout.js  ← Stripe Checkout Session
-    └── webhook.js           ← Stripe Webhooks (تحديث plan في DB)
+└── paddle/
+    └── webhook.js           ← Paddle Webhooks (تحديث plan في DB)
 
 supabase/
 └── rls_policies.sql    ← سياسات أمان قاعدة البيانات
@@ -133,21 +132,21 @@ To deploy MetaLearning to the global market, ensure you have completed the follo
 
 2. **Vercel API Rewrites**:
    - The `vercel.json` ensures that legacy imports (or imports expecting specific file extensions) for the edge functions map properly to the built files on Vercel. 
-   - Note that Stripe and Fal functions map to `api/<folder>/<filename>.js`.
+   - Note that Paddle and Fal functions map to `api/<folder>/<filename>.js`.
 
 3. **SEO & Indexing**:
    - Generate your `robots.txt` and `sitemap.xml` so search engines can crawl the platform.
    - We utilize `react-helmet-async` for deep dynamic meta tags on a per-lesson basis (social image previews, sharing).
 
 4. **Webhooks**:
-   - Add your live Vercel URL to your Stripe Webhook dashboard, pointing to `<url>/api/stripe/webhook` and configure `STRIPE_WEBHOOK_SECRET` in Vercel properly.
+   - Add your live Vercel URL to your Paddle Webhook dashboard, pointing to `<url>/api/paddle/webhook` and configure `PADDLE_WEBHOOK_SECRET` in Vercel properly.
 
 ## الأمان 🔒
 
 - **CORS محدود** — فقط النطاقات المصرح بها تصل لـ API
 - **Rate Limiting** — 5 طلبات/يوم مجاناً، 50 للـ Pro
 - **RLS Policies** — كل مستخدم يرى بياناته فقط في Supabase
-- **Stripe Webhooks** — تحديث خطة المستخدم بعد الدفع بشكل آمن
+- **Paddle Webhooks** — تحديث خطة المستخدم بعد الدفع بشكل آمن
 - **Error Boundaries** — منع انهيار التطبيق عند أخطاء WebGL
 
 ## سير العمل
