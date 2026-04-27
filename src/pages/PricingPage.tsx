@@ -386,7 +386,7 @@ export function PricingPage() {
               ].map((feat, fi) => (
                 <li key={fi} style={{ display: "flex", alignItems: "flex-start", gap: "10px", color: "#94a3b8", fontSize: "0.85rem" }}>
                   <Check size={16} style={{ color: "#7c3aed", flexShrink: 0, marginTop: "2px" }} />
-                  {feat[lang] || feat.en}
+                  {(feat as Record<string, string>)[lang] || feat.en}
                 </li>
               ))}
             </ul>
