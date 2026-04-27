@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { MetaTags } from "../components/MetaTags";
-import { Zap, Crown, Trophy, ArrowRight, Star, ShieldCheck, LogOut } from "lucide-react";
+import { Zap, Crown, Trophy, ArrowRight, Star, ShieldCheck, LogOut, Building2, Mail } from "lucide-react";
 import { supabase } from "../services/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -92,6 +92,9 @@ export function HomePage() {
   const { session, profile } = useAuth();
   const lang = i18n.language.startsWith("ar") ? "ar" : "en";
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
+  const [pricingTab, setPricingTab] = useState<'individual' | 'team'>('individual');
+  const [seatCount, setSeatCount] = useState(25);
+  const pricePerSeat = 5;
 
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth > 768);
@@ -218,8 +221,38 @@ export function HomePage() {
             <p style={{ color: "#64748b", fontSize: "1.1rem", margin: 0 }}>Choose the plan that fits your ambition.</p>
           </div>
 
+          {/* Tab Switcher */}
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "2.5rem" }}>
+            <div style={{
+              display: "inline-flex", background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.1)", borderRadius: "50px", padding: "5px", gap: "4px",
+            }}>
+              {(['individual', 'team'] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setPricingTab(tab)}
+                  style={{
+                    padding: "9px 28px", borderRadius: "999px", border: "none",
+                    fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", transition: "all 0.25s",
+                    background: pricingTab === tab
+                      ? (tab === 'team' ? "linear-gradient(135deg, #7c3aed, #3b82f6)" : "rgba(255,255,255,0.12)")
+                      : "transparent",
+                    color: pricingTab === tab ? "white" : "#64748b",
+                    display: "flex", alignItems: "center", gap: "8px",
+                  }}
+                >
+                  {tab === 'individual'
+                    ? (lang === "ar" ? "فردي" : "Individual")
+                    : <><Building2 size={15} />{lang === "ar" ? "فريق ومؤسسة" : "Team & Enterprise"}</>
+                  }
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Individual Tab */}
+          {pricingTab === 'individual' && (
           <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center", flexWrap: "wrap", alignItems: "stretch" }}>
-            
             {/* Free */}
             <div style={{
               background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)",
@@ -246,8 +279,7 @@ export function HomePage() {
             {/* Pro */}
             <div style={{
               background: "linear-gradient(180deg, rgba(6,182,212,0.1) 0%, rgba(2,6,23,0) 100%)",
-              border: "1px solid rgba(6,182,212,0.3)",
-              boxShadow: "0 0 40px rgba(6,182,212,0.15)",
+              border: "1px solid rgba(6,182,212,0.3)", boxShadow: "0 0 40px rgba(6,182,212,0.15)",
               borderRadius: "24px", padding: "2.5rem", flex: "1 1 300px", maxWidth: "340px",
               display: "flex", flexDirection: "column", position: "relative", transform: "scale(1.05)", zIndex: 2
             }}>
@@ -264,20 +296,27 @@ export function HomePage() {
                 <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#06b6d4" /> Image-to-3D AI</li>
                 <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#06b6d4" /> All Badges</li>
               </ul>
-              <Link to="/auth" style={{
+              <Link to="/pricing" style={{
                 display: "block", textAlign: "center", background: "linear-gradient(135deg, #0891b2, #06b6d4)",
                 color: "white", textDecoration: "none", padding: "14px", borderRadius: "12px", fontWeight: 700,
                 boxShadow: "0 8px 20px rgba(6,182,212,0.3)"
               }}>Get PRO</Link>
             </div>
+          </div>
+          )}
 
-            {/* Max */}
+          {/* Team & Enterprise Tab */}
+          {pricingTab === 'team' && (
+          <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center", flexWrap: "wrap", alignItems: "stretch" }}>
+            {/* MAX / Team */}
             <div style={{
               background: "rgba(255,255,255,0.02)", border: "1px solid rgba(245,158,11,0.4)",
-              boxShadow: "0 0 30px rgba(245,158,11,0.1)",
-              borderRadius: "24px", padding: "2.5rem", flex: "1 1 300px", maxWidth: "340px",
-              display: "flex", flexDirection: "column"
+              boxShadow: "0 0 30px rgba(245,158,11,0.1)", borderRadius: "24px", padding: "2.5rem",
+              flex: "1 1 300px", maxWidth: "340px", display: "flex", flexDirection: "column", position: "relative"
             }}>
+              <div style={{ position: "absolute", top: "-15px", left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, #d97706, #f59e0b)", color: "white", fontSize: "0.75rem", fontWeight: 800, padding: "6px 16px", borderRadius: "999px" }}>
+                👥 {lang === "ar" ? "فريق" : "Team Plan"}
+              </div>
               <h3 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem", display: "flex", alignItems: "center", gap: "8px" }}>MAX <Crown size={20} color="#f59e0b" /></h3>
               <p style={{ color: "#64748b", margin: "0 0 2rem", minHeight: "45px" }}>Uncompromised immersion and priority.</p>
               <div style={{ marginBottom: "2rem" }}>
@@ -290,14 +329,51 @@ export function HomePage() {
                 <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Early Access Models</li>
                 <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Legendary Glow Badges</li>
               </ul>
-              <Link to="/auth" style={{
+              <Link to="/pricing" style={{
                 display: "block", textAlign: "center", background: "linear-gradient(135deg, #d97706, #f59e0b)",
                 color: "white", textDecoration: "none", padding: "14px", borderRadius: "12px", fontWeight: 700,
                 boxShadow: "0 8px 20px rgba(245,158,11,0.3)"
               }}>Get MAX</Link>
             </div>
 
+            {/* Enterprise */}
+            <div style={{
+              background: "linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,10,60,0.9))",
+              border: "1px solid rgba(124,58,237,0.5)", boxShadow: "0 0 40px rgba(124,58,237,0.15)",
+              borderRadius: "24px", padding: "2.5rem", flex: "1 1 300px", maxWidth: "340px",
+              display: "flex", flexDirection: "column", position: "relative"
+            }}>
+              <div style={{ position: "absolute", top: "-15px", left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, #7c3aed, #3b82f6)", color: "white", fontSize: "0.75rem", fontWeight: 800, padding: "6px 16px", borderRadius: "999px" }}>
+                🏫 {lang === "ar" ? "مؤسسة" : "Enterprise"}
+              </div>
+              <h3 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem", display: "flex", alignItems: "center", gap: "8px" }}><Building2 size={22} color="#a78bfa" /> ENTERPRISE</h3>
+              <p style={{ color: "#64748b", margin: "0 0 1rem", minHeight: "45px" }}>For schools & institutions.</p>
+              <div style={{ marginBottom: "0.5rem" }}>
+                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#a78bfa" }}>${seatCount * pricePerSeat}</span>
+                <span style={{ color: "#64748b" }}> /mo</span>
+              </div>
+              <div style={{ background: "rgba(0,0,0,0.3)", padding: "10px 12px", borderRadius: "12px", marginBottom: "1.5rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                  <span style={{ color: "#94a3b8", fontSize: "0.75rem" }}>{lang === "ar" ? "عدد المقاعد" : "Seats"}</span>
+                  <span style={{ color: "#a78bfa", fontWeight: 700 }}>{seatCount}</span>
+                </div>
+                <input type="range" min={10} max={500} step={5} value={seatCount}
+                  onChange={e => setSeatCount(Number(e.target.value))}
+                  style={{ width: "100%", accentColor: "#7c3aed", cursor: "pointer" }} />
+              </div>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem", flex: 1 }}>
+                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#a78bfa" /> Everything in MAX</li>
+                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#a78bfa" /> Admin Dashboard</li>
+                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#a78bfa" /> Magic Invite Links</li>
+              </ul>
+              <a href={`mailto:enterprise@metalearning.app?subject=Enterprise%20%E2%80%94%20${seatCount}%20Seats`} style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                textAlign: "center", background: "linear-gradient(135deg, #7c3aed, #3b82f6)",
+                color: "white", textDecoration: "none", padding: "14px", borderRadius: "12px", fontWeight: 700
+              }}><Mail size={16} />{lang === "ar" ? "تواصل معنا" : "Contact Sales"}</a>
+            </div>
           </div>
+          )}
         </div>
       </section>
 
