@@ -102,10 +102,11 @@ export function PricingPage() {
              : "en";
 
   const [seatCount, setSeatCount] = useState(25);
-  const pricePerSeat = 5; // $5 per seat/month for enterprise
+  const pricePerSeat = 5;
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
   const isAnnual = billing === 'annual';
   const [checkoutTier, setCheckoutTier] = useState<{ tier: Tier; priceId: string } | null>(null);
+  const [pricingTab, setPricingTab] = useState<'individual' | 'team'>('individual');
 
   const handleUpgrade = (plan: typeof PLANS[0]) => {
     if (!user) { navigate("/auth"); return; }
@@ -159,22 +160,43 @@ export function PricingPage() {
             <p style={{ color: "#64748b", maxWidth: "500px", margin: "0 auto", lineHeight: 1.7, marginBottom: "1rem" }}>
               {lang === "ar" ? "اختر الخطة التي تناسبك وابدأ تحويل التعليم!" : lang === "fr" ? "Choisissez le plan qui vous convient et transformez l'enseignement !" : lang === "es" ? "Elige el plan que se adapte a ti y transforma la educación." : "Choose the plan that fits you and start transforming education!"}
             </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              onClick={() => document.getElementById('enterprise-section')?.scrollIntoView({ behavior: 'smooth' })}
-              style={{
-                background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.3)",
-                color: "#a78bfa", padding: "6px 20px", borderRadius: "999px",
-                fontSize: "0.85rem", cursor: "pointer", fontWeight: 600
-              }}
-            >
-              🏢 {lang === "ar" ? "هل أنت مدرسة؟ انقر هنا" : "Are you a School? Click here"}
-            </motion.button>
           </motion.div>
         </div>
 
-        {/* Billing Period Toggle */}
-        <div style={{
+        {/* ── TAB SWITCHER (Individual / Team & Enterprise) ── */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "2.5rem" }}>
+          <div style={{
+            display: "inline-flex", background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.1)", borderRadius: "50px", padding: "5px", gap: "4px",
+          }}>
+            {(['individual', 'team'] as const).map(tab => (
+              <motion.button
+                key={tab}
+                whileHover={{ scale: 1.02 }}
+                onClick={() => setPricingTab(tab)}
+                style={{
+                  padding: "9px 28px", borderRadius: "999px", border: "none",
+                  fontWeight: 700, fontSize: "0.9rem", cursor: "pointer",
+                  transition: "all 0.25s",
+                  background: pricingTab === tab
+                    ? (tab === 'team' ? "linear-gradient(135deg, #7c3aed, #3b82f6)" : "rgba(255,255,255,0.12)")
+                    : "transparent",
+                  color: pricingTab === tab ? "white" : "#64748b",
+                  display: "flex", alignItems: "center", gap: "8px",
+                }}
+              >
+                {tab === 'individual' ? (
+                  <>{lang === "ar" ? "فردي" : lang === "fr" ? "Individuel" : "Individual"}</>
+                ) : (
+                  <><Building2 size={15} />{lang === "ar" ? "فريق ومؤسسة" : lang === "fr" ? "Équipe et Enterprise" : "Team & Enterprise"}</>
+                )}
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
+        {/* Billing Period Toggle (individual only) */}
+        {pricingTab === 'individual' && <div style={{
           display: "flex", alignItems: "center", justifyContent: "center",
           gap: "8px", marginBottom: "2.5rem",
           background: "rgba(255,255,255,0.04)",
@@ -205,12 +227,13 @@ export function PricingPage() {
               )}
             </button>
           ))}
-        </div>
+        </div>}
 
-        {/* ── PRICING CARDS ───────────────────────────────────────────── */}
+        {/* ── INDIVIDUAL TAB: Free + Pro cards ── */}
+        {pricingTab === 'individual' && (
         <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center",
           flexWrap: "wrap", marginBottom: "4rem" }}>
-          {PLANS.map((plan, i) => (
+          {PLANS.filter(p => p.id !== 'max').map((plan, i) => (
             <motion.div
               key={plan.id}
               initial={{ opacity: 0, y: 40 }}
@@ -316,16 +339,76 @@ export function PricingPage() {
               )}
             </motion.div>
           ))}
+        </div>
+        )}
 
-          {/* ── ENTERPRISE CARD (Inline) ─────────────────────────────────── */}
+        {/* ── TEAM & ENTERPRISE TAB ── */}
+        {pricingTab === 'team' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          style={{ display: "flex", gap: "1.5rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "4rem" }}
+        >
+          {/* MAX / Team card */}
+          {PLANS.filter(p => p.id === 'max').map((plan, i) => (
+            <motion.div
+              key={plan.id}
+              initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
+              style={{
+                flex: "1 1 300px", maxWidth: "400px", position: "relative",
+                background: "rgba(245,158,11,0.06)", backdropFilter: "blur(16px)",
+                border: "1px solid rgba(245,158,11,0.5)",
+                borderRadius: "24px", padding: "2rem",
+                boxShadow: "0 0 60px rgba(245,158,11,0.2), 0 20px 40px rgba(0,0,0,0.5)"
+              }}
+            >
+              <div style={{
+                position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)",
+                background: plan.gradient, color: "white", fontSize: "0.75rem",
+                fontWeight: "bold", padding: "5px 18px", borderRadius: "999px",
+                whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(245,158,11,0.3)"
+              }}>
+                👥 {lang === "fr" ? "Équipe" : lang === "ar" ? "فريق" : "Team Plan"}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
+                <div style={{ padding: "10px", borderRadius: "12px", background: `${plan.color}20`, color: plan.color }}>{plan.icon}</div>
+                <div>
+                  <h2 style={{ margin: 0, color: "white", fontSize: "1.4rem", fontWeight: 800 }}>MAX</h2>
+                  <p style={{ margin: 0, color: plan.color, fontSize: "0.75rem" }}>{lang === "fr" ? "Jusqu’à 200 étudiants" : lang === "ar" ? "حتى 200 طالب" : "Up to 200 students"}</p>
+                </div>
+              </div>
+              <div style={{ marginBottom: "1.75rem" }}>
+                <span style={{ fontSize: "2.5rem", fontWeight: 900, color: plan.color }}>{plan.currency}{isAnnual && (plan as any).price_annual ? (plan as any).price_annual : plan.price_monthly}</span>
+                <span style={{ color: "#475569", fontSize: "0.85rem", marginLeft: "4px" }}>{isAnnual ? "/yr" : "/mo"}</span>
+              </div>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.75rem", display: "flex", flexDirection: "column", gap: "10px" }}>
+                {plan.features.map((feat, fi) => (
+                  <li key={fi} style={{ display: "flex", alignItems: "flex-start", gap: "10px", color: "#94a3b8", fontSize: "0.9rem" }}>
+                    <Check size={16} style={{ color: plan.color, flexShrink: 0, marginTop: "2px" }} />
+                    {feat[lang] || feat.en}
+                  </li>
+                ))}
+              </ul>
+              <motion.button
+                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                onClick={() => handleUpgrade(plan)}
+                style={{
+                  width: "100%", padding: "13px", borderRadius: "12px",
+                  background: plan.gradient, border: "none", color: "white",
+                  fontWeight: "bold", fontSize: "0.95rem", cursor: "pointer"
+                }}
+              >
+                {lang === "fr" ? "Obtenir MAX" : lang === "ar" ? "ترقية إلى MAX" : "Get MAX"}
+              </motion.button>
+            </motion.div>
+          ))}
+
+          {/* Enterprise card */}
           <motion.div
             id="enterprise-section"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
             style={{
-              flex: "1 1 300px", maxWidth: "420px", position: "relative",
-              background: "linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(30,10,60,0.9) 100%)",
+              flex: "1 1 300px", maxWidth: "400px", position: "relative",
+              background: "linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,10,60,0.9))",
               backdropFilter: "blur(16px)",
               border: "1px solid rgba(124,58,237,0.5)",
               borderRadius: "24px", padding: "2rem",
@@ -337,75 +420,66 @@ export function PricingPage() {
               position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)",
               background: "linear-gradient(135deg, #7c3aed, #3b82f6)", color: "white", fontSize: "0.75rem",
               fontWeight: "bold", padding: "5px 18px", borderRadius: "999px",
-              whiteSpace: "nowrap", letterSpacing: "0.08em",
-              boxShadow: "0 4px 16px rgba(124,58,237,0.4)"
+              whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(124,58,237,0.4)"
             }}>
-              🏫 {lang === "ar" ? "للمدارس والمؤسسات" : "SCHOOLS & ORGS"}
+              🏫 {lang === "fr" ? "Entreprise" : lang === "ar" ? "مؤسسة" : "Enterprise"}
             </div>
-
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
               <div style={{ padding: "10px", borderRadius: "12px", background: "rgba(124,58,237,0.2)", color: "#a78bfa" }}>
                 <Building2 size={28} />
               </div>
               <div>
                 <h2 style={{ margin: 0, color: "white", fontSize: "1.4rem", fontWeight: 800 }}>ENTERPRISE</h2>
-                <p style={{ margin: 0, color: "#7c3aed", fontSize: "0.75rem", fontWeight: 600 }}>Custom Scaling</p>
+                <p style={{ margin: 0, color: "#7c3aed", fontSize: "0.75rem" }}>{lang === "fr" ? "20+ utilisateurs" : lang === "ar" ? "20+ مستخدم" : "20+ users"}</p>
               </div>
             </div>
-
-            <div style={{ marginBottom: "1.5rem" }}>
+            <div style={{ marginBottom: "1rem" }}>
               <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
                 <span style={{ fontSize: "2.5rem", fontWeight: 900, color: "#a78bfa" }}>${(seatCount * pricePerSeat).toLocaleString()}</span>
                 <span style={{ color: "#475569", fontSize: "0.85rem" }}>/mo</span>
               </div>
-              <p style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "4px" }}>
-                {seatCount} seats included
-              </p>
+              <p style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "4px" }}>{seatCount} seats × ${pricePerSeat}/seat</p>
             </div>
-
-            {/* Slider */}
             <div style={{ background: "rgba(0,0,0,0.3)", padding: "12px", borderRadius: "14px", marginBottom: "1.5rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                <span style={{ color: "#94a3b8", fontSize: "0.75rem" }}>Adjust Seats</span>
-                <span style={{ color: "#a78bfa", fontWeight: 700, fontSize: "0.85rem" }}>{seatCount}</span>
+                <span style={{ color: "#94a3b8", fontSize: "0.75rem" }}>{lang === "fr" ? "Nombre de sièges" : lang === "ar" ? "عدد المقاعد" : "Adjust Seats"}</span>
+                <span style={{ color: "#a78bfa", fontWeight: 700 }}>{seatCount}</span>
               </div>
-              <input
-                type="range" min={10} max={500} step={5}
-                value={seatCount}
+              <input type="range" min={10} max={500} step={5} value={seatCount}
                 onChange={e => setSeatCount(Number(e.target.value))}
-                style={{ width: "100%", accentColor: "#7c3aed", cursor: "pointer" }}
-              />
+                style={{ width: "100%", accentColor: "#7c3aed", cursor: "pointer" }} />
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#475569", fontSize: "0.7rem", marginTop: "4px" }}>
+                <span>10</span><span>500</span>
+              </div>
             </div>
-
             <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem", display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
               {[
-                { en: "Everything in MAX", ar: "كل مزايا MAX" },
-                { en: "Admin Dashboard", ar: "لوحة تحكم للمدير" },
-                { en: "Magic Invite Links", ar: "روابط انضمام سحري" },
-                { en: "Custom Onboarding", ar: "تأهيل مخصص للمدرسة" }
+                { en: "Everything in MAX", ar: "كل مزايا MAX", fr: "Tout dans MAX", es: "Todo en MAX" },
+                { en: "Org Admin Dashboard", ar: "لوحة تحكم المدير", fr: "Tableau de bord admin", es: "Panel admin" },
+                { en: "Magic invite links", ar: "روابط انضمام سحرية", fr: "Liens d'invitation magiques", es: "Links de invitación" },
+                { en: "Dedicated support & onboarding", ar: "دعم مخصص", fr: "Support dédié", es: "Soporte dedicado" },
               ].map((feat, fi) => (
-                <li key={fi} style={{ display: "flex", alignItems: "flex-start", gap: "10px", color: "#94a3b8", fontSize: "0.85rem" }}>
+                <li key={fi} style={{ display: "flex", alignItems: "flex-start", gap: "10px", color: "#94a3b8", fontSize: "0.9rem" }}>
                   <Check size={16} style={{ color: "#7c3aed", flexShrink: 0, marginTop: "2px" }} />
-                  {(feat as Record<string, string>)[lang] || feat.en}
+                  {feat[lang] || feat.en}
                 </li>
               ))}
             </ul>
-
             <motion.a
-              href={`mailto:enterprise@metalearning.app?subject=Enterprise Inquiry — ${seatCount} Seats`}
+              href={`mailto:enterprise@metalearning.app?subject=Enterprise%20Inquiry%20%E2%80%94%20${seatCount}%20Seats`}
               whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
               style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                 width: "100%", padding: "13px", borderRadius: "12px",
-                background: "linear-gradient(135deg, #7c3aed, #3b82f6)", border: "none", color: "white",
-                fontWeight: "bold", fontSize: "0.95rem", cursor: "pointer", textAlign: "center", textDecoration: "none",
-                boxShadow: "0 6px 20px rgba(124,58,237,0.3)"
+                background: "linear-gradient(135deg, #7c3aed, #3b82f6)",
+                color: "white", fontWeight: 700, fontSize: "0.95rem", textDecoration: "none"
               }}
             >
-              {lang === "ar" ? "تواصل معنا" : "Contact Sales"}
+              <Mail size={16} />{lang === "fr" ? "Contacter les ventes" : lang === "ar" ? "تواصل معنا" : "Contact Sales"}
             </motion.a>
           </motion.div>
-        </div>
-
+        </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
