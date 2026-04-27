@@ -65,7 +65,7 @@ export function LeadMagnetPage() {
     const errs: Record<string, string> = {};
     if (!formState.full_name.trim()) errs.full_name = "Name is required";
     if (!formState.email.trim()) errs.email = "Email is required";
-    else if (!/\\S+@\\S+\\.\\S+/.test(formState.email)) errs.email = "Invalid email address";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) errs.email = "Invalid email address";
     return errs;
   };
 
