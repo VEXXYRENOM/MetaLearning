@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../services/supabaseClient";
-import { Users, Banknote, Shield, Activity, EyeOff, Trash2, CheckCircle, Search, Trophy } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Users, Banknote, Shield, Activity, EyeOff, Trash2, CheckCircle, Search, Trophy, Megaphone } from "lucide-react";
 import { showToast } from "../components/Toast";
 import { motion } from "framer-motion";
 
@@ -192,6 +193,26 @@ export function AdminDashboardPage() {
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "3rem" }}>
+            
+            {/* MARKETING TOOLS */}
+            <section style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "20px", padding: "2rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+                <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Megaphone color="#a855f7" /> Marketing Tools
+                </h2>
+              </div>
+              
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
+                <Link to="/admin/posts" style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: "12px", padding: "1.5rem", textDecoration: "none", color: "white", display: "flex", flexDirection: "column", gap: "8px", transition: "all 0.2s" }}>
+                  <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>AI Post Generator</h3>
+                  <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.85rem", lineHeight: 1.5 }}>Generate tailored social media posts for Twitter, LinkedIn, Instagram & TikTok.</p>
+                </Link>
+                <Link to="/ar-guide" target="_blank" rel="noopener noreferrer" style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: "12px", padding: "1.5rem", textDecoration: "none", color: "white", display: "flex", flexDirection: "column", gap: "8px", transition: "all 0.2s" }}>
+                  <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>Lead Magnet Page</h3>
+                  <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.85rem", lineHeight: 1.5 }}>View the public landing page used to capture teacher leads via the AR Guide.</p>
+                </Link>
+              </div>
+            </section>
             
             {/* USER REGISTRY */}
             <section style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "20px", padding: "2rem" }}>
