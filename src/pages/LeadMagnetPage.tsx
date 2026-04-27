@@ -76,6 +76,12 @@ export function LeadMagnetPage() {
     setErrors({});
     setLoading(true);
 
+    // Safety timeout — stop spinner after 10s regardless
+    const timeout = setTimeout(() => {
+      setLoading(false);
+      setErrors({ submit: "Request timed out. Please check your connection and try again." });
+    }, 10000);
+
     try {
       // Insert lead into Supabase
       const { error } = await supabase
@@ -90,20 +96,24 @@ export function LeadMagnetPage() {
           status:      "new",
         });
 
+      clearTimeout(timeout);
+
       if (error && error.code !== "23505") {
-        // 23505 = unique violation (already subscribed)
-        throw error;
+        // 23505 = unique violation (already subscribed — still treat as success)
+        throw new Error(error.message || "Database error. Please try again.");
       }
 
       // Trigger welcome email via pipeline (fire and forget)
       fetch("/api/email-pipeline?trigger=welcome&email=" + encodeURIComponent(formState.email), {
         method: "POST",
         headers: { "x-cron-secret": "manual_trigger" },
-      }).catch(() => {}); // Non-blocking
+      }).catch(() => {}); // Non-blocking — never block UI on this
 
       setSubmitted(true);
     } catch (err: unknown) {
+      clearTimeout(timeout);
       const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setErrors({ submit: msg });
       showToast({ type: "error", title: "Submission failed", message: msg });
     } finally {
       setLoading(false);
@@ -323,6 +333,13 @@ export function LeadMagnetPage() {
                       <> Send Me the Free Guide <ArrowRight size={18} /> </>
                     )}
                   </button>
+
+                  {/* Inline submit error */}
+                  {errors.submit && (
+                    <p style={{ color: "#ef4444", fontSize: "0.82rem", textAlign: "center", margin: "0.5rem 0 0", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: "8px", padding: "8px 12px" }}>
+                      ⚠️ {errors.submit}
+                    </p>
+                  )}
 
                   <p style={{ color: "#374151", fontSize: "0.75rem", textAlign: "center", margin: "0.5rem 0 0" }}>
                     By submitting, you agree to our{" "}
