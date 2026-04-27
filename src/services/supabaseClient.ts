@@ -33,6 +33,13 @@ export type Profile = {
   // ── Onboarding ────────────────────────────────────────────
   onboarding_done:          boolean;
   created_at:               string;
+  // ── Enterprise / Org ──────────────────────────────────────
+  org_id?:                  string | null;
+  role_in_org?:             'student' | 'teacher' | 'admin' | null;
+  organizations?: {
+    subscription_status: string;
+    name: string;
+  };
 };
 
 export type XpTransaction = {

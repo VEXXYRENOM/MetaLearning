@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchProfile = async (userId: string) => {
     const { data, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select("*, organizations(subscription_status, name)")
       .eq("id", userId)
       .single();
     
@@ -89,6 +89,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Check subscription tier AND expiry date (with 1-hour grace period)
   const subscriptionActive = (() => {
+    // 1. Enterprise/Org check:
+    if (profile?.organizations?.subscription_status === 'active') {
+      return true;
+    }
+
+    // 2. Individual check:
     const tier = profile?.subscription_tier;
     const expiresAt = profile?.subscription_expires_at;
     const isTierPaid = tier === "pro" || tier === "max";

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "../services/supabaseClient";
-import { UserCircle, Mail, Lock, LogIn, UserPlus } from "lucide-react";
+import { UserCircle, Mail, Lock, LogIn, UserPlus, Building2 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
@@ -11,7 +11,9 @@ export function AuthPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { session, profile, isLoading } = useAuth();
-  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
+  const [searchParams] = useSearchParams();
+  const orgToken = searchParams.get("org_token"); // Enterprise invite token
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">(orgToken ? "signup" : "login");
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [email, setEmail] = useState("");
@@ -54,12 +56,21 @@ export function AuthPage() {
           options: { data: { full_name: fullName, role } },
         });
         if (error) throw error;
-        
+
         // If user is created but session is null, email confirmation is required.
         if (data.user && !data.session) {
+          // If org_token present, store it in localStorage to process after email confirm
+          if (orgToken) localStorage.setItem("pending_org_token", orgToken);
           setSignupSuccess(true);
-        } else {
-          // If auto sign-in occurs (email confirmation disabled)
+        } else if (data.user) {
+          // Auto sign-in occurred — process org join immediately
+          if (orgToken) {
+            const { error: joinErr } = await supabase.rpc("join_organization", {
+              p_token: orgToken,
+              p_user_id: data.user.id,
+            });
+            if (joinErr) console.warn("Org join error:", joinErr.message);
+          }
           if (role === "teacher") navigate("/teacher/create");
           else navigate("/student/dashboard");
         }
@@ -107,6 +118,20 @@ export function AuthPage() {
       </div>
 
       <div className="ai-cyber-panel" style={{ maxWidth: "400px", width: "100%", padding: "2rem" }}>
+        {/* Org Invite Banner */}
+        {orgToken && (
+          <div style={{
+            padding: "10px 14px", borderRadius: "10px", marginBottom: "1.25rem",
+            background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.4)",
+            display: "flex", alignItems: "center", gap: "10px",
+          }}>
+            <Building2 size={18} color="#a78bfa" />
+            <p style={{ margin: 0, fontSize: "0.85rem", color: "#c4b5fd" }}>
+              You've been invited to join an organization. Create an account to continue.
+            </p>
+          </div>
+        )}
+
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
           <UserCircle size={48} color="#a855f7" className="mb-2 inline-block" />
           <h2 className="text-2xl font-bold" style={{ color: "white" }}>

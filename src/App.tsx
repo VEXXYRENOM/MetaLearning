@@ -33,6 +33,7 @@ const AdminDashboardPage    = lazy(() => import("./pages/AdminDashboardPage").th
 const PrivacyPolicyPage     = lazy(() => import("./pages/PrivacyPolicyPage").then(m => ({ default: m.PrivacyPolicyPage })));
 const TermsOfServicePage    = lazy(() => import("./pages/TermsOfServicePage").then(m => ({ default: m.TermsOfServicePage })));
 const CreatorStudioPage     = lazy(() => import("./pages/CreatorStudioPage").then(m => ({ default: m.CreatorStudioPage })));
+const OrgAdminDashboard     = lazy(() => import("./pages/OrgAdminDashboard").then(m => ({ default: m.OrgAdminDashboard })));
 
 // ── Lightweight global fallback for Suspense ──────────────────────────────────
 function PageSkeleton() {
@@ -109,10 +110,17 @@ function AnimatedRoutes() {
           </ProtectedRoute>
         } />
 
-        {/* ── Admin ───────────────────────────────────────────── */}
+        {/* ── Admin (Platform) ──────────────────────────── */}
         <Route path="/admin" element={
           <ProtectedRoute requiredRole="admin">
             <Suspense fallback={<PageSkeleton />}><PageTransition><AdminDashboardPage /></PageTransition></Suspense>
+          </ProtectedRoute>
+        } />
+
+        {/* ── Org Admin (Enterprise Schools) ───────────── */}
+        <Route path="/org-admin" element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageSkeleton />}><PageTransition><OrgAdminDashboard /></PageTransition></Suspense>
           </ProtectedRoute>
         } />
 
