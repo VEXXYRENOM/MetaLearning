@@ -70,16 +70,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const fetchProfile = async (userId: string) => {
+    // Try with org join first (requires v10 migration)
     const { data, error } = await supabase
       .from("profiles")
       .select("*, organizations(subscription_status, name)")
       .eq("id", userId)
       .single();
-    
-    if (error) {
-      console.error("Error fetching profile:", error);
-    } else {
+
+    if (!error) {
       setProfile(data as Profile);
+      return;
+    }
+
+    // Fallback: org join failed (migration not applied yet) — fetch basic profile
+    const { data: basicData, error: basicError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (basicError) {
+      console.error("Error fetching profile:", basicError);
+    } else {
+      setProfile(basicData as Profile);
     }
   };
 
