@@ -276,7 +276,7 @@ export function PricingPage() {
                   {plan.id === "pro" && <p style={{ margin: 0, color: "#0891b2", fontSize: "0.75rem" }}>
                     {lang === "ar" ? "الخطة الاحترافية" : lang === "fr" ? "Plan Professionnel" : lang === "es" ? "Plan Profesional" : "Professional Plan"}
                   </p>}
-                  {plan.id === "max" && <p style={{ margin: 0, color: "#d97706", fontSize: "0.75rem" }}>
+                  {(plan.id as string) === "max" && <p style={{ margin: 0, color: "#d97706", fontSize: "0.75rem" }}>
                     {lang === "ar" ? "الخطة القصوى" : lang === "fr" ? "Plan Maximum" : lang === "es" ? "Plan Máximo" : "Ultimate Plan"}
                   </p>}
                 </div>
