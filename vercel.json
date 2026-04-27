@@ -5,6 +5,7 @@
     { "source": "/api/lab-ai",           "destination": "/api/lab-ai.js" },
     { "source": "/api/paddle/webhook",   "destination": "/api/paddle/webhook.js" },
     { "source": "/api/email-pipeline",   "destination": "/api/email-pipeline.js" },
+    { "source": "/api/generate-posts",   "destination": "/api/generate-posts.js" },
     { "source": "/(.*)",                 "destination": "/index.html" }
   ],
   "crons": [
