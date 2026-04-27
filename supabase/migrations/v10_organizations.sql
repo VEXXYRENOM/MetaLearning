@@ -113,19 +113,30 @@ END;
 $$;
 
 -- ──────────────────────────────────────────────────────────────────────
--- SECTION 1F — join_organization RPC (Atomic, race-condition safe)
+-- SECTION 1F — join_organization RPC (Secure: uses auth.uid(), no p_user_id)
 -- ──────────────────────────────────────────────────────────────────────
-CREATE OR REPLACE FUNCTION join_organization(p_token TEXT, p_user_id UUID)
+
+-- Drop old insecure version that accepted p_user_id
+DROP FUNCTION IF EXISTS join_organization(TEXT, UUID);
+
+CREATE OR REPLACE FUNCTION join_organization(p_token TEXT)
 RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
-  v_org_id         UUID;
-  v_total_seats    INTEGER;
-  v_used_seats     INTEGER;
-  v_current_org_id UUID;
+  v_calling_user_id UUID     := auth.uid();
+  v_org_id          UUID;
+  v_total_seats     INTEGER;
+  v_used_seats      INTEGER;
+  v_current_org_id  UUID;
+  v_org_status      TEXT;
 BEGIN
-  -- 1. Find org by token and LOCK the row to prevent race conditions
-  SELECT id, total_seats, used_seats
-  INTO   v_org_id, v_total_seats, v_used_seats
+  -- 0. Must be authenticated
+  IF v_calling_user_id IS NULL THEN
+    RETURN json_build_object('success', false, 'error', 'Authentication required.');
+  END IF;
+
+  -- 1. Find org by token and LOCK row to prevent race conditions
+  SELECT id, total_seats, used_seats, subscription_status
+  INTO   v_org_id, v_total_seats, v_used_seats, v_org_status
   FROM   organizations
   WHERE  invite_token = p_token
   FOR UPDATE;
@@ -134,41 +145,56 @@ BEGIN
     RETURN json_build_object('success', false, 'error', 'Invalid invitation token.');
   END IF;
 
-  -- 2. Check if user already has an org
-  SELECT org_id INTO v_current_org_id
-  FROM   profiles
-  WHERE  id = p_user_id;
-
-  IF v_current_org_id IS NOT NULL THEN
-    RETURN json_build_object('success', false, 'error', 'User is already in an organization.');
+  -- 2. Check organization subscription is active
+  IF v_org_status != 'active' THEN
+    RETURN json_build_object('success', false, 'error', 'This organization subscription is not active.');
   END IF;
 
-  -- 3. Check seat availability
+  -- 3. Check if user already has an org
+  SELECT org_id INTO v_current_org_id
+  FROM   profiles
+  WHERE  id = v_calling_user_id;
+
+  IF v_current_org_id IS NOT NULL THEN
+    -- Already in THIS org → idempotent success
+    IF v_current_org_id = v_org_id THEN
+      RETURN json_build_object('success', true, 'org_id', v_org_id, 'note', 'Already a member.');
+    END IF;
+    RETURN json_build_object('success', false, 'error', 'User is already in a different organization.');
+  END IF;
+
+  -- 4. Check seat availability
   IF v_used_seats >= v_total_seats THEN
     RETURN json_build_object('success', false, 'error', 'No available seats in this organization.');
   END IF;
 
-  -- 4. Assign user to organization
+  -- 5. Assign user to organization
   UPDATE profiles
   SET    org_id      = v_org_id,
          role_in_org = 'student'
-  WHERE  id = p_user_id;
+  WHERE  id = v_calling_user_id;
 
-  -- 5. Increment used_seats atomically
+  -- 6. Increment used_seats atomically
   UPDATE organizations
-  SET    used_seats = used_seats + 1
+  SET    used_seats = used_seats + 1,
+         updated_at = NOW()
   WHERE  id = v_org_id;
 
   RETURN json_build_object('success', true, 'org_id', v_org_id);
 END;
 $$;
 
--- Grant execution to authenticated users only
-REVOKE ALL ON FUNCTION join_organization(TEXT, UUID) FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION join_organization(TEXT, UUID) TO authenticated;
+-- Authenticated users only (auth.uid() validated internally)
+REVOKE ALL ON FUNCTION join_organization(TEXT) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION join_organization(TEXT) TO authenticated;
 
-REVOKE ALL ON FUNCTION increment_api_usage(TEXT, TEXT, INTEGER, INTEGER) FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION increment_api_usage(TEXT, TEXT, INTEGER, INTEGER) TO authenticated;
+-- ──────────────────────────────────────────────────────────────────────
+-- SECTION 1G — increment_api_usage: restrict to service_role ONLY
+-- (Task 4 fix: prevents authenticated users from bypassing rate limits)
+-- ──────────────────────────────────────────────────────────────────────
+REVOKE ALL   ON FUNCTION increment_api_usage(TEXT, TEXT, INTEGER, INTEGER) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION increment_api_usage(TEXT, TEXT, INTEGER, INTEGER) FROM authenticated;
+GRANT  EXECUTE ON FUNCTION increment_api_usage(TEXT, TEXT, INTEGER, INTEGER) TO service_role;
 
 -- Reset check_function_bodies to default
 SET check_function_bodies = on;

@@ -67,7 +67,7 @@ export function AuthPage() {
           if (orgToken) {
             const { error: joinErr } = await supabase.rpc("join_organization", {
               p_token: orgToken,
-              p_user_id: data.user.id,
+              // auth.uid() is used server-side — no p_user_id needed
             });
             if (joinErr) console.warn("Org join error:", joinErr.message);
           }

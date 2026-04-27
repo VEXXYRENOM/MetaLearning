@@ -15,29 +15,46 @@ export function AuthCallbackPage() {
   useEffect(() => {
     const handleCallback = async () => {
       // Give Supabase time to process the hash/session from the URL
-      setTimeout(async () => {
-        const { data: { session }, error } = await supabase.auth.getSession();
+      await new Promise(r => setTimeout(r, 600));
 
-        if (error || !session) {
-          navigate('/auth');
-          return;
+      const { data: { session }, error } = await supabase.auth.getSession();
+
+      if (error || !session) {
+        navigate('/auth');
+        return;
+      }
+
+      // ── STEP 1: Process pending org invite (from email confirmation flow) ──
+      const pendingOrgToken = localStorage.getItem('pending_org_token');
+      if (pendingOrgToken) {
+        localStorage.removeItem('pending_org_token'); // Clear immediately to prevent reuse
+        try {
+          const { error: joinErr } = await supabase.rpc('join_organization', {
+            p_token: pendingOrgToken,
+          });
+          if (joinErr) {
+            console.warn('[AuthCallback] Org join failed:', joinErr.message);
+            // Don't block login — just warn. User can retry joining later.
+          } else {
+            console.log('[AuthCallback] Successfully joined organization via invite token.');
+          }
+        } catch (e) {
+          console.warn('[AuthCallback] Org join exception:', e);
         }
+      }
 
-        // Check if user already has a profile with a role
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
+      // ── STEP 2: Get/check profile role ────────────────────────────────────
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, org_id')
+        .eq('id', session.user.id)
+        .single();
 
-        if (profile?.role && ROLE_HOME[profile.role]) {
-          // Existing user — go straight to their dashboard
-          navigate(ROLE_HOME[profile.role]);
-        } else {
-          // New user — pick a role first
-          navigate('/auth/role-selection');
-        }
-      }, 600);
+      if (profile?.role && ROLE_HOME[profile.role]) {
+        navigate(ROLE_HOME[profile.role]);
+      } else {
+        navigate('/auth/role-selection');
+      }
     };
 
     handleCallback();
@@ -63,7 +80,7 @@ export function AuthCallbackPage() {
         animation: 'spin 1s linear infinite',
       }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      <p>جاري تسجيل الدخول...</p>
+      <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>جاري تسجيل الدخول...</p>
     </div>
   );
 }

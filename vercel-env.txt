@@ -24,6 +24,13 @@ PADDLE_WEBHOOK_SECRET=pdl_ntfset_your_webhook_secret
 # رابط تطبيقك على Vercel (لإعادة التوجيه بعد الدفع)
 VITE_APP_URL=https://your-app-domain.vercel.app
 
+# ── 3. Paddle Environment (مهم جداً للإنتاج) ─────────────────
+# يجب أن تكون "production" للمدفوعات الحقيقية
+# إذا تركتها فارغة أو "sandbox" ستعمل بوضع الاختبار فقط!
+VITE_PADDLE_ENVIRONMENT=production
+VITE_PADDLE_PRO_ANNUAL_PRICE_ID=pri_your_pro_annual_price_id
+VITE_PADDLE_MAX_ANNUAL_PRICE_ID=pri_your_max_annual_price_id
+
 # ── 3. Fal.ai (توليد الـ 3D والذكاء الاصطناعي) ───────────────
 FAL_API_KEY=your_fal_api_key_here
 
