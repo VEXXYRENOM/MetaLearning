@@ -34,6 +34,8 @@ const PrivacyPolicyPage     = lazy(() => import("./pages/PrivacyPolicyPage").the
 const TermsOfServicePage    = lazy(() => import("./pages/TermsOfServicePage").then(m => ({ default: m.TermsOfServicePage })));
 const CreatorStudioPage     = lazy(() => import("./pages/CreatorStudioPage").then(m => ({ default: m.CreatorStudioPage })));
 const OrgAdminDashboard     = lazy(() => import("./pages/OrgAdminDashboard").then(m => ({ default: m.OrgAdminDashboard })));
+const LeadMagnetPage        = lazy(() => import("./pages/LeadMagnetPage").then(m => ({ default: m.LeadMagnetPage })));
+const PostGeneratorPage     = lazy(() => import("./pages/PostGeneratorPage").then(m => ({ default: m.PostGeneratorPage })));
 
 // ── Lightweight global fallback for Suspense ──────────────────────────────────
 function PageSkeleton() {
@@ -63,6 +65,7 @@ function AnimatedRoutes() {
         <Route path="/auth/callback" element={<Suspense fallback={<PageSkeleton />}><PageTransition><AuthCallbackPage /></PageTransition></Suspense>} />
         <Route path="/auth/role-selection" element={<Suspense fallback={<PageSkeleton />}><PageTransition><RoleSelectionPage /></PageTransition></Suspense>} />
         <Route path="/join" element={<Suspense fallback={<PageSkeleton />}><PageTransition><StudentJoinPage /></PageTransition></Suspense>} />
+        <Route path="/ar-guide" element={<Suspense fallback={<PageSkeleton />}><PageTransition><LeadMagnetPage /></PageTransition></Suspense>} />
         <Route path="/pricing" element={<Suspense fallback={<PageSkeleton />}><PageTransition><PricingPage /></PageTransition></Suspense>} />
         <Route path="/privacy" element={<Suspense fallback={<PageSkeleton />}><PageTransition><PrivacyPolicyPage /></PageTransition></Suspense>} />
         <Route path="/terms" element={<Suspense fallback={<PageSkeleton />}><PageTransition><TermsOfServicePage /></PageTransition></Suspense>} />
@@ -114,6 +117,11 @@ function AnimatedRoutes() {
         <Route path="/admin" element={
           <ProtectedRoute requiredRole="admin">
             <Suspense fallback={<PageSkeleton />}><PageTransition><AdminDashboardPage /></PageTransition></Suspense>
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/posts" element={
+          <ProtectedRoute requiredRole="admin">
+            <Suspense fallback={<PageSkeleton />}><PageTransition><PostGeneratorPage /></PageTransition></Suspense>
           </ProtectedRoute>
         } />
 
