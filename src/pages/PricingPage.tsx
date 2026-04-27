@@ -156,9 +156,20 @@ export function PricingPage() {
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               {lang === "ar" ? "الخطط والأسعار" : lang === "fr" ? "Plans & Tarifs" : lang === "es" ? "Planes y Precios" : "Plans & Pricing"}
             </h1>
-            <p style={{ color: "#64748b", maxWidth: "500px", margin: "0 auto", lineHeight: 1.7 }}>
+            <p style={{ color: "#64748b", maxWidth: "500px", margin: "0 auto", lineHeight: 1.7, marginBottom: "1rem" }}>
               {lang === "ar" ? "اختر الخطة التي تناسبك وابدأ تحويل التعليم!" : lang === "fr" ? "Choisissez le plan qui vous convient et transformez l'enseignement !" : lang === "es" ? "Elige el plan que se adapte a ti y transforma la educación." : "Choose the plan that fits you and start transforming education!"}
             </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              onClick={() => document.getElementById('enterprise-section')?.scrollIntoView({ behavior: 'smooth' })}
+              style={{
+                background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.3)",
+                color: "#a78bfa", padding: "6px 20px", borderRadius: "999px",
+                fontSize: "0.85rem", cursor: "pointer", fontWeight: 600
+              }}
+            >
+              🏢 {lang === "ar" ? "هل أنت مدرسة؟ انقر هنا" : "Are you a School? Click here"}
+            </motion.button>
           </motion.div>
         </div>
 
@@ -305,116 +316,97 @@ export function PricingPage() {
               )}
             </motion.div>
           ))}
+
+          {/* ── ENTERPRISE CARD (Inline) ─────────────────────────────────── */}
+          <motion.div
+            id="enterprise-section"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            style={{
+              flex: "1 1 300px", maxWidth: "420px", position: "relative",
+              background: "linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(30,10,60,0.9) 100%)",
+              backdropFilter: "blur(16px)",
+              border: "1px solid rgba(124,58,237,0.5)",
+              borderRadius: "24px", padding: "2rem",
+              boxShadow: "0 0 60px rgba(124,58,237,0.15), 0 20px 40px rgba(0,0,0,0.5)",
+              display: "flex", flexDirection: "column"
+            }}
+          >
+            <div style={{
+              position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)",
+              background: "linear-gradient(135deg, #7c3aed, #3b82f6)", color: "white", fontSize: "0.75rem",
+              fontWeight: "bold", padding: "5px 18px", borderRadius: "999px",
+              whiteSpace: "nowrap", letterSpacing: "0.08em",
+              boxShadow: "0 4px 16px rgba(124,58,237,0.4)"
+            }}>
+              🏫 {lang === "ar" ? "للمدارس والمؤسسات" : "SCHOOLS & ORGS"}
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1.5rem" }}>
+              <div style={{ padding: "10px", borderRadius: "12px", background: "rgba(124,58,237,0.2)", color: "#a78bfa" }}>
+                <Building2 size={28} />
+              </div>
+              <div>
+                <h2 style={{ margin: 0, color: "white", fontSize: "1.4rem", fontWeight: 800 }}>ENTERPRISE</h2>
+                <p style={{ margin: 0, color: "#7c3aed", fontSize: "0.75rem", fontWeight: 600 }}>Custom Scaling</p>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "1.5rem" }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+                <span style={{ fontSize: "2.5rem", fontWeight: 900, color: "#a78bfa" }}>${(seatCount * pricePerSeat).toLocaleString()}</span>
+                <span style={{ color: "#475569", fontSize: "0.85rem" }}>/mo</span>
+              </div>
+              <p style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "4px" }}>
+                {seatCount} seats included
+              </p>
+            </div>
+
+            {/* Slider */}
+            <div style={{ background: "rgba(0,0,0,0.3)", padding: "12px", borderRadius: "14px", marginBottom: "1.5rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                <span style={{ color: "#94a3b8", fontSize: "0.75rem" }}>Adjust Seats</span>
+                <span style={{ color: "#a78bfa", fontWeight: 700, fontSize: "0.85rem" }}>{seatCount}</span>
+              </div>
+              <input
+                type="range" min={10} max={500} step={5}
+                value={seatCount}
+                onChange={e => setSeatCount(Number(e.target.value))}
+                style={{ width: "100%", accentColor: "#7c3aed", cursor: "pointer" }}
+              />
+            </div>
+
+            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem", display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
+              {[
+                { en: "Everything in MAX", ar: "كل مزايا MAX" },
+                { en: "Admin Dashboard", ar: "لوحة تحكم للمدير" },
+                { en: "Magic Invite Links", ar: "روابط انضمام سحري" },
+                { en: "Custom Onboarding", ar: "تأهيل مخصص للمدرسة" }
+              ].map((feat, fi) => (
+                <li key={fi} style={{ display: "flex", alignItems: "flex-start", gap: "10px", color: "#94a3b8", fontSize: "0.85rem" }}>
+                  <Check size={16} style={{ color: "#7c3aed", flexShrink: 0, marginTop: "2px" }} />
+                  {feat[lang] || feat.en}
+                </li>
+              ))}
+            </ul>
+
+            <motion.a
+              href={`mailto:enterprise@metalearning.app?subject=Enterprise Inquiry — ${seatCount} Seats`}
+              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+              style={{
+                width: "100%", padding: "13px", borderRadius: "12px",
+                background: "linear-gradient(135deg, #7c3aed, #3b82f6)", border: "none", color: "white",
+                fontWeight: "bold", fontSize: "0.95rem", cursor: "pointer", textAlign: "center", textDecoration: "none",
+                boxShadow: "0 6px 20px rgba(124,58,237,0.3)"
+              }}
+            >
+              {lang === "ar" ? "تواصل معنا" : "Contact Sales"}
+            </motion.a>
+          </motion.div>
         </div>
 
-        {/* ── ENTERPRISE CARD ─────────────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          style={{
-            maxWidth: "860px", margin: "0 auto 4rem",
-            background: "linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(30,10,60,0.9) 100%)",
-            border: "1px solid rgba(124,58,237,0.5)",
-            boxShadow: "0 0 80px rgba(124,58,237,0.15), 0 20px 40px rgba(0,0,0,0.5)",
-            borderRadius: "24px", padding: "2.5rem",
-          }}
-        >
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "2.5rem", alignItems: "center" }}>
-            {/* Left: Info */}
-            <div style={{ flex: "1 1 300px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1rem" }}>
-                <div style={{
-                  padding: "10px", borderRadius: "12px",
-                  background: "rgba(124,58,237,0.2)", color: "#a78bfa",
-                }}>
-                  <Building2 size={28} />
-                </div>
-                <div>
-                  <h2 style={{ margin: 0, color: "white", fontSize: "1.5rem", fontWeight: 800 }}>Enterprise</h2>
-                  <p style={{ margin: 0, color: "#7c3aed", fontSize: "0.8rem", fontWeight: 600 }}>Schools &amp; Institutions</p>
-                </div>
-                <span style={{
-                  marginLeft: "auto", padding: "4px 12px", borderRadius: "999px",
-                  background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.4)",
-                  color: "#a78bfa", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em",
-                }}>CUSTOM PRICING</span>
-              </div>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem", display: "flex", flexDirection: "column", gap: "9px" }}>
-                {[
-                  { en: "Everything in MAX", ar: "كل مزايا MAX", fr: "Tout dans MAX", es: "Todo en MAX" },
-                  { en: "Bulk seats for teachers & students", ar: "مقاعد جماعية للطلاب والمعلمين", fr: "Places en volume", es: "Asientos en volumen" },
-                  { en: "Organization Admin Dashboard", ar: "لوحة تحكم مدير المدرسة", fr: "Tableau de bord admin", es: "Panel de admin org" },
-                  { en: "Magic invite link (auto seat assign)", ar: "رابط انضمام سحري تلقائي", fr: "Lien d'invitation magique", es: "Enlace de invitación mágico" },
-                  { en: "Auto-approve by email domain", ar: "قبول تلقائي بنطاق الإيميل", fr: "Approbation auto par domaine", es: "Aprobación auto por dominio" },
-                  { en: "Dedicated support & onboarding", ar: "دعم مخصص وتأهيل", fr: "Support dédié & onboarding", es: "Soporte dedicado" },
-                ].map((f, i) => (
-                  <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "9px", color: "#94a3b8", fontSize: "0.88rem" }}>
-                    <Check size={15} style={{ color: "#7c3aed", flexShrink: 0, marginTop: "2px" }} />
-                    {f[lang] || f.en}
-                  </li>
-                ))}
-              </ul>
-            </div>
 
-            {/* Right: Seat Calculator */}
-            <div style={{
-              flex: "1 1 260px",
-              background: "rgba(124,58,237,0.07)",
-              border: "1px solid rgba(124,58,237,0.2)",
-              borderRadius: "18px", padding: "1.75rem",
-            }}>
-              <p style={{ margin: "0 0 0.5rem", color: "#94a3b8", fontSize: "0.8rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Seat Calculator</p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "1rem" }}>
-                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#a78bfa" }}>${(seatCount * pricePerSeat).toLocaleString()}</span>
-                <span style={{ color: "#475569" }}>/mo</span>
-              </div>
-              <p style={{ color: "#64748b", fontSize: "0.78rem", margin: "0 0 1.25rem" }}>
-                {seatCount} seats × ${pricePerSeat}/seat &nbsp;·&nbsp; ${(seatCount * pricePerSeat * 10).toLocaleString()}/yr (Save 16%)
-              </p>
-
-              {/* Slider */}
-              <div style={{ marginBottom: "1.25rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                  <span style={{ color: "#94a3b8", fontSize: "0.8rem" }}>Number of seats</span>
-                  <span style={{ color: "#a78bfa", fontWeight: 700 }}>{seatCount}</span>
-                </div>
-                <input
-                  type="range" min={10} max={500} step={5}
-                  value={seatCount}
-                  onChange={e => setSeatCount(Number(e.target.value))}
-                  style={{
-                    width: "100%", accentColor: "#7c3aed",
-                    cursor: "pointer",
-                  }}
-                />
-                <div style={{ display: "flex", justifyContent: "space-between", color: "#475569", fontSize: "0.72rem" }}>
-                  <span>10 min</span>
-                  <span>500 max</span>
-                </div>
-              </div>
-
-              {/* CTA */}
-              <motion.a
-                href={`mailto:enterprise@metalearning.app?subject=Enterprise Inquiry — ${seatCount} Seats&body=Hello, I'm interested in the Enterprise plan for ${seatCount} seats.`}
-                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                  width: "100%", padding: "13px", borderRadius: "12px",
-                  background: "linear-gradient(135deg, #7c3aed, #3b82f6)",
-                  color: "white", fontWeight: 700, fontSize: "0.95rem",
-                  textDecoration: "none", boxShadow: "0 8px 24px rgba(124,58,237,0.4)",
-                  marginBottom: "0.75rem",
-                }}
-              >
-                <Mail size={16} /> Contact Sales
-              </motion.a>
-              <p style={{ textAlign: "center", color: "#475569", fontSize: "0.72rem", margin: 0 }}>
-                Response within 24 hours · Custom contracts available
-              </p>
-            </div>
-          </div>
-        </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
