@@ -119,7 +119,7 @@ function AnimatedRoutes() {
 
         {/* ── Org Admin (Enterprise Schools) ───────────── */}
         <Route path="/org-admin" element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole={["teacher", "admin"]}>
             <Suspense fallback={<PageSkeleton />}><PageTransition><OrgAdminDashboard /></PageTransition></Suspense>
           </ProtectedRoute>
         } />
