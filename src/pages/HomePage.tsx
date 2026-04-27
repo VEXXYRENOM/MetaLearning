@@ -302,6 +302,32 @@ export function HomePage() {
                 boxShadow: "0 8px 20px rgba(6,182,212,0.3)"
               }}>Get PRO</Link>
             </div>
+
+            {/* Max */}
+            <div style={{
+              background: "rgba(255,255,255,0.02)", border: "1px solid rgba(245,158,11,0.4)",
+              boxShadow: "0 0 30px rgba(245,158,11,0.1)",
+              borderRadius: "24px", padding: "2.5rem", flex: "1 1 300px", maxWidth: "340px",
+              display: "flex", flexDirection: "column"
+            }}>
+              <h3 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem", display: "flex", alignItems: "center", gap: "8px" }}>MAX <Crown size={20} color="#f59e0b" /></h3>
+              <p style={{ color: "#64748b", margin: "0 0 2rem", minHeight: "45px" }}>Uncompromised immersion and priority.</p>
+              <div style={{ marginBottom: "2rem" }}>
+                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#f59e0b" }}>$14</span>
+                <span style={{ color: "#64748b" }}> / month</span>
+              </div>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", flex: 1 }}>
+                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Everything in PRO</li>
+                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Ultra 4K Textures</li>
+                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Early Access Models</li>
+                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Legendary Glow Badges</li>
+              </ul>
+              <Link to="/pricing" style={{
+                display: "block", textAlign: "center", background: "linear-gradient(135deg, #d97706, #f59e0b)",
+                color: "white", textDecoration: "none", padding: "14px", borderRadius: "12px", fontWeight: 700,
+                boxShadow: "0 8px 20px rgba(245,158,11,0.3)"
+              }}>Get MAX</Link>
+            </div>
           </div>
           )}
 
@@ -319,10 +345,11 @@ export function HomePage() {
               </div>
               <h3 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem", display: "flex", alignItems: "center", gap: "8px" }}>MAX <Crown size={20} color="#f59e0b" /></h3>
               <p style={{ color: "#64748b", margin: "0 0 2rem", minHeight: "45px" }}>Uncompromised immersion and priority.</p>
-              <div style={{ marginBottom: "2rem" }}>
-                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#f59e0b" }}>$14</span>
-                <span style={{ color: "#64748b" }}> / month</span>
+              <div style={{ marginBottom: "0.5rem" }}>
+                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#f59e0b" }}>$20</span>
+                <span style={{ color: "#64748b" }}> / seat / mo</span>
               </div>
+              <p style={{ color: "#64748b", fontSize: "0.78rem", marginBottom: "1.5rem" }}>vs $14 for individual accounts</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", flex: 1 }}>
                 <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Everything in PRO</li>
                 <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Ultra 4K Textures</li>

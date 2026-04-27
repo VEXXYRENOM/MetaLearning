@@ -233,7 +233,7 @@ export function PricingPage() {
         {pricingTab === 'individual' && (
         <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center",
           flexWrap: "wrap", marginBottom: "4rem" }}>
-          {PLANS.filter(p => p.id !== 'max').map((plan, i) => (
+          {PLANS.map((plan, i) => (
             <motion.div
               key={plan.id}
               initial={{ opacity: 0, y: 40 }}
@@ -376,10 +376,11 @@ export function PricingPage() {
                   <p style={{ margin: 0, color: plan.color, fontSize: "0.75rem" }}>{lang === "fr" ? "Jusqu’à 200 étudiants" : lang === "ar" ? "حتى 200 طالب" : "Up to 200 students"}</p>
                 </div>
               </div>
-              <div style={{ marginBottom: "1.75rem" }}>
-                <span style={{ fontSize: "2.5rem", fontWeight: 900, color: plan.color }}>{plan.currency}{isAnnual && (plan as any).price_annual ? (plan as any).price_annual : plan.price_monthly}</span>
-                <span style={{ color: "#475569", fontSize: "0.85rem", marginLeft: "4px" }}>{isAnnual ? "/yr" : "/mo"}</span>
+              <div style={{ marginBottom: "0.5rem" }}>
+                <span style={{ fontSize: "2.5rem", fontWeight: 900, color: plan.color }}>$20</span>
+                <span style={{ color: "#475569", fontSize: "0.85rem", marginLeft: "4px" }}> / seat / mo</span>
               </div>
+              <p style={{ color: "#64748b", fontSize: "0.75rem", marginBottom: "1.5rem" }}>vs $14 for individual accounts</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.75rem", display: "flex", flexDirection: "column", gap: "10px" }}>
                 {plan.features.map((feat, fi) => (
                   <li key={fi} style={{ display: "flex", alignItems: "flex-start", gap: "10px", color: "#94a3b8", fontSize: "0.9rem" }}>
