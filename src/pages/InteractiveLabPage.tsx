@@ -628,7 +628,7 @@ function VolumeModal({
 }
 
 // ─── Main Lab Page ────────────────────────────────────────────
-export function InteractiveLabPage() {
+export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInputType?: string }) {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language.startsWith("ar");
   const navigate = useNavigate();

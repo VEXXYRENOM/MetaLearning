@@ -1,19 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { supabase } from "../services/supabaseClient";
+import { supabase, Profile } from "../services/supabaseClient";
 import { Link } from "react-router-dom";
 import { Users, Banknote, Shield, Activity, EyeOff, Trash2, CheckCircle, Search, Trophy, Megaphone } from "lucide-react";
 import { showToast } from "../components/Toast";
 import { motion } from "framer-motion";
-
-interface UserRow {
-  id: string;
-  email: string;
-  full_name: string;
-  role: string;
-  subscription_tier: "free" | "pro" | "max";
-  created_at: string;
-}
 
 interface LessonRow {
   id: string;
@@ -26,7 +17,7 @@ interface LessonRow {
 
 export function AdminDashboardPage() {
   const { profile } = useAuth();
-  const [users, setUsers] = useState<UserRow[]>([]);
+  const [users, setUsers] = useState<Profile[]>([]);
   const [lessons, setLessons] = useState<LessonRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,7 +31,7 @@ export function AdminDashboardPage() {
       // Fetch users
       const { data: usersData, error: usersErr } = await supabase
         .from("profiles")
-        .select("id, email, full_name, role, subscription_tier, created_at")
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (usersErr) throw usersErr;
