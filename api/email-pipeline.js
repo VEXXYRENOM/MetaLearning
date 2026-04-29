@@ -70,7 +70,7 @@ async function sendEmail(lead, templateKey) {
       Authorization: `Bearer ${resendKey}`,
     },
     body: JSON.stringify({
-      from: "MetaLearning <hello@metalearning.app>",
+      from: "MetaLearning <contact@metalearning.tech>",
       to: lead.email,
       subject: template.subject,
       html: template.html(lead.full_name),

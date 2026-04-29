@@ -9,7 +9,7 @@ import crypto from 'crypto';
 const ALLOWED_ORIGINS = [
   'https://metalearning.app',
   'https://www.metalearning.app',
-  'https://project-ap4pe.vercel.app',
+  'https://metalearning.tech',
   'http://localhost:5173',
   'http://localhost:3000',
 ];

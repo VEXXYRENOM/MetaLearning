@@ -7,7 +7,7 @@ interface Props {
 }
 
 const BASE = 'MetaLearning';
-const BASE_URL = import.meta.env.VITE_APP_URL || 'https://project-ap4pe.vercel.app';
+const BASE_URL = import.meta.env.VITE_APP_URL || 'https://metalearning.tech';
 const DEFAULT_DESC =
   'Transform education with interactive 3D lessons powered by AI. Share lessons instantly with PIN codes. Works on any browser — no hardware required.';
 
