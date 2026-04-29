@@ -9,7 +9,7 @@
 
 # ── 1. Supabase (قاعدة البيانات والهوية) ──────────────────────
 VITE_SUPABASE_URL=https://blgcopastsmctjpjwsod.supabase.co
-VITE_SUPABASE_ANON_KEY=sb_publishable_RLnTycv1P_mVQktUfxr8AQ_gYED9MZ7
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsZ2NvcGFzdHNtY3RqcGp3c29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODUwMTksImV4cCI6MjA5MzA2MTAxOX0.VNKZ6HBGwu3BONWTvhIN_TCXrA7Dd13x2hNd3Kcpu2g
 SUPABASE_URL=https://blgcopastsmctjpjwsod.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
