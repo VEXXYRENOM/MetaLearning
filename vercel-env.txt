@@ -8,9 +8,9 @@
 # ⚠️ استبدل القيم التي تبدأ بـ "your_..." بالقيم الحقيقية من لوحة التحكم.
 
 # ── 1. Supabase (قاعدة البيانات والهوية) ──────────────────────
-VITE_SUPABASE_URL=https://your-project-id.supabase.co
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
-SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_URL=https://blgcopastsmctjpjwsod.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_RLnTycv1P_mVQktUfxr8AQ_gYED9MZ7
+SUPABASE_URL=https://blgcopastsmctjpjwsod.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 # ── 2. Paddle (نظام الدفع) ────────────────────────────────────
