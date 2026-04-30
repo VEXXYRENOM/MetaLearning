@@ -29,7 +29,7 @@ export function AuthPage() {
     if (profile?.role === "teacher") navigate("/teacher/create");
     else if (profile?.role === "student") navigate("/student/dashboard");
     else if (profile?.role === "creator") navigate("/creator/lab");
-    else if (profile?.role === "admin") navigate("/admin/dashboard");
+    else if (profile?.role === "admin") navigate("/admin");
     else if (!profile?.role) navigate("/auth/role-selection");
   }, [session, profile, isLoading, navigate]);
 

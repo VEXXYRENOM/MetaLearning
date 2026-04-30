@@ -470,7 +470,7 @@ export function LessonPage() {
         <Link className="lesson-back" to={
           profile?.role === "teacher" ? "/teacher/create"
           : profile?.role === "creator" ? "/creator/lab"
-          : profile?.role === "admin"   ? "/admin/dashboard"
+          : profile?.role === "admin"   ? "/admin"
           : profile?.role === "student" ? "/student/dashboard"
           : "/"
         }>
