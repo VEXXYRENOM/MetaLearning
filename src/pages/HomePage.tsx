@@ -43,7 +43,7 @@ export function HomePage() {
     : "/auth/role-selection";
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#EBF5FF 0%,#DBEAFE 35%,#E0F2FE 65%,#F0F9FF 100%)", fontFamily: "'Inter',system-ui,sans-serif", overflowX: "hidden" }}>
+    <div dir="ltr" style={{ minHeight: "100vh", background: "linear-gradient(160deg,#EBF5FF 0%,#DBEAFE 35%,#E0F2FE 65%,#F0F9FF 100%)", fontFamily: "'Inter',system-ui,sans-serif", overflowX: "hidden" }}>
       <MetaTags title="MetaLearning — The 3D Education Revolution" description="The Future of Education is 3D." />
 
       <style>{`
@@ -132,7 +132,7 @@ export function HomePage() {
         <nav className="glass" style={{ maxWidth: 1200, margin: ".9rem auto 0", borderRadius: 18, padding: ".85rem 1.4rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Link to="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
             <div style={{ width: 36, height: 36, borderRadius: 11, background: "linear-gradient(135deg,#2563EB,#0EA5E9)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: ".95rem", boxShadow: "0 4px 12px rgba(37,99,235,.28)" }}>M</div>
-            <span style={{ fontWeight: 800, fontSize: "1.08rem", color: "#1e3a5f", letterSpacing: "-.02em" }}>MetaLearning</span>
+            {!isMobile && <span style={{ fontWeight: 800, fontSize: "1.08rem", color: "#1e3a5f", letterSpacing: "-.02em" }}>MetaLearning</span>}
           </Link>
           {!isMobile && (
             <div style={{ display: "flex", gap: "1.8rem" }}>
