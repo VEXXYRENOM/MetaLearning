@@ -123,102 +123,103 @@ export function AdminDashboardPage() {
 
   return (
     <div style={{
-      minHeight: "100vh", background: "#020617", color: "white",
-      fontFamily: "'Inter', system-ui, sans-serif", padding: "3rem 1.5rem"
+      minHeight: "100vh", background: "linear-gradient(160deg,#EBF4FF 0%,#DBEAFE 40%,#E0F2FE 70%,#F0F9FF 100%)", color: "#0f1f3d",
+      fontFamily: "'Host Grotesk', system-ui, sans-serif", padding: "3rem 1.5rem"
     }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
         
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2.5rem" }}>
           <div style={{
-            background: "linear-gradient(135deg, #06b6d4, #3b82f6)",
-            padding: "1rem", borderRadius: "16px"
+            background: "linear-gradient(135deg, #2563EB, #0EA5E9)",
+            padding: "1rem", borderRadius: "16px",
+            boxShadow: "0 8px 24px rgba(37,99,235,0.25)"
           }}>
             <Shield size={32} color="white" />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: "2rem", fontWeight: 800 }}>Control Tower</h1>
-            <p style={{ margin: 0, color: "#94a3b8" }}>MetaLearning Administrative Hub</p>
+            <h1 style={{ margin: 0, fontSize: "2rem", fontWeight: 900, letterSpacing: "-.02em" }}>Control Tower</h1>
+            <p style={{ margin: 0, color: "#6b7280" }}>MetaLearning Administrative Hub</p>
           </div>
         </div>
 
         {/* Dashboard Widgets */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
           
-          <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "16px", padding: "1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div style={{ background: "rgba(16,185,129,0.15)", padding: "1rem", borderRadius: "12px" }}>
+          <div style={{ background: "rgba(255,255,255,0.55)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: "16px", padding: "1.5rem", display: "flex", alignItems: "center", gap: "1rem", boxShadow: "0 4px 20px rgba(37,99,235,0.06)" }}>
+            <div style={{ background: "rgba(16,185,129,0.1)", padding: "1rem", borderRadius: "12px" }}>
               <Banknote size={24} color="#10b981" />
             </div>
             <div>
-              <p style={{ margin: 0, color: "#64748b", fontSize: "0.85rem", fontWeight: 600 }}>MONTHLY REVENUE</p>
-              <h2 style={{ margin: 0, fontSize: "1.8rem", color: "white" }}>{revenue} د.ت</h2>
+              <p style={{ margin: 0, color: "#6b7280", fontSize: "0.85rem", fontWeight: 700 }}>MONTHLY REVENUE</p>
+              <h2 style={{ margin: 0, fontSize: "1.8rem", color: "#0f1f3d", fontWeight: 800 }}>{revenue} د.ت</h2>
             </div>
           </div>
 
-          <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "16px", padding: "1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div style={{ background: "rgba(59,130,246,0.15)", padding: "1rem", borderRadius: "12px" }}>
-              <Users size={24} color="#3b82f6" />
+          <div style={{ background: "rgba(255,255,255,0.55)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: "16px", padding: "1.5rem", display: "flex", alignItems: "center", gap: "1rem", boxShadow: "0 4px 20px rgba(37,99,235,0.06)" }}>
+            <div style={{ background: "rgba(37,99,235,0.1)", padding: "1rem", borderRadius: "12px" }}>
+              <Users size={24} color="#2563EB" />
             </div>
             <div>
-              <p style={{ margin: 0, color: "#64748b", fontSize: "0.85rem", fontWeight: 600 }}>TOTAL USERS</p>
-              <h2 style={{ margin: 0, fontSize: "1.8rem", color: "white" }}>{users.length}</h2>
+              <p style={{ margin: 0, color: "#6b7280", fontSize: "0.85rem", fontWeight: 700 }}>TOTAL USERS</p>
+              <h2 style={{ margin: 0, fontSize: "1.8rem", color: "#0f1f3d", fontWeight: 800 }}>{users.length}</h2>
             </div>
           </div>
 
-          <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "16px", padding: "1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div style={{ background: "rgba(168,85,247,0.15)", padding: "1rem", borderRadius: "12px" }}>
+          <div style={{ background: "rgba(255,255,255,0.55)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: "16px", padding: "1.5rem", display: "flex", alignItems: "center", gap: "1rem", boxShadow: "0 4px 20px rgba(37,99,235,0.06)" }}>
+            <div style={{ background: "rgba(168,85,247,0.1)", padding: "1rem", borderRadius: "12px" }}>
               <Trophy size={24} color="#a855f7" />
             </div>
             <div>
-              <p style={{ margin: 0, color: "#64748b", fontSize: "0.85rem", fontWeight: 600 }}>PRO/MAX SUBS</p>
-              <h2 style={{ margin: 0, fontSize: "1.8rem", color: "white" }}>{users.filter(u => u.subscription_tier !== 'free').length}</h2>
+              <p style={{ margin: 0, color: "#6b7280", fontSize: "0.85rem", fontWeight: 700 }}>PRO/MAX SUBS</p>
+              <h2 style={{ margin: 0, fontSize: "1.8rem", color: "#0f1f3d", fontWeight: 800 }}>{users.filter(u => u.subscription_tier !== 'free').length}</h2>
             </div>
           </div>
 
         </div>
 
         {loading ? (
-          <div style={{ textAlign: "center", color: "#64748b", padding: "3rem" }}>
-            <Activity size={32} style={{ animation: "spin 2s linear infinite" }} />
-            <p>Loading registry...</p>
+          <div style={{ textAlign: "center", color: "#6b7280", padding: "3rem" }}>
+            <Activity size={32} style={{ animation: "spin 2s linear infinite", margin: "0 auto 1rem" }} />
+            <p style={{ fontWeight: 600 }}>Loading registry...</p>
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "3rem" }}>
             
             {/* MARKETING TOOLS */}
-            <section style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "20px", padding: "2rem" }}>
+            <section style={{ background: "rgba(255,255,255,0.55)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: "20px", padding: "2rem", boxShadow: "0 4px 20px rgba(37,99,235,0.06)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-                <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
+                <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 800, display: "flex", alignItems: "center", gap: "8px", color: "#0f1f3d" }}>
                   <Megaphone color="#a855f7" /> Marketing Tools
                 </h2>
               </div>
               
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
-                <Link to="/admin/posts" style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: "12px", padding: "1.5rem", textDecoration: "none", color: "white", display: "flex", flexDirection: "column", gap: "8px", transition: "all 0.2s" }}>
-                  <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>AI Post Generator</h3>
-                  <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.85rem", lineHeight: 1.5 }}>Generate tailored social media posts for Twitter, LinkedIn, Instagram & TikTok.</p>
+                <Link to="/admin/posts" style={{ background: "rgba(255,255,255,0.6)", border: "1.5px solid rgba(168,85,247,0.3)", borderRadius: "12px", padding: "1.5rem", textDecoration: "none", color: "#0f1f3d", display: "flex", flexDirection: "column", gap: "8px", transition: "all 0.2s" }}>
+                  <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800 }}>AI Post Generator</h3>
+                  <p style={{ margin: 0, color: "#6b7280", fontSize: "0.85rem", lineHeight: 1.5 }}>Generate tailored social media posts for Twitter, LinkedIn, Instagram & TikTok.</p>
                 </Link>
-                <Link to="/ar-guide" target="_blank" rel="noopener noreferrer" style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: "12px", padding: "1.5rem", textDecoration: "none", color: "white", display: "flex", flexDirection: "column", gap: "8px", transition: "all 0.2s" }}>
-                  <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>Lead Magnet Page</h3>
-                  <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.85rem", lineHeight: 1.5 }}>View the public landing page used to capture teacher leads via the AR Guide.</p>
+                <Link to="/ar-guide" target="_blank" rel="noopener noreferrer" style={{ background: "rgba(255,255,255,0.6)", border: "1.5px solid rgba(16,185,129,0.3)", borderRadius: "12px", padding: "1.5rem", textDecoration: "none", color: "#0f1f3d", display: "flex", flexDirection: "column", gap: "8px", transition: "all 0.2s" }}>
+                  <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800 }}>Lead Magnet Page</h3>
+                  <p style={{ margin: 0, color: "#6b7280", fontSize: "0.85rem", lineHeight: 1.5 }}>View the public landing page used to capture teacher leads via the AR Guide.</p>
                 </Link>
               </div>
             </section>
             
             {/* USER REGISTRY */}
-            <section style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "20px", padding: "2rem" }}>
+            <section style={{ background: "rgba(255,255,255,0.55)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: "20px", padding: "2rem", boxShadow: "0 4px 20px rgba(37,99,235,0.06)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-                <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Users color="#06b6d4" /> User Registry
+                <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 800, display: "flex", alignItems: "center", gap: "8px", color: "#0f1f3d" }}>
+                  <Users color="#2563EB" /> User Registry
                 </h2>
-                <div style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.3)", borderRadius: "8px", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  <Search size={14} color="#64748b" style={{ marginRight: "8px" }} />
+                <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.6)", borderRadius: "8px", padding: "6px 12px", border: "1px solid rgba(37,99,235,0.2)" }}>
+                  <Search size={14} color="#6b7280" style={{ marginRight: "8px" }} />
                   <input 
                     type="text" 
                     placeholder="Search email or name..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ background: "transparent", border: "none", color: "white", outline: "none", fontSize: "0.85rem", width: "200px" }}
+                    style={{ background: "transparent", border: "none", color: "#0f1f3d", outline: "none", fontSize: "0.85rem", width: "200px" }}
                   />
                 </div>
               </div>
@@ -226,7 +227,7 @@ export function AdminDashboardPage() {
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "600px" }}>
                   <thead>
-                    <tr style={{ background: "rgba(255,255,255,0.04)", color: "#a5b4fc", fontSize: "0.8rem", textAlign: "left" }}>
+                    <tr style={{ background: "rgba(37,99,235,0.08)", color: "#2563EB", fontSize: "0.8rem", textAlign: "left" }}>
                       <th style={{ padding: "12px 16px", borderRadius: "8px 0 0 8px" }}>User Info</th>
                       <th style={{ padding: "12px 16px" }}>Role</th>
                       <th style={{ padding: "12px 16px" }}>Join Date</th>
@@ -235,27 +236,27 @@ export function AdminDashboardPage() {
                   </thead>
                   <tbody>
                     {filteredUsers.map(u => (
-                      <tr key={u.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                      <tr key={u.id} style={{ borderBottom: "1px solid rgba(37,99,235,0.08)" }}>
                         <td style={{ padding: "12px 16px" }}>
-                          <p style={{ margin: 0, fontWeight: 600 }}>{u.full_name || "Anonymous"}</p>
-                          <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>{u.email}</p>
+                          <p style={{ margin: 0, fontWeight: 700, color: "#0f1f3d" }}>{u.full_name || "Anonymous"}</p>
+                          <p style={{ margin: 0, fontSize: "0.75rem", color: "#6b7280" }}>{u.email}</p>
                         </td>
-                        <td style={{ padding: "12px 16px", fontSize: "0.85rem", color: "#94a3b8", textTransform: "capitalize" }}>{u.role}</td>
-                        <td style={{ padding: "12px 16px", fontSize: "0.85rem", color: "#64748b" }}>{new Date(u.created_at).toLocaleDateString()}</td>
+                        <td style={{ padding: "12px 16px", fontSize: "0.85rem", color: "#4b5563", textTransform: "capitalize", fontWeight: 600 }}>{u.role}</td>
+                        <td style={{ padding: "12px 16px", fontSize: "0.85rem", color: "#6b7280" }}>{new Date(u.created_at).toLocaleDateString()}</td>
                         <td style={{ padding: "12px 16px" }}>
                           <select 
                             value={u.subscription_tier || "free"}
                             onChange={(e) => updateTier(u.id, e.target.value as "free" | "pro" | "max")}
                             style={{ 
-                              background: u.subscription_tier === 'max' ? "rgba(245,158,11,0.2)" : u.subscription_tier === 'pro' ? "rgba(6,182,212,0.2)" : "rgba(255,255,255,0.05)",
-                              color: u.subscription_tier === 'max' ? "#f59e0b" : u.subscription_tier === 'pro' ? "#06b6d4" : "#94a3b8",
-                              border: `1px solid ${u.subscription_tier === 'max' ? "#f59e0b55" : u.subscription_tier === 'pro' ? "#06b6d455" : "#334155"}`,
+                              background: u.subscription_tier === 'max' ? "rgba(245,158,11,0.1)" : u.subscription_tier === 'pro' ? "rgba(14,165,233,0.1)" : "rgba(255,255,255,0.5)",
+                              color: u.subscription_tier === 'max' ? "#d97706" : u.subscription_tier === 'pro' ? "#0284c7" : "#4b5563",
+                              border: `1px solid ${u.subscription_tier === 'max' ? "rgba(245,158,11,0.3)" : u.subscription_tier === 'pro' ? "rgba(14,165,233,0.3)" : "rgba(37,99,235,0.2)"}`,
                               padding: "4px 10px", borderRadius: "6px", outline: "none", cursor: "pointer", fontSize: "0.8rem", textTransform: "uppercase", fontWeight: 700
                             }}
                           >
-                            <option value="free" style={{ background: "#0f172a", color: "white" }}>Free</option>
-                            <option value="pro" style={{ background: "#0f172a", color: "white" }}>PRO</option>
-                            <option value="max" style={{ background: "#0f172a", color: "white" }}>MAX</option>
+                            <option value="free" style={{ background: "white", color: "#0f1f3d" }}>Free</option>
+                            <option value="pro" style={{ background: "white", color: "#0f1f3d" }}>PRO</option>
+                            <option value="max" style={{ background: "white", color: "#0f1f3d" }}>MAX</option>
                           </select>
                         </td>
                       </tr>
@@ -266,39 +267,39 @@ export function AdminDashboardPage() {
             </section>
 
             {/* CONTENT MODERATION */}
-            <section style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "20px", padding: "2rem" }}>
+            <section style={{ background: "rgba(255,255,255,0.55)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: "20px", padding: "2rem", boxShadow: "0 4px 20px rgba(37,99,235,0.06)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-                <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Shield color="#f43f5e" /> Content Moderation
+                <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 800, display: "flex", alignItems: "center", gap: "8px", color: "#0f1f3d" }}>
+                  <Shield color="#ef4444" /> Content Moderation
                 </h2>
               </div>
               
               <div style={{ display: "grid", gap: "1rem" }}>
                 {lessons.length === 0 ? (
-                  <p style={{ color: "#64748b", fontSize: "0.85rem", fontStyle: "italic" }}>No public lessons to moderate.</p>
+                  <p style={{ color: "#6b7280", fontSize: "0.85rem", fontStyle: "italic" }}>No public lessons to moderate.</p>
                 ) : (
                   lessons.map(lesson => (
                     <div key={lesson.id} style={{
                       display: "flex", justifyContent: "space-between", alignItems: "center",
-                      background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.05)",
-                      padding: "1rem 1.5rem", borderRadius: "12px"
+                      background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.8)",
+                      padding: "1rem 1.5rem", borderRadius: "12px", boxShadow: "0 2px 8px rgba(37,99,235,0.04)"
                     }}>
                       <div>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: "1rem" }}>{lesson.title}</p>
-                        <p style={{ margin: 0, fontSize: "0.8rem", color: "#64748b" }}>
-                          Subject: {lesson.subject} | Creator: <span style={{ color: "#a5b4fc" }}>{lesson.teacher_name}</span>
+                        <p style={{ margin: 0, fontWeight: 800, fontSize: "1rem", color: "#0f1f3d" }}>{lesson.title}</p>
+                        <p style={{ margin: 0, fontSize: "0.8rem", color: "#6b7280" }}>
+                          Subject: {lesson.subject} | Creator: <span style={{ color: "#2563EB", fontWeight: 600 }}>{lesson.teacher_name}</span>
                         </p>
                       </div>
                       <div style={{ display: "flex", gap: "1rem" }}>
                         <button onClick={() => hideLesson(lesson.id)} style={{
-                          background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)",
-                          padding: "6px 14px", borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "6px", fontWeight: 600
+                          background: "rgba(245,158,11,0.1)", color: "#d97706", border: "1px solid rgba(245,158,11,0.3)",
+                          padding: "6px 14px", borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "6px", fontWeight: 700
                         }}>
                           <EyeOff size={14} /> Hide
                         </button>
                         <button onClick={() => deleteLesson(lesson.id)} style={{
-                          background: "rgba(244,63,94,0.15)", color: "#f43f5e", border: "1px solid rgba(244,63,94,0.3)",
-                          padding: "6px 14px", borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "6px", fontWeight: 600
+                          background: "rgba(239,68,68,0.1)", color: "#b91c1c", border: "1px solid rgba(239,68,68,0.3)",
+                          padding: "6px 14px", borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "6px", fontWeight: 700
                         }}>
                           <Trash2 size={14} /> Delete
                         </button>

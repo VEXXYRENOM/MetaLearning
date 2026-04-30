@@ -40,7 +40,7 @@ const PostGeneratorPage     = lazy(() => import("./pages/PostGeneratorPage").the
 // ── Lightweight global fallback for Suspense ──────────────────────────────────
 function PageSkeleton() {
   return (
-    <div style={{ minHeight: "100vh", background: "#020617", padding: "2rem" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#EBF4FF 0%,#DBEAFE 40%,#E0F2FE 70%,#F0F9FF 100%)", padding: "2rem" }}>
       <Skeleton width="100%" height="60px" borderRadius="12px" />
       <div style={{ marginTop: "2rem", display: "grid", gap: "1rem",
         gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
