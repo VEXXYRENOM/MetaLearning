@@ -63,10 +63,49 @@ export function HomePage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         .glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.8);}
-        .btn-p{background:linear-gradient(135deg,#2563EB,#0EA5E9);color:#fff;border:none;cursor:pointer;font-weight:700;transition:all .3s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
-        .btn-p:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(37,99,235,.35);}
-        .btn-g{background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.9);color:#1e40af;cursor:pointer;font-weight:600;transition:all .3s;text-decoration:none;display:inline-flex;align-items:center;}
-        .btn-g:hover{background:#fff;transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.08);}
+        /* ── Glass Buttons ── */
+        .btn-p{
+          background:rgba(37,99,235,0.15);
+          backdrop-filter:blur(16px);
+          -webkit-backdrop-filter:blur(16px);
+          border:1.5px solid rgba(37,99,235,0.4);
+          color:#1d4ed8;
+          cursor:pointer;font-weight:700;transition:all .3s;
+          text-decoration:none;display:inline-flex;align-items:center;gap:8px;
+          box-shadow:inset 0 1px 0 rgba(255,255,255,0.6), 0 4px 15px rgba(37,99,235,0.15);
+        }
+        .btn-p:hover{
+          background:rgba(37,99,235,0.25);
+          border-color:rgba(37,99,235,0.7);
+          transform:translateY(-2px);
+          box-shadow:inset 0 1px 0 rgba(255,255,255,0.7), 0 12px 30px rgba(37,99,235,.25);
+        }
+        .btn-g{
+          background:rgba(255,255,255,0.35);
+          backdrop-filter:blur(16px);
+          -webkit-backdrop-filter:blur(16px);
+          border:1.5px solid rgba(255,255,255,0.9);
+          color:#374151;
+          cursor:pointer;font-weight:600;transition:all .3s;
+          text-decoration:none;display:inline-flex;align-items:center;
+          box-shadow:inset 0 1px 0 rgba(255,255,255,0.8), 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .btn-g:hover{
+          background:rgba(255,255,255,0.6);
+          transform:translateY(-2px);
+          box-shadow:inset 0 1px 0 rgba(255,255,255,0.9), 0 8px 20px rgba(0,0,0,.1);
+        }
+        .btn-nav-glass{
+          background:rgba(255,255,255,0.25);
+          backdrop-filter:blur(12px);
+          -webkit-backdrop-filter:blur(12px);
+          border:1px solid rgba(37,99,235,0.25);
+          color:#1e40af;
+          cursor:pointer;font-weight:600;transition:all .3s;
+          text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+          box-shadow:inset 0 1px 0 rgba(255,255,255,0.6);
+        }
+        .btn-nav-glass:hover{background:rgba(37,99,235,0.12);border-color:rgba(37,99,235,0.5);transform:translateY(-1px);}
         .fc{transition:all .35s cubic-bezier(.4,0,.2,1);}
         .fc:hover{transform:translateY(-8px);box-shadow:0 24px 50px rgba(37,99,235,.13);}
         .sc{transition:all .3s;} .sc:hover{transform:translateY(-4px);}
@@ -76,7 +115,7 @@ export function HomePage() {
         .fu{animation:fadeUp .8s ease both;} .fu2{animation:fadeUp .8s .15s ease both;} .fu3{animation:fadeUp .8s .3s ease both;}
         .fc1{animation:float2 5s .5s ease-in-out infinite;} .fc2{animation:float2 7s 1s ease-in-out infinite;} .fc3{animation:float2 4s 2s ease-in-out infinite;}
         .pulse{animation:pulse 2.5s ease-in-out infinite;}
-        @keyframes pulse{0%,100%{opacity:.6;transform:scale(.97)}50%{opacity:1;transform:scale(1.03)}}
+        @keyframes pulse{0%,100%{opacity:.5;transform:scale(.97)}50%{opacity:0.9;transform:scale(1.03)}}
       `}</style>
 
       {/* ══ NAVBAR ══ */}
@@ -112,12 +151,16 @@ export function HomePage() {
         {/* BIG BG TEXT */}
         <div style={{ position: "absolute", right: "-5%", top: "50%", transform: "translateY(-50%)", fontSize: "clamp(8rem,18vw,22rem)", fontWeight: 900, color: "rgba(37,99,235,0.04)", lineHeight: 1, letterSpacing: "-.05em", userSelect: "none", pointerEvents: "none", whiteSpace: "nowrap" }}>META</div>
 
-        {/* 3D ORB full background glow */}
-        <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-          <div style={{ position: "absolute", right: "5%", top: "50%", transform: "translateY(-50%)", width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle,rgba(37,99,235,.18) 0%,transparent 70%)" }} className="pulse" />
+        {/* 3D ORB — full hero background */}
+        <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+          <Suspense fallback={
+            <div style={{ position:"absolute", right:"5%", top:"50%", transform:"translateY(-50%)", width:520, height:520, borderRadius:"50%", background:"radial-gradient(circle,rgba(37,99,235,.15) 0%,transparent 70%)" }} className="pulse" />
+          }>
+            <HeroOrb3D />
+          </Suspense>
         </div>
 
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "4rem 2rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center", width: "100%" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "4rem 2rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center", width: "100%", position: "relative", zIndex: 1 }}>
           {/* LEFT */}
           <div>
             <div className="fu glass" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "7px 16px", borderRadius: 50, marginBottom: "1.5rem" }}>
@@ -133,7 +176,7 @@ export function HomePage() {
               Transform any lesson into an immersive 3D experience. Powered by AI, built for the next generation of learners and teachers.
             </p>
             <div className="fu3" style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-              <Link to="/auth" className="btn-p" style={{ padding: "15px 32px", borderRadius: 14, fontSize: "1rem", boxShadow: "0 8px 25px rgba(37,99,235,.3)" }}>Start for Free <ArrowRight size={18} /></Link>
+              <Link to="/auth" className="btn-p" style={{ padding: "15px 32px", borderRadius: 14, fontSize: "1rem" }}>Start for Free <ArrowRight size={18} /></Link>
               <Link to="/join" className="btn-g" style={{ padding: "15px 32px", borderRadius: 14, fontSize: "1rem" }}>I have a PIN</Link>
             </div>
             <div className="fu3" style={{ marginTop: "2rem", display: "flex", alignItems: "center", gap: 12 }}>
@@ -146,11 +189,10 @@ export function HomePage() {
             </div>
           </div>
 
-          {/* RIGHT: 3D ORB */}
+          {/* RIGHT: Floating stat cards only — 3D is full-bg behind everything */}
           <div style={{ position: "relative", height: 480, display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <Suspense fallback={<div style={{ width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle,rgba(37,99,235,.2) 0%,transparent 70%)" }} className="pulse" />}>
-              <HeroOrb3D />
-            </Suspense>
+            {/* Central glow ring hint */}
+            <div style={{ width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle,rgba(37,99,235,.12) 0%,transparent 70%)", border: "1px solid rgba(37,99,235,0.1)" }} className="pulse" />
 
             {/* Floating Cards */}
             <div className="glass fc1" style={{ position: "absolute", top: "8%", left: "-5%", padding: "12px 18px", borderRadius: 16, display: "flex", alignItems: "center", gap: 10, zIndex: 5, boxShadow: "0 8px 30px rgba(37,99,235,.12)" }}>
@@ -166,6 +208,11 @@ export function HomePage() {
             <div className="glass fc3" style={{ position: "absolute", top: "55%", left: "-8%", padding: "10px 16px", borderRadius: 14, zIndex: 5, boxShadow: "0 8px 30px rgba(245,158,11,.15)" }}>
               <p style={{ margin:0, fontSize:".7rem", color:"#64748b", fontWeight:600 }}>Avg. Rating</p>
               <p style={{ margin:0, fontSize:"1.3rem", fontWeight:900, color:"#F59E0B" }}>4.9 ★</p>
+            </div>
+
+            <div className="glass fc1" style={{ position: "absolute", top: "30%", right: "-10%", padding: "10px 16px", borderRadius: 14, zIndex: 5, boxShadow: "0 8px 30px rgba(16,185,129,.15)" }}>
+              <p style={{ margin:0, fontSize:".7rem", color:"#64748b", fontWeight:600 }}>Satisfaction</p>
+              <p style={{ margin:0, fontSize:"1.1rem", fontWeight:900, color:"#10B981" }}>98% ✓</p>
             </div>
           </div>
         </div>
