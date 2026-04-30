@@ -47,8 +47,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // 2. Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
+      async (event, newSession) => {
         try {
+          // Prevent redundant fetching if it's the INITIAL_SESSION event and we already set it
+          if (event === 'INITIAL_SESSION' && session) return;
+          
           setSession(newSession);
           setUser(newSession?.user ?? null);
           if (newSession?.user) {
@@ -90,7 +93,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .single();
 
     if (basicError) {
-      console.error("Error fetching profile:", basicError);
+      // Suppress logging if it's just a missing row (e.g. new user sign up in progress)
+      if (basicError.code !== "PGRST116") {
+        console.warn("Profile fetch error:", basicError.message);
+      }
     } else {
       setProfile(basicData as Profile);
     }
