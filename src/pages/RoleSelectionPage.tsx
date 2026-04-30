@@ -23,27 +23,27 @@ const ROLE_CARDS: RoleCard[] = [
     emoji: "👨‍🏫",
     titleKey: "role.teacher",
     descKey: "role.teacher_desc",
-    gradient: "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(99,102,241,0.1))",
-    border: "#3b82f6",
-    glow: "rgba(59,130,246,0.25)",
+    gradient: "linear-gradient(135deg, rgba(37,99,235,0.12), rgba(14,165,233,0.08))",
+    border: "#2563EB",
+    glow: "rgba(37,99,235,0.20)",
   },
   {
     id: "student",
     emoji: "👨‍🎓",
     titleKey: "role.student",
     descKey: "role.student_desc",
-    gradient: "linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.1))",
+    gradient: "linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.08))",
     border: "#10b981",
-    glow: "rgba(16,185,129,0.25)",
+    glow: "rgba(16,185,129,0.20)",
   },
   {
     id: "creator",
     emoji: "🛠️",
     titleKey: "role.creator",
     descKey: "role.creator_desc",
-    gradient: "linear-gradient(135deg, rgba(168,85,247,0.15), rgba(139,92,246,0.1))",
-    border: "#a855f7",
-    glow: "rgba(168,85,247,0.25)",
+    gradient: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(99,102,241,0.08))",
+    border: "#7C3AED",
+    glow: "rgba(124,58,237,0.20)",
   },
   // ⚠️ SECURITY: admin role is intentionally NOT shown here.
   // Set admin via Supabase SQL Editor only:
@@ -100,13 +100,13 @@ export function RoleSelectionPage() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(168,85,247,0.08) 0%, transparent 60%), #020617",
+      background: "linear-gradient(160deg,#EBF4FF 0%,#DBEAFE 40%,#E0F2FE 70%,#F0F9FF 100%)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
       padding: "2rem",
-      color: "white",
-      fontFamily: "'Inter', 'Noto Sans Arabic', sans-serif",
+      color: "#0f1f3d",
+      fontFamily: "'Host Grotesk', 'Noto Sans Arabic', sans-serif",
     }}>
       <div style={{ maxWidth: "720px", width: "100%" }}>
         
@@ -114,20 +114,21 @@ export function RoleSelectionPage() {
         <div style={{ textAlign: "center", marginBottom: "3rem" }}>
           <div style={{
             display: "inline-flex", alignItems: "center", gap: "0.5rem",
-            background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)",
+            background: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.2)",
             borderRadius: "50px", padding: "0.4rem 1rem", marginBottom: "1.5rem",
-            fontSize: "0.8rem", color: "#c084fc", fontWeight: "600", letterSpacing: "0.05em"
+            fontSize: "0.8rem", color: "#2563EB", fontWeight: "700", letterSpacing: "0.05em"
           }}>
             ✦ MetaLearning Platform
           </div>
           <h1 style={{
             fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: "900", margin: "0 0 0.75rem 0",
-            background: "linear-gradient(135deg, #fff 0%, #94a3b8 100%)",
+            background: "linear-gradient(135deg, #0f1f3d 0%, #2563EB 100%)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            letterSpacing: "-.02em",
           }}>
             {t("role.title")}
           </h1>
-          <p style={{ color: "#64748b", fontSize: "1rem", margin: 0, lineHeight: 1.6 }}>
+          <p style={{ color: "#6b7280", fontSize: "1rem", margin: 0, lineHeight: 1.6 }}>
             {t("role.desc")}
           </p>
         </div>
@@ -146,8 +147,12 @@ export function RoleSelectionPage() {
                 key={card.id}
                 onClick={() => setSelected(card.id)}
                 style={{
-                  background: isActive ? card.gradient : "rgba(15,23,42,0.6)",
-                  border: `1px solid ${isActive ? card.border : "rgba(255,255,255,0.06)"}`,
+                  background: isActive
+                    ? card.gradient
+                    : "rgba(255,255,255,0.45)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  border: `1.5px solid ${isActive ? card.border : "rgba(255,255,255,0.75)"}`,
                   borderRadius: "20px",
                   padding: "1.5rem",
                   cursor: "pointer",
@@ -155,7 +160,9 @@ export function RoleSelectionPage() {
                   textAlign: "left",
                   position: "relative",
                   outline: "none",
-                  boxShadow: isActive ? `0 0 0 1px ${card.border}40, 0 8px 32px ${card.glow}` : "none",
+                  boxShadow: isActive
+                    ? `0 0 0 1px ${card.border}30, 0 8px 32px ${card.glow}`
+                    : "0 2px 10px rgba(37,99,235,0.05)",
                   transform: isActive ? "translateY(-3px)" : "none",
                 }}
               >
@@ -171,12 +178,13 @@ export function RoleSelectionPage() {
                 {/* Text */}
                 <h3 style={{
                   margin: "0 0 0.4rem 0", fontSize: "1.05rem", fontWeight: "700",
-                  color: isActive ? "#fff" : "#e2e8f0",
+                  color: isActive ? card.border : "#1e3a5f",
                 }}>
                   {t(card.titleKey)}
                 </h3>
                 <p style={{
-                  margin: 0, fontSize: "0.82rem", color: isActive ? "#cbd5e1" : "#475569",
+                  margin: 0, fontSize: "0.82rem",
+                  color: isActive ? "#374151" : "#9ca3af",
                   lineHeight: 1.5,
                 }}>
                   {t(card.descKey)}
@@ -199,9 +207,9 @@ export function RoleSelectionPage() {
         {/* Error */}
         {error && (
           <div style={{
-            background: "rgba(239,68,68,0.1)", border: "1px solid #ef4444",
+            background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)",
             borderRadius: "12px", padding: "0.75rem 1rem", marginBottom: "1rem",
-            color: "#fca5a5", fontSize: "0.875rem", textAlign: "center",
+            color: "#b91c1c", fontSize: "0.875rem", textAlign: "center",
           }}>
             {error}
           </div>
@@ -215,14 +223,20 @@ export function RoleSelectionPage() {
             width: "100%", padding: "1rem 2rem",
             borderRadius: "16px",
             background: selected
-              ? `linear-gradient(135deg, ${ROLE_CARDS.find(c => c.id === selected)?.border ?? "#3b82f6"}, #a855f7)`
-              : "#1e293b",
-            border: "none", color: "white", fontWeight: "700",
-            fontSize: "1rem", cursor: selected && !loading ? "pointer" : "not-allowed",
-            opacity: selected && !loading ? 1 : 0.5,
+              ? `linear-gradient(135deg, ${ROLE_CARDS.find(c => c.id === selected)?.border ?? "#2563EB"}, #0EA5E9)`
+              : "rgba(255,255,255,0.3)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: selected ? "none" : "1px solid rgba(37,99,235,0.15)",
+            color: selected ? "white" : "#9ca3af",
+            fontWeight: "700",
+            fontSize: "1rem",
+            cursor: selected && !loading ? "pointer" : "not-allowed",
+            opacity: selected && !loading ? 1 : 0.6,
             transition: "all 0.2s",
             display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
-            boxShadow: selected ? "0 8px 24px rgba(168,85,247,0.2)" : "none",
+            boxShadow: selected ? "0 8px 24px rgba(37,99,235,0.25)" : "none",
+            fontFamily: "inherit",
           }}
         >
           {loading ? (

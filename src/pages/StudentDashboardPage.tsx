@@ -19,23 +19,25 @@ import { checkAndUpdateStreak } from "../lib/streakSystem";
 
 // ─── Design tokens ─────────────────────────────────────────────
 const C = {
-  bg:         "#020617",
-  card:       "rgba(15, 23, 42, 0.85)",
-  border:     "rgba(255,255,255,0.07)",
-  borderHover:"rgba(255,255,255,0.14)",
-  textPrimary:"#f1f5f9",
-  textMuted:  "#64748b",
-  indigo:     "#6366f1",
-  cyan:       "#06b6d4",
-  amber:      "#f59e0b",
-  emerald:    "#10b981",
+  bg:         "linear-gradient(160deg,#EBF4FF 0%,#DBEAFE 40%,#E0F2FE 70%,#F0F9FF 100%)",
+  card:       "rgba(255,255,255,0.50)",
+  border:     "rgba(255,255,255,0.78)",
+  borderHover:"rgba(37,99,235,0.30)",
+  textPrimary:"#0f1f3d",
+  textMuted:  "#6b7280",
+  indigo:     "#2563EB",
+  cyan:       "#0EA5E9",
+  amber:      "#F59E0B",
+  emerald:    "#10B981",
 };
 
 const glass = {
   background: C.card,
   backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
   border: `1px solid ${C.border}`,
   borderRadius: "20px",
+  boxShadow: "0 2px 12px rgba(37,99,235,0.05)",
 };
 
 // ─── Bento Card Wrapper ─────────────────────────────────────────
@@ -183,31 +185,32 @@ export function StudentDashboardPage() {
   const challengeColor = categoryColors[todayChallenge.category];
 
   return (
-    <div dir={isRTL ? "rtl" : "ltr"} style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div dir={isRTL ? "rtl" : "ltr"} style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Host Grotesk', system-ui, sans-serif" }}>
       {showWizard && <OnboardingWizard role="student" onComplete={() => setShowWizard(false)} />}
 
       {/* ── Top Nav ─────────────────────────────────── */}
       <header style={{
         position: "sticky", top: 0, zIndex: 50,
-        background: "rgba(2,6,23,0.8)", backdropFilter: "blur(12px)",
-        borderBottom: `1px solid ${C.border}`,
+        background: "rgba(255,255,255,0.6)", backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderBottom: "1px solid rgba(255,255,255,0.78)",
+        boxShadow: "0 2px 12px rgba(37,99,235,0.06)",
         padding: "0.75rem 2rem",
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{
-            background: "linear-gradient(135deg, #6366f1, #a855f7)",
+          <div style={{ background: "linear-gradient(135deg,#2563EB,#0EA5E9)",
             borderRadius: "10px", padding: "6px 12px",
             color: "white", fontWeight: 800, fontSize: "0.9rem", letterSpacing: "1px"
           }}>ML</div>
-          <span style={{ color: C.textMuted, fontSize: "0.9rem" }}>MetaLearning</span>
+          <span style={{ color: "#1e3a5f", fontSize: "0.9rem", fontWeight: 600 }}>MetaLearning</span>
         </div>
         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
           {profile && <XPProgressWidget compact points={profile.points} level={profile.level} badges={profile.badges} />}
           <LanguageSwitcher />
           <button
             onClick={() => signOut()}
-            style={{ background: "none", border: `1px solid ${C.border}`, color: C.textMuted, padding: "6px 10px", borderRadius: "8px", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem" }}
+            style={{ background: "none", border: "1px solid rgba(37,99,235,0.2)", color: "#6b7280", padding: "6px 10px", borderRadius: "8px", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem" }}
           >
             <LogOut size={14} /> {t("nav.signout", "Sign Out")}
           </button>
@@ -219,7 +222,7 @@ export function StudentDashboardPage() {
 
         {/* Welcome row */}
         <div style={{ marginBottom: "1.5rem" }}>
-          <h1 style={{ color: C.textPrimary, fontSize: "clamp(1.4rem, 3vw, 2rem)", fontWeight: 700, margin: "0 0 4px" }}>
+          <h1 style={{ color: "#0f1f3d", fontSize: "clamp(1.4rem, 3vw, 2rem)", fontWeight: 800, margin: "0 0 4px", letterSpacing: "-.02em" }}>
             {t("student_dashboard.welcome", "Welcome back")}, {profile.full_name?.split(" ")[0] || "Student"} 👋
           </h1>
           <p style={{ color: C.textMuted, margin: 0, fontSize: "0.95rem" }}>
@@ -239,11 +242,11 @@ export function StudentDashboardPage() {
           <BentoCard accent={C.indigo} style={{ gridColumn: "span 8" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", flexWrap: "wrap" }}>
               <motion.div
-                animate={{ boxShadow: ["0 0 16px #6366f155", "0 0 32px #a855f777", "0 0 16px #6366f155"] }}
+                animate={{ boxShadow: ["0 0 16px rgba(37,99,235,0.3)", "0 0 32px rgba(14,165,233,0.4)", "0 0 16px rgba(37,99,235,0.3)"] }}
                 transition={{ duration: 2.5, repeat: Infinity }}
                 style={{
                   width: "72px", height: "72px", borderRadius: "50%", flexShrink: 0,
-                  background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                  background: "linear-gradient(135deg, #2563EB, #0EA5E9)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   color: "white", fontWeight: 900, fontSize: "1.8rem"
                 }}
@@ -253,7 +256,7 @@ export function StudentDashboardPage() {
               <div style={{ flex: 1, minWidth: "200px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "6px" }}>
                   <div>
-                    <p style={{ margin: 0, color: "#a5b4fc", fontWeight: 700, fontSize: "1.1rem" }}>{levelTitle}</p>
+                    <p style={{ margin: 0, color: "#2563EB", fontWeight: 700, fontSize: "1.1rem" }}>{levelTitle}</p>
                     <p style={{ margin: 0, color: C.textMuted, fontSize: "0.8rem" }}>
                       <Zap size={11} style={{ display: "inline", verticalAlign: "middle" }} /> {(profile.points ?? 0).toLocaleString()} XP total
                     </p>
@@ -262,12 +265,13 @@ export function StudentDashboardPage() {
                     <Trophy size={14} /> {t("student_dashboard.leaderboard", "Leaderboard")}
                   </Link>
                 </div>
-                <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: "999px", height: "10px", overflow: "hidden" }}>
+                <div style={{ background: "rgba(37,99,235,0.08)", borderRadius: "999px", height: "10px", overflow: "hidden" }}
+                >
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${xp.percent}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
-                    style={{ height: "100%", background: "linear-gradient(90deg, #6366f1, #a855f7, #ec4899)", borderRadius: "999px" }}
+                    style={{ height: "100%", background: "linear-gradient(90deg, #2563EB, #0EA5E9)", borderRadius: "999px" }}
                   />
                 </div>
                 <p style={{ margin: "4px 0 0", color: C.textMuted, fontSize: "0.75rem" }}>
@@ -283,7 +287,7 @@ export function StudentDashboardPage() {
               <div style={{ fontSize: "2.5rem", marginBottom: "4px" }}>
                 {streak.current >= 7 ? "🔥" : streak.current >= 3 ? "⚡" : "✨"}
               </div>
-              <div style={{ color: C.textPrimary, fontWeight: 800, fontSize: "2.2rem", lineHeight: 1 }}>
+              <div style={{ color: "#0f1f3d", fontWeight: 800, fontSize: "2.2rem", lineHeight: 1 }}>
                 {streak.current}
               </div>
               <div style={{ color: C.amber, fontWeight: 600, fontSize: "0.85rem", marginBottom: "8px" }}>
@@ -294,7 +298,7 @@ export function StudentDashboardPage() {
                   <div key={i} style={{
                     width: "10px", height: "10px", borderRadius: "50%",
                     background: i < (streak.current % 7 || (streak.current >= 7 ? 7 : streak.current))
-                      ? C.amber : "rgba(255,255,255,0.1)"
+                      ? C.amber : "rgba(37,99,235,0.1)"
                   }} />
                 ))}
               </div>
@@ -359,8 +363,9 @@ export function StudentDashboardPage() {
                 placeholder={t("student_dashboard.pin_placeholder", "Enter PIN code e.g. AB12CD")}
                 maxLength={8}
                 style={{
-                  background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`,
-                  borderRadius: "10px", padding: "12px 14px", color: C.textPrimary,
+                  background: "rgba(255,255,255,0.5)", backdropFilter: "blur(12px)",
+                  border: "1.5px solid rgba(37,99,235,0.2)",
+                  borderRadius: "10px", padding: "12px 14px", color: "#0f1f3d",
                   fontSize: "1rem", fontFamily: "'Orbitron', monospace", letterSpacing: "3px",
                   outline: "none", width: "100%", boxSizing: "border-box"
                 }}
@@ -468,7 +473,7 @@ export function StudentDashboardPage() {
           {/* 8. Recent Sessions — 12 cols full width */}
           <BentoCard style={{ gridColumn: "span 12" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-              <h3 style={{ color: C.textPrimary, margin: 0, fontSize: "1rem", fontWeight: 700 }}>
+            <h3 style={{ color: "#0f1f3d", margin: 0, fontSize: "1rem", fontWeight: 700 }}>
                 📋 {t("student_dashboard.recent", "Recent Sessions")}
               </h3>
             </div>
@@ -490,7 +495,7 @@ export function StudentDashboardPage() {
                     transition={{ delay: i * 0.05 }}
                     style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between",
-                      background: "rgba(255,255,255,0.02)", border: `1px solid ${C.border}`,
+                      background: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.75)",
                       borderRadius: "12px", padding: "12px 16px"
                     }}
                   >
@@ -509,8 +514,8 @@ export function StudentDashboardPage() {
                     <Link
                       to={`/lesson/${s.lesson_id || s.model_key}`}
                       style={{
-                        background: `${C.indigo}22`, border: `1px solid ${C.indigo}44`,
-                        color: "#a5b4fc", padding: "6px 12px", borderRadius: "8px",
+                        background: "rgba(37,99,235,0.1)", border: "1px solid rgba(37,99,235,0.25)",
+                        color: "#1d4ed8", padding: "6px 12px", borderRadius: "8px",
                         textDecoration: "none", fontSize: "0.8rem", fontWeight: 600,
                         display: "flex", alignItems: "center", gap: "4px"
                       }}
