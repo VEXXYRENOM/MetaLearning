@@ -1,47 +1,213 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300..800;1,300..800&family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap');
 
+/* ══════════════════════════════════════════
+   MetaLearning 2.0 — Light Blue Glassmorphism
+   ══════════════════════════════════════════ */
 :root {
-  --bg: #0c1118;
-  --panel: #151c28;
-  --border: #2a3548;
-  --text: #e8edf4;
-  --muted: #8b9bb5;
-  --accent: #3d9cf0;
-  --accent-dim: #2563a8;
-  /* MetaLearning OS Palette */
-  --meta-bg: #050508;
-  --meta-purple: #7c3aed;
-  --meta-blue: #06b6d4;
-  --meta-glow: #a78bfa;
-  --meta-surface: rgba(15, 10, 30, 0.7);
+  /* ── Core Light-Blue Palette ── */
+  --bg:           #EBF4FF;
+  --bg-2:         #DBEAFE;
+  --bg-3:         #E0F2FE;
+  --panel:        rgba(255,255,255,0.55);
+  --panel-hover:  rgba(255,255,255,0.70);
+  --border:       rgba(255,255,255,0.75);
+  --border-soft:  rgba(37,99,235,0.12);
+  --text:         #0f1f3d;
+  --text-2:       #1e3a5f;
+  --muted:        #6b7280;
+  --muted-2:      #94a3b8;
+
+  /* ── Brand Colors ── */
+  --accent:       #2563EB;
+  --accent-2:     #0EA5E9;
+  --accent-dim:   #1d4ed8;
+  --purple:       #7C3AED;
+  --green:        #10B981;
+  --amber:        #F59E0B;
+
+  /* ── Glass Blur ── */
+  --blur:         blur(20px);
+  --blur-sm:      blur(12px);
+
+  /* ── Shadows ── */
+  --shadow-sm:    0 2px 12px rgba(37,99,235,0.06);
+  --shadow-md:    0 8px 30px rgba(37,99,235,0.10);
+  --shadow-lg:    0 20px 60px rgba(37,99,235,0.14);
+
+  /* ── Radii ── */
+  --radius-sm:    10px;
+  --radius-md:    16px;
+  --radius-lg:    24px;
+  --radius-xl:    32px;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html,
-body,
-#root {
+html, body, #root {
   margin: 0;
   height: 100%;
-  font-family: "Noto Sans Arabic", system-ui, sans-serif;
-  background: var(--bg);
+  font-family: "Host Grotesk", "Noto Sans Arabic", system-ui, sans-serif;
+  background: linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 40%, var(--bg-3) 70%, #F0F9FF 100%);
   color: var(--text);
 }
 
-button {
+button { font-family: inherit; cursor: pointer; }
+
+a { color: var(--accent); }
+
+canvas { touch-action: none; }
+
+/* ══════════════════════════════════════════
+   GLOBAL GLASSMORPHISM UTILITIES
+   ══════════════════════════════════════════ */
+
+/* Glass Panel — cards, sidebars, dialogs */
+.glass-panel {
+  background: var(--panel);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Glass Card — lighter, for feature cards */
+.glass-card {
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  border: 1px solid rgba(255,255,255,0.70);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.glass-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Glass Input */
+.glass-input {
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  border: 1.5px solid rgba(37,99,235,0.2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
   font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.65rem 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  width: 100%;
+}
+.glass-input::placeholder { color: var(--muted-2); }
+.glass-input:focus {
+  border-color: rgba(37,99,235,0.5);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+/* Glass Button Primary */
+.glass-btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(37,99,235,0.12);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  border: 1px solid rgba(37,99,235,0.3);
+  border-radius: var(--radius-sm);
+  color: var(--accent-dim);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.65rem 1.4rem;
   cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), var(--shadow-sm);
+}
+.glass-btn-primary:hover {
+  background: rgba(37,99,235,0.20);
+  border-color: rgba(37,99,235,0.55);
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), var(--shadow-md);
+  filter: brightness(1.05);
 }
 
-a {
+/* Glass Button Secondary */
+.glass-btn-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s;
+}
+.glass-btn-secondary:hover {
+  background: rgba(255,255,255,0.30);
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+}
+
+/* Glass Nav */
+.glass-nav {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border-bottom: 1px solid rgba(255,255,255,0.75);
+}
+
+/* Glass Sidebar */
+.glass-sidebar {
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border-right: 1px solid rgba(255,255,255,0.7);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Glass Tag / Badge */
+.glass-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(37,99,235,0.08);
+  border: 1px solid rgba(37,99,235,0.18);
+  border-radius: 50px;
   color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 12px;
 }
 
-canvas {
-  touch-action: none;
+/* Page base for internal pages */
+.ml-page {
+  min-height: 100vh;
+  background: linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 40%, var(--bg-3) 70%, #F0F9FF 100%);
+  color: var(--text);
+  font-family: "Host Grotesk", system-ui, sans-serif;
 }
+
+/* ── Divider ── */
+.ml-divider {
+  border: none;
+  border-top: 1px solid var(--border-soft);
+  margin: 1.5rem 0;
+}
+
+/* ── Text Utilities ── */
+.text-accent  { color: var(--accent); }
+.text-muted   { color: var(--muted); }
+.text-heading { color: var(--text); font-weight: 800; letter-spacing: -0.02em; }
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 
 /* ——— AR / Dark Mode Homepage Premium Redesign ——— */
 .home-ar-layout {
