@@ -929,13 +929,14 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
           )}
 
           {!isMobile && (
-            <h1 style={{ color: "#0f1f3d", margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>
-              ⚗️ {t("lab.title", "Interactive Physics & Chemistry Lab")}
-            </h1>
-            <p style={{ color: "#6b7280", margin: 0, fontSize: "0.78rem" }}>
-              {t("lab.subtitle", "Stoichiometric Precision Mode. Enter exact quantities to pour.")}
-            </p>
-          </div>
+            <div>
+              <h1 style={{ color: "#0f1f3d", margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>
+                ⚗️ {t("lab.title", "Interactive Physics & Chemistry Lab")}
+              </h1>
+              <p style={{ color: "#6b7280", margin: 0, fontSize: "0.78rem" }}>
+                {t("lab.subtitle", "Stoichiometric Precision Mode. Enter exact quantities to pour.")}
+              </p>
+            </div>
           )}
         </div>
         
