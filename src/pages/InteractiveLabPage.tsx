@@ -5,7 +5,7 @@ import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, RotateCcw, Droplet } from "lucide-react";
+import { ArrowLeft, RotateCcw, Droplet, Menu } from "lucide-react";
 import { LabSidebar } from "../components/lab/LabSidebar";
 import { LabAnalyticsHUD } from "../components/lab/LabAnalyticsHUD";
 import { LabReportOverlay, ReactionLogItem } from "../components/lab/LabReportOverlay";
@@ -645,6 +645,9 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [showSidebarHint, setShowSidebarHint] = useState(() => localStorage.getItem("lab_sidebar_hint_seen") !== "true");
+
   const [beaker, setBeaker] = useState<BeakerState>({ substances: [], color: "#ffffff" });
   
   // Pending pour state
@@ -741,6 +744,25 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
 
   function handleDragStart(el: LabElement) {
     dragElementRef.current = el;
+    if (isMobile) {
+      setShowMobileSidebar(false);
+      if (showSidebarHint) {
+        setShowSidebarHint(false);
+        localStorage.setItem("lab_sidebar_hint_seen", "true");
+      }
+    }
+  }
+
+  function handleItemClick(el: LabElement) {
+    dragElementRef.current = el;
+    handleDrop();
+    if (isMobile) {
+      setShowMobileSidebar(false);
+      if (showSidebarHint) {
+        setShowSidebarHint(false);
+        localStorage.setItem("lab_sidebar_hint_seen", "true");
+      }
+    }
   }
 
   function handleDrop() {
@@ -884,7 +906,29 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
           }}>
             <ArrowLeft size={18} />
           </button>
-          <div>
+          
+          {isMobile && (
+            <div style={{ position: "relative" }}>
+              <button onClick={() => setShowMobileSidebar(!showMobileSidebar)} style={{
+                background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", color: "#6366f1",
+                padding: "8px", borderRadius: "10px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px"
+              }}>
+                <Menu size={18} /> {isRTL ? "مكونات" : "Elements"}
+              </button>
+              {showSidebarHint && (
+                <div style={{
+                  position: "absolute", top: "110%", left: isRTL ? "auto" : 0, right: isRTL ? 0 : "auto",
+                  width: "max-content", background: "#ef4444", color: "white", padding: "6px 12px",
+                  borderRadius: "8px", fontSize: "0.75rem", fontWeight: "bold", zIndex: 100,
+                  boxShadow: "0 4px 12px rgba(239,68,68,0.3)", pointerEvents: "none"
+                }}>
+                  {isRTL ? "👆 اضغط هنا لإضافة المكونات" : "👆 Click here to add elements"}
+                </div>
+              )}
+            </div>
+          )}
+
+          {!isMobile && (
             <h1 style={{ color: "#0f1f3d", margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>
               ⚗️ {t("lab.title", "Interactive Physics & Chemistry Lab")}
             </h1>
@@ -892,6 +936,7 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
               {t("lab.subtitle", "Stoichiometric Precision Mode. Enter exact quantities to pour.")}
             </p>
           </div>
+          )}
         </div>
         
         <div style={{ display: "flex", gap: "8px" }}>
@@ -918,9 +963,27 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
       <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative", flexDirection: isMobile ? "column" : "row" }}>
         
         {/* Sidebar */}
-        <div style={{ width: isMobile ? "100%" : "260px", height: isMobile ? "45vh" : "100%", flexShrink: 0, borderTop: isMobile ? "1px solid rgba(37,99,235,0.1)" : "none" }}>
-          <LabSidebar onDragStart={handleDragStart} />
-        </div>
+        {(!isMobile || showMobileSidebar) && (
+          <div style={{ 
+            ...(isMobile ? {
+              position: "absolute", top: 0, left: 0, right: 0, height: "55vh", zIndex: 100,
+              boxShadow: "0 10px 30px rgba(0,0,0,0.15)", borderRadius: "0 0 16px 16px", overflow: "hidden",
+              background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)"
+            } : {
+              width: "260px", height: "100%", flexShrink: 0, borderTop: "none"
+            })
+          }}>
+            {isMobile && (
+               <div style={{ background: "rgba(255,255,255,0.95)", padding: "8px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
+                 <span style={{ fontWeight: "bold", fontSize: "0.85rem", color: "#0f1f3d" }}>{isRTL ? "اختر مكوناً" : "Elements Menu"}</span>
+                 <button onClick={() => setShowMobileSidebar(false)} style={{ background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#64748b" }}>✕</button>
+               </div>
+            )}
+            <div style={{ height: isMobile ? "calc(100% - 40px)" : "100%" }}>
+              <LabSidebar onDragStart={handleDragStart} onItemClick={isMobile ? handleItemClick : undefined} />
+            </div>
+          </div>
+        )}
 
         {/* 3D Scene */}
         <div style={{ flex: 1, position: "relative", minHeight: 0 }}>

@@ -3,6 +3,7 @@ import { LAB_ELEMENTS, ELEMENTS_ONLY, EQUIPMENT_ONLY, LabElement } from "../../l
 
 interface LabSidebarProps {
   onDragStart: (element: LabElement) => void;
+  onItemClick?: (element: LabElement) => void;
 }
 
 const C = {
@@ -13,7 +14,7 @@ const C = {
   muted:   "#6b7280",
 };
 
-export function LabSidebar({ onDragStart }: LabSidebarProps) {
+export function LabSidebar({ onDragStart, onItemClick }: LabSidebarProps) {
   const [tab, setTab] = useState<"elements" | "equipment">("elements");
   const items = tab === "elements" ? ELEMENTS_ONLY : EQUIPMENT_ONLY;
 
@@ -63,6 +64,7 @@ export function LabSidebar({ onDragStart }: LabSidebarProps) {
               transition: "border-color 0.15s, transform 0.1s",
               userSelect: "none",
             }}
+            onClick={() => onItemClick && onItemClick(el)}
             onMouseEnter={e => {
               (e.currentTarget as HTMLDivElement).style.borderColor = el.color + "66";
               (e.currentTarget as HTMLDivElement).style.transform = "translateX(2px)";
