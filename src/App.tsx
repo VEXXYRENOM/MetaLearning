@@ -119,6 +119,9 @@ function AnimatedRoutes() {
             <Suspense fallback={<PageSkeleton />}><PageTransition><AdminDashboardPage /></PageTransition></Suspense>
           </ProtectedRoute>
         } />
+        {/* Redirect /admin/dashboard → /admin (legacy path safety net) */}
+        <Route path="/admin/dashboard" element={<Navigate to="/admin" replace />} />
+
         <Route path="/admin/posts" element={
           <ProtectedRoute requiredRole="admin">
             <Suspense fallback={<PageSkeleton />}><PageTransition><PostGeneratorPage /></PageTransition></Suspense>
