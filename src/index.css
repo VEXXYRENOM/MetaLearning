@@ -1556,3 +1556,34 @@ canvas { touch-action: none; }
 @media (max-width: 768px) {
   .ai-lab-layout { padding-top: 4rem; }
 }
+
+/* ------------------------------------------
+   BENTO GRID SYSTEM (RESPONSIVE)
+   ------------------------------------------ */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.bento-span-4 { grid-column: span 4; }
+.bento-span-6 { grid-column: span 6; }
+.bento-span-8 { grid-column: span 8; }
+.bento-span-12 { grid-column: span 12; }
+
+@media (max-width: 1024px) {
+  .bento-span-4 { grid-column: span 6; }
+  .bento-span-8 { grid-column: span 12; }
+}
+
+@media (max-width: 768px) {
+  .bento-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .bento-span-4, .bento-span-6, .bento-span-8, .bento-span-12 {
+    width: 100%;
+  }
+}

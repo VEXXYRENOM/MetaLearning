@@ -42,16 +42,18 @@ const glass = {
 
 // ─── Bento Card Wrapper ─────────────────────────────────────────
 function BentoCard({
-  children, style = {}, onClick, accent = C.indigo
+  children, style = {}, className = "", onClick, accent = C.indigo
 }: {
   children: React.ReactNode;
   style?: React.CSSProperties;
+  className?: string;
   onClick?: () => void;
   accent?: string;
 }) {
   const [hovered, setHovered] = useState(false);
   return (
     <motion.div
+      className={className}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -195,8 +197,8 @@ export function StudentDashboardPage() {
         WebkitBackdropFilter: "blur(20px)",
         borderBottom: "1px solid rgba(255,255,255,0.78)",
         boxShadow: "0 2px 12px rgba(37,99,235,0.06)",
-        padding: "0.75rem 2rem",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0.75rem 1rem",
+        display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{ background: "linear-gradient(135deg,#2563EB,#0EA5E9)",
@@ -223,7 +225,7 @@ export function StudentDashboardPage() {
         {/* Welcome row */}
         <div style={{ marginBottom: "1.5rem" }}>
           <h1 style={{ color: "#0f1f3d", fontSize: "clamp(1.4rem, 3vw, 2rem)", fontWeight: 800, margin: "0 0 4px", letterSpacing: "-.02em" }}>
-            {t("student_dashboard.welcome", "Welcome back")}, {profile.full_name?.split(" ")[0] || "Student"} 👋
+            {t("student_dashboard.welcome", "Welcome back")}{isRTL ? "،" : ","} <bdi>{profile.full_name?.split(" ")[0] || "Student"}</bdi> 👋
           </h1>
           <p style={{ color: C.textMuted, margin: 0, fontSize: "0.95rem" }}>
             {t("student_dashboard.subtitle", "Your daily growth hub — show up, level up.")}
@@ -231,15 +233,10 @@ export function StudentDashboardPage() {
         </div>
 
         {/* BENTO GRID */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(12, 1fr)",
-          gap: "1rem",
-          alignItems: "start",
-        }}>
+        <div className="bento-grid">
 
           {/* 1. XP / Level Hero Card — 8 cols */}
-          <BentoCard accent={C.indigo} style={{ gridColumn: "span 8" }}>
+          <BentoCard accent={C.indigo} className="bento-span-8">
             <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", flexWrap: "wrap" }}>
               <motion.div
                 animate={{ boxShadow: ["0 0 16px rgba(37,99,235,0.3)", "0 0 32px rgba(14,165,233,0.4)", "0 0 16px rgba(37,99,235,0.3)"] }}
@@ -282,7 +279,7 @@ export function StudentDashboardPage() {
           </BentoCard>
 
           {/* 2. Streak Card — 4 cols */}
-          <BentoCard accent={C.amber} style={{ gridColumn: "span 4" }}>
+          <BentoCard accent={C.amber} className="bento-span-4">
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: "2.5rem", marginBottom: "4px" }}>
                 {streak.current >= 7 ? "🔥" : streak.current >= 3 ? "⚡" : "✨"}
@@ -309,7 +306,7 @@ export function StudentDashboardPage() {
           </BentoCard>
 
           {/* 3. Daily Challenge — 6 cols */}
-          <BentoCard accent={challengeColor} style={{ gridColumn: "span 6" }}>
+          <BentoCard accent={challengeColor} className="bento-span-6">
             <div style={{ marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
               <span style={{
                 background: `${challengeColor}22`, border: `1px solid ${challengeColor}44`,
@@ -349,7 +346,7 @@ export function StudentDashboardPage() {
           </BentoCard>
 
           {/* 4. Join with PIN — 6 cols */}
-          <BentoCard accent={C.cyan} style={{ gridColumn: "span 6" }}>
+          <BentoCard accent={C.cyan} className="bento-span-6">
             <div style={{ marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
               <Hash size={16} color={C.cyan} />
               <span style={{ color: C.textPrimary, fontWeight: 600, fontSize: "0.95rem" }}>
@@ -388,7 +385,7 @@ export function StudentDashboardPage() {
           </BentoCard>
 
           {/* 5. Interactive Lab — 4 cols */}
-          <BentoCard accent={C.emerald} style={{ gridColumn: "span 4" }} onClick={() => navigate("/lab")}>
+          <BentoCard accent={C.emerald} className="bento-span-4" onClick={() => navigate("/lab")}>
             <div style={{ display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
               <div style={{
                 width: "48px", height: "48px", borderRadius: "14px",
@@ -412,7 +409,7 @@ export function StudentDashboardPage() {
           </BentoCard>
 
           {/* 6. Browse Library — 4 cols */}
-          <BentoCard accent={C.indigo} style={{ gridColumn: "span 4" }} onClick={() => navigate("/sandbox")}>
+          <BentoCard accent={C.indigo} className="bento-span-4" onClick={() => navigate("/sandbox")}>
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={{
                 width: "48px", height: "48px", borderRadius: "14px",
@@ -436,7 +433,7 @@ export function StudentDashboardPage() {
           </BentoCard>
 
           {/* 7. Skills / AI tracker — 4 cols */}
-          <BentoCard accent="#a855f7" style={{ gridColumn: "span 4" }}>
+          <BentoCard accent="#a855f7" className="bento-span-4">
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={{
                 width: "48px", height: "48px", borderRadius: "14px",
@@ -471,7 +468,7 @@ export function StudentDashboardPage() {
           </BentoCard>
 
           {/* 8. Recent Sessions — 12 cols full width */}
-          <BentoCard style={{ gridColumn: "span 12" }}>
+          <BentoCard className="bento-span-12">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
             <h3 style={{ color: "#0f1f3d", margin: 0, fontSize: "1rem", fontWeight: 700 }}>
                 📋 {t("student_dashboard.recent", "Recent Sessions")}
