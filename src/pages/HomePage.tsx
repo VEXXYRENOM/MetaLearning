@@ -1,409 +1,310 @@
-import { useEffect, useState, Suspense, lazy } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { MetaTags } from "../components/MetaTags";
-import { Zap, Crown, Trophy, ArrowRight, Star, ShieldCheck, LogOut, Building2, Mail } from "lucide-react";
+import { ArrowRight, Zap, Users, BookOpen, Brain, Shield, Star, LogOut, ChevronRight } from "lucide-react";
 import { supabase } from "../services/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
 
-const Hero3DBackground = lazy(() => import("../components/Hero3DBackground"));
+const STATS = [
+  { label: "Active Learners", value: "3,200+", icon: Users, color: "#2563EB" },
+  { label: "3D Lessons", value: "120+", icon: BookOpen, color: "#0EA5E9" },
+  { label: "AI Features", value: "12", icon: Brain, color: "#7C3AED" },
+  { label: "Avg. Rating", value: "4.9 ★", icon: Star, color: "#F59E0B" },
+];
 
-// CSS-only animated background — zero WebGL context cost
-const CSSBackground = () => (
-  <div style={{
-    position: "absolute", inset: 0, overflow: "hidden",
-    background: "radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(168,85,247,0.08) 0%, transparent 60%), #020617",
-    zIndex: 0
-  }}>
-    {[
-      { size: 300, x: "10%", y: "20%", color: "rgba(99,102,241,0.06)", dur: 8, delay: 0 },
-      { size: 200, x: "80%", y: "60%", color: "rgba(168,85,247,0.06)", dur: 10, delay: 2 },
-      { size: 150, x: "50%", y: "80%", color: "rgba(6,182,212,0.05)",  dur: 12, delay: 4 },
-    ].map((orb, i) => (
-      <div key={i} style={{
-        position: "absolute", width: orb.size, height: orb.size,
-        left: orb.x, top: orb.y, borderRadius: "50%",
-        background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
-        animation: `cssOrb ${orb.dur}s ease-in-out infinite`,
-        animationDelay: `${orb.delay}s`,
-      }} />
-    ))}
-    <style>{`@keyframes cssOrb { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-30px) scale(1.05); } }`}</style>
-  </div>
-);
+const FEATURES = [
+  {
+    icon: Brain,
+    title: "AI-Powered 3D Learning",
+    desc: "Generate immersive 3D lessons from text or images using our advanced AI engine.",
+    color: "#2563EB",
+    bg: "rgba(37,99,235,0.08)",
+  },
+  {
+    icon: Shield,
+    title: "Live Classroom Sync",
+    desc: "Control student viewpoints in real-time. Every student sees exactly what you show them.",
+    color: "#0EA5E9",
+    bg: "rgba(14,165,233,0.08)",
+  },
+  {
+    icon: Zap,
+    title: "Instant Quizzes & XP",
+    desc: "Gamified quizzes with leaderboards keep students engaged and motivated every session.",
+    color: "#7C3AED",
+    bg: "rgba(124,58,237,0.08)",
+  },
+];
 
-// ─── LEADERBOARD COMPONENT ───
-const TopPlayers = () => {
-  const [top, setTop] = useState<any[]>([]);
+export function HomePage() {
+  const { t } = useTranslation();
+  const { session, profile } = useAuth();
+  const [scrollY, setScrollY] = useState(0);
+  const [activeUsers, setActiveUsers] = useState(0);
 
   useEffect(() => {
-    async function load() {
-      const { data } = await supabase
-        .from('global_leaderboard')
-        .select('*')
-        .order('rank', { ascending: true })
-        .limit(3);
-      if (data) setTop(data);
-    }
-    load();
+    const onScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  if (top.length === 0) return null;
+  useEffect(() => {
+    supabase.from("profiles").select("id", { count: "exact", head: true }).then(({ count }) => {
+      if (count) setActiveUsers(count);
+    });
+  }, []);
+
+  const dashboardLink = profile?.role === "teacher" ? "/teacher/create"
+    : profile?.role === "creator" ? "/creator/lab"
+    : profile?.role === "admin" ? "/admin"
+    : profile?.role === "student" ? "/student/dashboard"
+    : "/auth/role-selection";
 
   return (
-    <div style={{ marginTop: "4rem", textAlign: "center" }}>
-      <p style={{ color: "#06b6d4", fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.1em", marginBottom: "1.5rem" }}>
-        <Trophy size={16} style={{ verticalAlign: "middle", marginRight: "6px" }} />
-        GLOBAL TOP SCHOLARS
-      </p>
-      <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>
-        {top.map((player) => (
-          <div key={player.id} style={{
-            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)",
-            backdropFilter: "blur(10px)", borderRadius: "16px", padding: "1rem 1.5rem",
-            display: "flex", alignItems: "center", gap: "12px", minWidth: "220px"
-          }}>
-            <div style={{
-              width: "40px", height: "40px", borderRadius: "50%",
-              background: player.rank === 1 ? "linear-gradient(135deg, #f59e0b, #fbbf24)" : player.rank === 2 ? "linear-gradient(135deg, #94a3b8, #cbd5e1)" : "linear-gradient(135deg, #b45309, #d97706)",
-              display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: "bold"
-            }}>
-              #{player.rank}
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg, #EBF4FF 0%, #DBEAFE 30%, #E0F2FE 60%, #F0F9FF 100%)", fontFamily: "'Inter', system-ui, sans-serif", overflowX: "hidden" }}>
+      <MetaTags title="MetaLearning — The 3D Education Revolution" description="The Future of Education is 3D. Join MetaLearning and transform how you teach and learn." />
+
+      {/* ── GLOBAL STYLES ── */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        .glass { background: rgba(255,255,255,0.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.8); }
+        .glass-dark { background: rgba(255,255,255,0.3); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.5); }
+        .btn-primary { background: linear-gradient(135deg, #2563EB, #0EA5E9); color: white; border: none; cursor: pointer; font-weight: 700; transition: all 0.3s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(37,99,235,0.35); }
+        .btn-ghost { background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.9); color: #1e40af; cursor: pointer; font-weight: 600; transition: all 0.3s; backdrop-filter: blur(10px); }
+        .btn-ghost:hover { background: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .feature-card { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+        .feature-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(37,99,235,0.12); }
+        .stat-card { transition: all 0.3s; }
+        .stat-card:hover { transform: translateY(-4px); }
+        .nav-link { color: #475569; font-weight: 500; text-decoration: none; font-size: 0.95rem; transition: color 0.2s; }
+        .nav-link:hover { color: #2563EB; }
+        @keyframes float { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-20px) rotate(2deg); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-ring { 0% { transform: scale(0.95); opacity: 0.6; } 70% { transform: scale(1.1); opacity: 0; } 100% { transform: scale(1.1); opacity: 0; } }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+        .fade-up { animation: fadeUp 0.8s ease forwards; }
+        .fade-up-2 { animation: fadeUp 0.8s 0.15s ease both; }
+        .fade-up-3 { animation: fadeUp 0.8s 0.3s ease both; }
+      `}</style>
+
+      {/* ══ NAVBAR ══ */}
+      <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, padding: "0 2rem" }}>
+        <nav style={{ maxWidth: "1200px", margin: "1rem auto 0", borderRadius: "18px", padding: "1rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }} className="glass">
+          {/* Logo */}
+          <Link to="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
+            <div style={{ width: "38px", height: "38px", borderRadius: "12px", background: "linear-gradient(135deg, #2563EB, #0EA5E9)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 900, fontSize: "1.1rem", boxShadow: "0 4px 15px rgba(37,99,235,0.3)" }}>M</div>
+            <span style={{ fontWeight: 800, fontSize: "1.15rem", color: "#1e3a5f", letterSpacing: "-0.02em" }}>MetaLearning</span>
+          </Link>
+
+          {/* Nav Links */}
+          <div style={{ display: "flex", gap: "2rem", alignItems: "center" }}>
+            <Link to="/pricing" className="nav-link">Pricing</Link>
+            <Link to="/leaderboard" className="nav-link">Leaderboard</Link>
+            <Link to="/ar-guide" className="nav-link">Free Guide</Link>
+          </div>
+
+          {/* CTA */}
+          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+            {session ? (
+              <>
+                <button onClick={() => supabase.auth.signOut()} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", display: "flex", alignItems: "center", gap: "5px", fontSize: "0.9rem", fontWeight: 600 }}>
+                  <LogOut size={15} /> Sign Out
+                </button>
+                <Link to={dashboardLink} className="btn-primary" style={{ padding: "9px 20px", borderRadius: "12px", fontSize: "0.9rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
+                  Dashboard <ChevronRight size={15} />
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/auth" className="btn-ghost" style={{ padding: "9px 20px", borderRadius: "12px", fontSize: "0.9rem", textDecoration: "none" }}>Log In</Link>
+                <Link to="/auth" className="btn-primary" style={{ padding: "9px 20px", borderRadius: "12px", fontSize: "0.9rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
+                  Get Started <ArrowRight size={15} />
+                </Link>
+              </>
+            )}
+          </div>
+        </nav>
+      </header>
+
+      {/* ══ HERO SECTION ══ */}
+      <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", position: "relative", paddingTop: "100px", overflow: "hidden" }}>
+
+        {/* BIG BG TEXT */}
+        <div style={{ position: "absolute", right: "-5%", top: "50%", transform: "translateY(-50%)", fontSize: "clamp(8rem, 18vw, 22rem)", fontWeight: 900, color: "rgba(37,99,235,0.05)", lineHeight: 1, letterSpacing: "-0.05em", userSelect: "none", pointerEvents: "none", whiteSpace: "nowrap" }}>
+          META
+        </div>
+
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "4rem 2rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center", width: "100%" }}>
+
+          {/* LEFT: Content */}
+          <div>
+            {/* Badge */}
+            <div className="fade-up glass" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "7px 16px", borderRadius: "50px", marginBottom: "1.5rem" }}>
+              <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10B981", boxShadow: "0 0 0 3px rgba(16,185,129,0.2)" }} />
+              <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "#1e40af" }}>MetaLearning 2.0 is Live</span>
+              {activeUsers > 0 && <span style={{ color: "#2563EB", fontWeight: 700, fontSize: "0.82rem" }}>· {activeUsers} users</span>}
             </div>
-            <div style={{ textAlign: "left" }}>
-              <p style={{ margin: 0, color: "white", fontWeight: 600, fontSize: "0.95rem" }}>{player.full_name || "Anonymous"}</p>
-              <p style={{ margin: 0, color: "#64748b", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "4px" }}>
-                <Zap size={12} color="#a855f7" /> {player.points?.toLocaleString() || 0} XP
+
+            {/* Headline */}
+            <h1 className="fade-up-2" style={{ fontSize: "clamp(2.8rem, 5vw, 4.2rem)", fontWeight: 900, lineHeight: 1.1, color: "#0f1f3d", margin: "0 0 1.5rem", letterSpacing: "-0.03em" }}>
+              The Future of<br />
+              <span style={{ background: "linear-gradient(135deg, #2563EB, #0EA5E9)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                Education
+              </span>{" "}
+              is 3D
+            </h1>
+
+            <p className="fade-up-3" style={{ fontSize: "1.1rem", color: "#475569", lineHeight: 1.7, margin: "0 0 2.5rem", maxWidth: "500px" }}>
+              Transform any lesson into an immersive 3D experience. Powered by AI, built for the next generation of learners and teachers.
+            </p>
+
+            {/* CTAs */}
+            <div className="fade-up-3" style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+              <Link to="/auth" className="btn-primary" style={{ padding: "15px 32px", borderRadius: "14px", fontSize: "1rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 8px 25px rgba(37,99,235,0.3)" }}>
+                Start for Free <ArrowRight size={18} />
+              </Link>
+              <Link to="/join" className="btn-ghost" style={{ padding: "15px 32px", borderRadius: "14px", fontSize: "1rem", textDecoration: "none" }}>
+                I have a PIN
+              </Link>
+            </div>
+
+            {/* Social proof */}
+            <div className="fade-up-3" style={{ marginTop: "2rem", display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ display: "flex" }}>
+                {["#2563EB", "#0EA5E9", "#7C3AED", "#10B981"].map((c, i) => (
+                  <div key={i} style={{ width: "34px", height: "34px", borderRadius: "50%", background: c, border: "2px solid white", marginLeft: i === 0 ? 0 : "-10px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "0.7rem", fontWeight: 700 }}>{["T", "S", "M", "A"][i]}</div>
+                ))}
+              </div>
+              <p style={{ color: "#64748b", fontSize: "0.88rem", margin: 0 }}>
+                Join <strong style={{ color: "#1e40af" }}>3,200+ students & teachers</strong> already learning in 3D
               </p>
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
+          {/* RIGHT: Hero Visual */}
+          <div style={{ position: "relative", display: "flex", justifyContent: "center", alignItems: "center" }}>
+            {/* Glow ring */}
+            <div style={{ position: "absolute", width: "380px", height: "380px", borderRadius: "50%", background: "radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%)" }} />
 
+            {/* Brain Image */}
+            <img
+              src="/hero-brain.png"
+              alt="3D AI Brain"
+              className="float-anim"
+              style={{ width: "380px", height: "380px", objectFit: "contain", position: "relative", zIndex: 2, filter: "drop-shadow(0 30px 60px rgba(37,99,235,0.25))" }}
+            />
 
+            {/* Floating Card 1 — Active Learners */}
+            <div className="glass" style={{ position: "absolute", top: "10%", left: "-10%", padding: "12px 18px", borderRadius: "16px", display: "flex", alignItems: "center", gap: "10px", zIndex: 5, boxShadow: "0 8px 30px rgba(37,99,235,0.12)", animation: "float 5s 0.5s ease-in-out infinite" }}>
+              <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "linear-gradient(135deg, #2563EB, #0EA5E9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Users size={18} color="white" />
+              </div>
+              <div>
+                <p style={{ margin: 0, fontSize: "0.7rem", color: "#64748b", fontWeight: 600 }}>Active Users</p>
+                <p style={{ margin: 0, fontSize: "1rem", color: "#0f1f3d", fontWeight: 800 }}>+3,200</p>
+              </div>
+            </div>
 
-export function HomePage() {
-  const { t, i18n } = useTranslation();
-  const { session, profile } = useAuth();
-  const lang = i18n.language.startsWith("ar") ? "ar" : "en";
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
-  const [pricingTab, setPricingTab] = useState<'individual' | 'team'>('individual');
-  const [seatCount, setSeatCount] = useState(25);
-  const pricePerSeat = 5;
+            {/* Floating Card 2 — AI Lessons */}
+            <div className="glass" style={{ position: "absolute", bottom: "15%", right: "-12%", padding: "12px 18px", borderRadius: "16px", display: "flex", alignItems: "center", gap: "10px", zIndex: 5, boxShadow: "0 8px 30px rgba(14,165,233,0.15)", animation: "float 7s 1s ease-in-out infinite" }}>
+              <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "linear-gradient(135deg, #7C3AED, #A855F7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Brain size={18} color="white" />
+              </div>
+              <div>
+                <p style={{ margin: 0, fontSize: "0.7rem", color: "#64748b", fontWeight: 600 }}>AI 3D Lessons</p>
+                <p style={{ margin: 0, fontSize: "1rem", color: "#0f1f3d", fontWeight: 800 }}>120+ Ready</p>
+              </div>
+            </div>
 
-  useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth > 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return (
-    <div style={{
-      minHeight: "100vh", position: "relative", overflowX: "hidden",
-      background: "#020617", fontFamily: "'Inter', system-ui, sans-serif"
-    }}>
-      <MetaTags title="MetaLearning — The 3D Education Revolution" description="The Future of Tunisian Education is 3D." />
-
-      {/* 3D Background on Desktop, CSS on Mobile */}
-      {isDesktop ? (
-        <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
-          <Suspense fallback={<CSSBackground />}>
-            <Hero3DBackground />
-          </Suspense>
-        </div>
-      ) : (
-        <CSSBackground />
-      )}
-
-      {/* Navigation */}
-      <header style={{
-        position: "relative", zIndex: 10, padding: "1.5rem 2rem",
-        display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "1200px", margin: "0 auto"
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "linear-gradient(135deg, #06b6d4, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: "bold" }}>M</div>
-          <span style={{ fontSize: "1.2rem", fontWeight: 800, color: "white", letterSpacing: "0.05em" }}>MetaLearning</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-          <LanguageSwitcher theme="dark" />
-          {session ? (
-            <>
-              <button onClick={() => supabase.auth.signOut()} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontWeight: 600 }}>
-                <LogOut size={16} /> {lang === "ar" ? "خروج" : "Sign Out"}
-              </button>
-              <Link to={
-                profile?.role === "teacher" ? "/teacher/create"
-                : profile?.role === "creator" ? "/creator/lab"
-                : profile?.role === "admin" ? "/admin"
-                : profile?.role === "student" ? "/student/dashboard"
-                : "/auth/role-selection"
-              } style={{
-                background: "linear-gradient(90deg, #06b6d4, #3b82f6)",
-                color: "white", textDecoration: "none", padding: "10px 20px", borderRadius: "999px",
-                fontWeight: 700, fontSize: "0.95rem", boxShadow: "0 4px 15px rgba(6,182,212,0.3)"
-              }}>
-                {lang === "ar" ? "لوحة التحكم" : "Dashboard"}
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link to="/auth" style={{ color: "white", textDecoration: "none", fontWeight: 600, fontSize: "0.95rem" }}>
-                {lang === "ar" ? "تسجيل الدخول" : "Log In"}
-              </Link>
-              <Link to="/auth" style={{
-                background: "linear-gradient(90deg, #06b6d4, #3b82f6)",
-                color: "white", textDecoration: "none", padding: "10px 20px", borderRadius: "999px",
-                fontWeight: 700, fontSize: "0.95rem", boxShadow: "0 4px 15px rgba(6,182,212,0.3)"
-              }}>
-                {lang === "ar" ? "ابدأ الآن" : "Get Started"}
-              </Link>
-            </>
-          )}
-        </div>
-      </header>
-
-      {/* Hero Content */}
-      <main style={{ position: "relative", zIndex: 10, maxWidth: "1200px", margin: "0 auto", padding: "6rem 2rem 4rem", textAlign: "center" }}>
-        
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(6,182,212,0.1)",
-          border: "1px solid rgba(6,182,212,0.3)", borderRadius: "999px", padding: "8px 16px",
-          color: "#06b6d4", fontSize: "0.85rem", fontWeight: 700, marginBottom: "2rem"
-        }}>
-          <Star size={14} /> MetaLearning 2.0 is Live
-        </div>
-
-        <h1 style={{
-          fontSize: "clamp(2.5rem, 6vw, 4.5rem)", fontWeight: 900, lineHeight: 1.1, margin: "0 0 1.5rem",
-          background: "linear-gradient(135deg, #ffffff 30%, #93c5fd 100%)",
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"
-        }}>
-          The Future of <span style={{ color: "#06b6d4", WebkitTextFillColor: "#06b6d4" }}>Tunisian Education</span> is 3D
-        </h1>
-
-        <p style={{ color: "#94a3b8", fontSize: "clamp(1rem, 2vw, 1.25rem)", maxWidth: "700px", margin: "0 auto 3rem", lineHeight: 1.6 }}>
-          Join the MetaLearning Revolution. Step into immersive interactive environments, compete globally, and transform the way you learn forever.
-        </p>
-
-        <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", alignItems: "center" }}>
-          <Link to="/auth" style={{
-            background: "linear-gradient(135deg, #a855f7, #6366f1)",
-            color: "white", textDecoration: "none", padding: "16px 36px", borderRadius: "999px",
-            fontWeight: 800, fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "8px",
-            boxShadow: "0 8px 30px rgba(168,85,247,0.4)"
-          }}>
-            Join the Revolution <ArrowRight size={20} />
-          </Link>
-          <Link to="/join" style={{
-            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
-            color: "white", textDecoration: "none", padding: "16px 36px", borderRadius: "999px",
-            fontWeight: 600, fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "8px", backdropFilter: "blur(10px)"
-          }}>
-            I have a PIN
-          </Link>
-        </div>
-
-        {/* Top Players */}
-        <TopPlayers />
-
-      </main>
-
-      {/* Pricing Section */}
-      <section style={{ position: "relative", zIndex: 10, background: "#020617", padding: "4rem 2rem 8rem" }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-            <h2 style={{ fontSize: "2.5rem", fontWeight: 800, color: "white", margin: "0 0 1rem" }}>Simple, Transparent Pricing</h2>
-            <p style={{ color: "#64748b", fontSize: "1.1rem", margin: 0 }}>Choose the plan that fits your ambition.</p>
-          </div>
-
-          {/* Tab Switcher */}
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "2.5rem" }}>
-            <div style={{
-              display: "inline-flex", background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.1)", borderRadius: "50px", padding: "5px", gap: "4px",
-            }}>
-              {(['individual', 'team'] as const).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setPricingTab(tab)}
-                  style={{
-                    padding: "9px 28px", borderRadius: "999px", border: "none",
-                    fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", transition: "all 0.25s",
-                    background: pricingTab === tab
-                      ? (tab === 'team' ? "linear-gradient(135deg, #7c3aed, #3b82f6)" : "rgba(255,255,255,0.12)")
-                      : "transparent",
-                    color: pricingTab === tab ? "white" : "#64748b",
-                    display: "flex", alignItems: "center", gap: "8px",
-                  }}
-                >
-                  {tab === 'individual'
-                    ? (lang === "ar" ? "فردي" : "Individual")
-                    : <><Building2 size={15} />{lang === "ar" ? "فريق ومؤسسة" : "Team & Enterprise"}</>
-                  }
-                </button>
-              ))}
+            {/* Floating Card 3 — Rating */}
+            <div className="glass" style={{ position: "absolute", top: "55%", left: "-8%", padding: "10px 16px", borderRadius: "14px", zIndex: 5, boxShadow: "0 8px 30px rgba(245,158,11,0.15)", animation: "float 4s 2s ease-in-out infinite" }}>
+              <p style={{ margin: 0, fontSize: "0.7rem", color: "#64748b", fontWeight: 600 }}>Avg. Rating</p>
+              <p style={{ margin: 0, fontSize: "1.3rem", fontWeight: 900, color: "#F59E0B" }}>4.9 ★</p>
             </div>
           </div>
-
-          {/* Individual Tab */}
-          {pricingTab === 'individual' && (
-          <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center", flexWrap: "wrap", alignItems: "stretch" }}>
-            {/* Free */}
-            <div style={{
-              background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)",
-              borderRadius: "24px", padding: "2.5rem", flex: "1 1 300px", maxWidth: "340px",
-              display: "flex", flexDirection: "column"
-            }}>
-              <h3 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem" }}>FREE</h3>
-              <p style={{ color: "#64748b", margin: "0 0 2rem", minHeight: "45px" }}>Perfect to taste the 3D learning experience.</p>
-              <div style={{ marginBottom: "2rem" }}>
-                <span style={{ fontSize: "3rem", fontWeight: 900, color: "white" }}>$0</span>
-                <span style={{ color: "#64748b" }}> / month</span>
-              </div>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", flex: 1 }}>
-                <li style={{ color: "#94a3b8", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#06b6d4" /> 3 daily lessons</li>
-                <li style={{ color: "#94a3b8", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#06b6d4" /> Basic 3D library</li>
-                <li style={{ color: "#94a3b8", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#06b6d4" /> Standard XP</li>
-              </ul>
-              <Link to="/auth" style={{
-                display: "block", textAlign: "center", background: "rgba(255,255,255,0.05)",
-                color: "white", textDecoration: "none", padding: "14px", borderRadius: "12px", fontWeight: 600
-              }}>Start Free</Link>
-            </div>
-
-            {/* Pro */}
-            <div style={{
-              background: "linear-gradient(180deg, rgba(6,182,212,0.1) 0%, rgba(2,6,23,0) 100%)",
-              border: "1px solid rgba(6,182,212,0.3)", boxShadow: "0 0 40px rgba(6,182,212,0.15)",
-              borderRadius: "24px", padding: "2.5rem", flex: "1 1 300px", maxWidth: "340px",
-              display: "flex", flexDirection: "column", position: "relative", transform: "scale(1.05)", zIndex: 2
-            }}>
-              <div style={{ position: "absolute", top: "-15px", left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, #0891b2, #06b6d4)", color: "white", fontSize: "0.75rem", fontWeight: 800, padding: "6px 16px", borderRadius: "999px", letterSpacing: "0.1em" }}>MOST POPULAR</div>
-              <h3 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem" }}>PRO</h3>
-              <p style={{ color: "#64748b", margin: "0 0 2rem", minHeight: "45px" }}>The full academy in your pocket.</p>
-              <div style={{ marginBottom: "2rem" }}>
-                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#06b6d4" }}>$9</span>
-                <span style={{ color: "#64748b" }}> / month</span>
-              </div>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", flex: 1 }}>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#06b6d4" /> Unlimited lessons</li>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#06b6d4" /> Global Leaderboard</li>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#06b6d4" /> Image-to-3D AI</li>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#06b6d4" /> All Badges</li>
-              </ul>
-              <Link to="/pricing" style={{
-                display: "block", textAlign: "center", background: "linear-gradient(135deg, #0891b2, #06b6d4)",
-                color: "white", textDecoration: "none", padding: "14px", borderRadius: "12px", fontWeight: 700,
-                boxShadow: "0 8px 20px rgba(6,182,212,0.3)"
-              }}>Get PRO</Link>
-            </div>
-
-            {/* Max */}
-            <div style={{
-              background: "rgba(255,255,255,0.02)", border: "1px solid rgba(245,158,11,0.4)",
-              boxShadow: "0 0 30px rgba(245,158,11,0.1)",
-              borderRadius: "24px", padding: "2.5rem", flex: "1 1 300px", maxWidth: "340px",
-              display: "flex", flexDirection: "column"
-            }}>
-              <h3 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem", display: "flex", alignItems: "center", gap: "8px" }}>MAX <Crown size={20} color="#f59e0b" /></h3>
-              <p style={{ color: "#64748b", margin: "0 0 2rem", minHeight: "45px" }}>Uncompromised immersion and priority.</p>
-              <div style={{ marginBottom: "2rem" }}>
-                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#f59e0b" }}>$14</span>
-                <span style={{ color: "#64748b" }}> / month</span>
-              </div>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", flex: 1 }}>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Everything in PRO</li>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Ultra 4K Textures</li>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Early Access Models</li>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Legendary Glow Badges</li>
-              </ul>
-              <Link to="/pricing" style={{
-                display: "block", textAlign: "center", background: "linear-gradient(135deg, #d97706, #f59e0b)",
-                color: "white", textDecoration: "none", padding: "14px", borderRadius: "12px", fontWeight: 700,
-                boxShadow: "0 8px 20px rgba(245,158,11,0.3)"
-              }}>Get MAX</Link>
-            </div>
-          </div>
-          )}
-
-          {/* Team & Enterprise Tab */}
-          {pricingTab === 'team' && (
-          <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center", flexWrap: "wrap", alignItems: "stretch" }}>
-            {/* MAX / Team */}
-            <div style={{
-              background: "rgba(255,255,255,0.02)", border: "1px solid rgba(245,158,11,0.4)",
-              boxShadow: "0 0 30px rgba(245,158,11,0.1)", borderRadius: "24px", padding: "2.5rem",
-              flex: "1 1 300px", maxWidth: "340px", display: "flex", flexDirection: "column", position: "relative"
-            }}>
-              <div style={{ position: "absolute", top: "-15px", left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, #d97706, #f59e0b)", color: "white", fontSize: "0.75rem", fontWeight: 800, padding: "6px 16px", borderRadius: "999px" }}>
-                👥 {lang === "ar" ? "فريق" : "Team Plan"}
-              </div>
-              <h3 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem", display: "flex", alignItems: "center", gap: "8px" }}>MAX <Crown size={20} color="#f59e0b" /></h3>
-              <p style={{ color: "#64748b", margin: "0 0 2rem", minHeight: "45px" }}>Uncompromised immersion and priority.</p>
-              <div style={{ marginBottom: "0.5rem" }}>
-                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#f59e0b" }}>$20</span>
-                <span style={{ color: "#64748b" }}> / seat / mo</span>
-              </div>
-              <p style={{ color: "#64748b", fontSize: "0.78rem", marginBottom: "1.5rem" }}>vs $14 for individual accounts</p>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", flex: 1 }}>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Everything in PRO</li>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Ultra 4K Textures</li>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Early Access Models</li>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#f59e0b" /> Legendary Glow Badges</li>
-              </ul>
-              <Link to="/pricing" style={{
-                display: "block", textAlign: "center", background: "linear-gradient(135deg, #d97706, #f59e0b)",
-                color: "white", textDecoration: "none", padding: "14px", borderRadius: "12px", fontWeight: 700,
-                boxShadow: "0 8px 20px rgba(245,158,11,0.3)"
-              }}>Get MAX</Link>
-            </div>
-
-            {/* Enterprise */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,10,60,0.9))",
-              border: "1px solid rgba(124,58,237,0.5)", boxShadow: "0 0 40px rgba(124,58,237,0.15)",
-              borderRadius: "24px", padding: "2.5rem", flex: "1 1 300px", maxWidth: "340px",
-              display: "flex", flexDirection: "column", position: "relative"
-            }}>
-              <div style={{ position: "absolute", top: "-15px", left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, #7c3aed, #3b82f6)", color: "white", fontSize: "0.75rem", fontWeight: 800, padding: "6px 16px", borderRadius: "999px" }}>
-                🏫 {lang === "ar" ? "مؤسسة" : "Enterprise"}
-              </div>
-              <h3 style={{ fontSize: "1.5rem", color: "white", margin: "0 0 0.5rem", display: "flex", alignItems: "center", gap: "8px" }}><Building2 size={22} color="#a78bfa" /> ENTERPRISE</h3>
-              <p style={{ color: "#64748b", margin: "0 0 1rem", minHeight: "45px" }}>For schools & institutions.</p>
-              <div style={{ marginBottom: "0.5rem" }}>
-                <span style={{ fontSize: "3rem", fontWeight: 900, color: "#a78bfa" }}>${seatCount * pricePerSeat}</span>
-                <span style={{ color: "#64748b" }}> /mo</span>
-              </div>
-              <div style={{ background: "rgba(0,0,0,0.3)", padding: "10px 12px", borderRadius: "12px", marginBottom: "1.5rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                  <span style={{ color: "#94a3b8", fontSize: "0.75rem" }}>{lang === "ar" ? "عدد المقاعد" : "Seats"}</span>
-                  <span style={{ color: "#a78bfa", fontWeight: 700 }}>{seatCount}</span>
-                </div>
-                <input type="range" min={10} max={500} step={5} value={seatCount}
-                  onChange={e => setSeatCount(Number(e.target.value))}
-                  style={{ width: "100%", accentColor: "#7c3aed", cursor: "pointer" }} />
-              </div>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem", flex: 1 }}>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#a78bfa" /> Everything in MAX</li>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#a78bfa" /> Admin Dashboard</li>
-                <li style={{ color: "#e2e8f0", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}><ShieldCheck size={18} color="#a78bfa" /> Magic Invite Links</li>
-              </ul>
-              <a href={`mailto:enterprise@metalearning.app?subject=Enterprise%20%E2%80%94%20${seatCount}%20Seats`} style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                textAlign: "center", background: "linear-gradient(135deg, #7c3aed, #3b82f6)",
-                color: "white", textDecoration: "none", padding: "14px", borderRadius: "12px", fontWeight: 700
-              }}><Mail size={16} />{lang === "ar" ? "تواصل معنا" : "Contact Sales"}</a>
-            </div>
-          </div>
-          )}
         </div>
       </section>
 
+      {/* ══ STATS BAND ══ */}
+      <section style={{ padding: "2rem" }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem" }}>
+          {STATS.map((s) => (
+            <div key={s.label} className="glass stat-card" style={{ padding: "1.5rem", borderRadius: "20px", textAlign: "center", boxShadow: "0 4px 20px rgba(37,99,235,0.06)" }}>
+              <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: s.color + "15", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 0.75rem" }}>
+                <s.icon size={22} color={s.color} />
+              </div>
+              <p style={{ margin: 0, fontSize: "1.8rem", fontWeight: 900, color: "#0f1f3d" }}>{s.value}</p>
+              <p style={{ margin: "4px 0 0", fontSize: "0.82rem", color: "#64748b", fontWeight: 500 }}>{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ══ FEATURES ══ */}
+      <section style={{ padding: "6rem 2rem" }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+            <span className="glass" style={{ display: "inline-block", padding: "6px 18px", borderRadius: "50px", fontSize: "0.8rem", fontWeight: 700, color: "#2563EB", marginBottom: "1rem" }}>WHY METALEARNING</span>
+            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, color: "#0f1f3d", margin: 0, letterSpacing: "-0.02em" }}>Built for the Next Generation</h2>
+            <p style={{ color: "#64748b", fontSize: "1.05rem", margin: "1rem auto 0", maxWidth: "500px" }}>Everything you need to create, share, and experience education in 3D.</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.5rem" }}>
+            {FEATURES.map((f) => (
+              <div key={f.title} className="glass feature-card" style={{ padding: "2rem", borderRadius: "24px", boxShadow: "0 4px 20px rgba(37,99,235,0.05)" }}>
+                <div style={{ width: "52px", height: "52px", borderRadius: "16px", background: f.bg, border: `1px solid ${f.color}25`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.25rem" }}>
+                  <f.icon size={26} color={f.color} />
+                </div>
+                <h3 style={{ fontSize: "1.15rem", fontWeight: 800, color: "#0f1f3d", margin: "0 0 0.75rem" }}>{f.title}</h3>
+                <p style={{ color: "#64748b", margin: 0, lineHeight: 1.6, fontSize: "0.93rem" }}>{f.desc}</p>
+                <div style={{ marginTop: "1.5rem", display: "flex", alignItems: "center", gap: "6px", color: f.color, fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}>
+                  Learn more <ChevronRight size={16} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ CTA SECTION ══ */}
+      <section style={{ padding: "4rem 2rem 8rem" }}>
+        <div style={{ maxWidth: "700px", margin: "0 auto", textAlign: "center" }}>
+          <div className="glass" style={{ padding: "4rem 3rem", borderRadius: "32px", boxShadow: "0 20px 60px rgba(37,99,235,0.1)", position: "relative", overflow: "hidden" }}>
+            {/* BG decoration */}
+            <div style={{ position: "absolute", top: "-80px", right: "-80px", width: "200px", height: "200px", borderRadius: "50%", background: "radial-gradient(circle, rgba(37,99,235,0.1) 0%, transparent 70%)" }} />
+            <div style={{ position: "absolute", bottom: "-60px", left: "-60px", width: "160px", height: "160px", borderRadius: "50%", background: "radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 70%)" }} />
+
+            <span style={{ display: "inline-block", padding: "6px 18px", borderRadius: "50px", fontSize: "0.8rem", fontWeight: 700, color: "#2563EB", background: "rgba(37,99,235,0.08)", marginBottom: "1.5rem" }}>🚀 START FOR FREE</span>
+            <h2 style={{ fontSize: "2.5rem", fontWeight: 900, color: "#0f1f3d", margin: "0 0 1rem", letterSpacing: "-0.02em" }}>Ready to Revolutionize Your Classroom?</h2>
+            <p style={{ color: "#64748b", fontSize: "1.05rem", margin: "0 0 2rem", lineHeight: 1.6 }}>Join thousands of teachers and students already experiencing the future of education.</p>
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+              <Link to="/auth" className="btn-primary" style={{ padding: "16px 36px", borderRadius: "14px", fontSize: "1rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 8px 25px rgba(37,99,235,0.3)" }}>
+                Get Started Free <ArrowRight size={18} />
+              </Link>
+              <Link to="/pricing" className="btn-ghost" style={{ padding: "16px 36px", borderRadius: "14px", fontSize: "1rem", textDecoration: "none" }}>
+                View Pricing
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══ FOOTER ══ */}
+      <footer style={{ borderTop: "1px solid rgba(37,99,235,0.1)", padding: "2rem", background: "rgba(255,255,255,0.3)" }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ width: "30px", height: "30px", borderRadius: "8px", background: "linear-gradient(135deg, #2563EB, #0EA5E9)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 900, fontSize: "0.9rem" }}>M</div>
+            <span style={{ fontWeight: 700, color: "#1e3a5f" }}>MetaLearning</span>
+          </div>
+          <div style={{ display: "flex", gap: "1.5rem" }}>
+            <Link to="/privacy" style={{ color: "#64748b", textDecoration: "none", fontSize: "0.85rem" }}>Privacy</Link>
+            <Link to="/terms" style={{ color: "#64748b", textDecoration: "none", fontSize: "0.85rem" }}>Terms</Link>
+            <Link to="/pricing" style={{ color: "#64748b", textDecoration: "none", fontSize: "0.85rem" }}>Pricing</Link>
+          </div>
+          <p style={{ color: "#94a3b8", fontSize: "0.82rem", margin: 0 }}>© 2025 MetaLearning. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
