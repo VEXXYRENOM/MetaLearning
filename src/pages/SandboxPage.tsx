@@ -203,11 +203,11 @@ export function SandboxPage() {
         </aside>
 
         {/* MAIN — 3D Canvas + info overlay */}
-        <main style={{ flex: 1, position: "relative", display: "flex", flexDirection: "column" }}>
+        <main style={{ flex: 1, position: "relative", display: "flex", flexDirection: "column", minHeight: 0 }}>
           {displayLesson ? (
             <>
               {/* 3D Canvas */}
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minHeight: 0 }}>
                 <Canvas
                   camera={{ position: [0, 0, 8], fov: 45 }}
                   style={{ background: "radial-gradient(ellipse at center, #E0F2FE 0%, #DBEAFE 100%)" }}

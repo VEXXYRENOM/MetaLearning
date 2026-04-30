@@ -638,6 +638,13 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
   const [litmusState, setLitmusState] = useState<{ active: boolean, color: string }>({ active: false, color: "#fcd34d" });
   const [isStirring, setIsStirring] = useState(false);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const [beaker, setBeaker] = useState<BeakerState>({ substances: [], color: "#ffffff" });
   
   // Pending pour state
@@ -865,23 +872,26 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
       {/* Header */}
       <header style={{
         display: "flex", alignItems: "center", gap: "12px", padding: "0.75rem 1.5rem",
-        borderBottom: "1px solid rgba(255,255,255,0.07)",
-        background: "rgba(2,6,23,0.9)", backdropFilter: "blur(12px)",
+        borderBottom: "1px solid rgba(255,255,255,0.8)",
+        background: "rgba(255,255,255,0.6)", backdropFilter: "blur(12px)",
         position: "sticky", top: 0, zIndex: 50, flexShrink: 0,
+        flexWrap: "wrap", justifyContent: "space-between"
       }}>
-        <button onClick={() => navigate("/student/dashboard")} style={{
-          background: "none", border: "1px solid rgba(255,255,255,0.1)", color: "#64748b",
-          padding: "8px", borderRadius: "10px", cursor: "pointer", display: "flex"
-        }}>
-          <ArrowLeft size={18} />
-        </button>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ color: "#f1f5f9", margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>
-            ⚗️ {t("lab.title", "Interactive Physics & Chemistry Lab")}
-          </h1>
-          <p style={{ color: "#64748b", margin: 0, fontSize: "0.78rem" }}>
-            {t("lab.subtitle", "Stoichiometric Precision Mode. Enter exact quantities to pour.")}
-          </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <button onClick={() => navigate("/student/dashboard")} style={{
+            background: "rgba(255,255,255,0.5)", border: "1px solid rgba(37,99,235,0.2)", color: "#0f1f3d",
+            padding: "8px", borderRadius: "10px", cursor: "pointer", display: "flex"
+          }}>
+            <ArrowLeft size={18} />
+          </button>
+          <div>
+            <h1 style={{ color: "#0f1f3d", margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>
+              ⚗️ {t("lab.title", "Interactive Physics & Chemistry Lab")}
+            </h1>
+            <p style={{ color: "#6b7280", margin: 0, fontSize: "0.78rem" }}>
+              {t("lab.subtitle", "Stoichiometric Precision Mode. Enter exact quantities to pour.")}
+            </p>
+          </div>
         </div>
         
         <div style={{ display: "flex", gap: "8px" }}>
@@ -905,13 +915,15 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
       </header>
 
       {/* Body */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
+      <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative", flexDirection: isMobile ? "column" : "row" }}>
         
         {/* Sidebar */}
-        <LabSidebar onDragStart={handleDragStart} />
+        <div style={{ width: isMobile ? "100%" : "260px", height: isMobile ? "45vh" : "100%", flexShrink: 0, borderTop: isMobile ? "1px solid rgba(37,99,235,0.1)" : "none" }}>
+          <LabSidebar onDragStart={handleDragStart} />
+        </div>
 
         {/* 3D Scene */}
-        <div style={{ flex: 1, position: "relative" }}>
+        <div style={{ flex: 1, position: "relative", minHeight: 0 }}>
           <LabAnalyticsHUD tempHistory={tempHistory} substances={beaker.substances} />
           <Canvas
             shadows

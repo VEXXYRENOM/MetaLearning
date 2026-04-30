@@ -19,7 +19,7 @@ export function LabSidebar({ onDragStart }: LabSidebarProps) {
 
   return (
     <aside style={{
-      width: "240px", flexShrink: 0,
+      width: "100%", height: "100%", flexShrink: 0,
       background: C.bg,
       borderInlineEnd: `1px solid ${C.border}`,
       display: "flex", flexDirection: "column",
