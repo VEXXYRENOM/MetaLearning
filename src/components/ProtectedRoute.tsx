@@ -50,7 +50,7 @@ export function ProtectedRoute({
         teacher: "/teacher/create",
         student: "/student/dashboard",
         creator: "/creator/lab",
-        admin: "/admin/dashboard",
+        admin: "/admin",
       };
       return <Navigate to={homeMap[profile.role as Role] ?? "/"} replace />;
     }

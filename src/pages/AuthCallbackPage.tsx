@@ -6,7 +6,7 @@ const ROLE_HOME: Record<string, string> = {
   teacher: '/teacher/create',
   student: '/student/dashboard',
   creator: '/creator/lab',
-  admin:   '/admin/dashboard',
+  admin:   '/admin',
 };
 
 export function AuthCallbackPage() {
