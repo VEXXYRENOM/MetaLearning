@@ -5,8 +5,8 @@
   flex-direction: column;
   height: 100vh;
   width: 100vw;
-  background: #050a11;
-  color: #e2e8f0;
+  background: linear-gradient(160deg,#EBF4FF 0%,#DBEAFE 40%,#E0F2FE 70%,#F0F9FF 100%);
+  color: #0f1f3d;
   overflow: hidden;
   font-family: system-ui, -apple-system, sans-serif;
 }
@@ -17,10 +17,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 2rem;
-  background: rgba(5, 10, 17, 0.85);
+  background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(15px);
-  border-bottom: 1px solid rgba(79, 172, 254, 0.15);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 30px rgba(37, 99, 235, 0.05);
   z-index: 10;
 }
 
@@ -43,7 +43,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: #fff;
+  color: #0f1f3d;
 }
 
 .title-icon {
@@ -55,7 +55,7 @@
   font-size: 1.35rem;
   font-weight: 800;
   letter-spacing: 0.5px;
-  background: linear-gradient(to right, #fff, #94a3b8);
+  background: linear-gradient(to right, #0f1f3d, #2563EB);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -98,9 +98,9 @@
 /* --- Sidebar Controls --- */
 .ai-cyber-panel {
   width: 400px;
-  background: rgba(10, 15, 28, 0.9);
-  border-right: 1px solid rgba(79, 172, 254, 0.1);
-  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.55);
+  border-right: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 10px 0 30px rgba(37, 99, 235, 0.05);
   display: flex;
   flex-direction: column;
   padding: 2rem;
@@ -112,10 +112,10 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #fff;
+  color: #0f1f3d;
   font-size: 1.1rem;
   margin: 0 0 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(37, 99, 235, 0.1);
   padding-bottom: 0.75rem;
 }
 
@@ -169,7 +169,7 @@
 }
 
 .upload-text {
-  color: #fff;
+  color: #0f1f3d;
   font-size: 1rem;
   font-weight: 600;
 }
@@ -236,10 +236,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255,255,255,0.02);
+  background: rgba(255,255,255,0.6);
   padding: 1rem;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.8);
   cursor: pointer;
   transition: border-color 0.2s;
 }
@@ -253,7 +253,7 @@
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.9rem;
-  color: #fff;
+  color: #0f1f3d;
   font-weight: 500;
 }
 
@@ -340,7 +340,7 @@
 .ai-hologram-stage {
   flex: 1;
   position: relative;
-  background: radial-gradient(circle at center, #0f1c2e 0%, #050a11 100%);
+  background: transparent;
 }
 
 .empty-hologram-state {
@@ -415,7 +415,7 @@
 
 .hud-overlay-text strong {
   font-size: 1.25rem;
-  color: rgba(255,255,255,0.2);
+  color: rgba(15, 31, 61, 0.5);
   font-family: monospace;
   letter-spacing: 1px;
 }

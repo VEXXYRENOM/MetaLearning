@@ -8,12 +8,12 @@ import { LESSONS, ALL_SUBJECTS, LessonDef } from "../data/lessons";
 
 // ─── Design tokens (same as StudentDashboard) ─────────────────
 const C = {
-  bg:          "#020617",
-  card:        "rgba(15, 23, 42, 0.85)",
-  border:      "rgba(255,255,255,0.07)",
-  textPrimary: "#f1f5f9",
-  textMuted:   "#64748b",
-  indigo:      "#6366f1",
+  bg:          "linear-gradient(160deg,#EBF4FF 0%,#DBEAFE 40%,#E0F2FE 70%,#F0F9FF 100%)",
+  card:        "rgba(255, 255, 255, 0.55)",
+  border:      "rgba(255,255,255,0.8)",
+  textPrimary: "#0f1f3d",
+  textMuted:   "#6b7280",
+  indigo:      "#2563EB",
 };
 
 // ─── Simple procedural sphere per lesson ─────────────────────
@@ -46,9 +46,9 @@ function ModelPreview({ lesson }: { lesson: LessonDef }) {
         />
       </mesh>
       <Html center position={[0, -3, 0]}>
-        <div style={{ color: "white", textAlign: "center", whiteSpace: "nowrap",
-          fontSize: "0.9rem", fontWeight: 600,
-          textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
+        <div style={{ color: "#0f1f3d", textAlign: "center", whiteSpace: "nowrap",
+          fontSize: "1rem", fontWeight: 800,
+          textShadow: "0 2px 10px rgba(255,255,255,0.9), 0 0 4px rgba(255,255,255,0.5)" }}>
           {lesson.emoji} {lesson.titleAr}
         </div>
       </Html>
@@ -92,7 +92,7 @@ export function SandboxPage() {
         display: "flex", alignItems: "center", gap: "16px",
         padding: "1rem 1.5rem",
         borderBottom: `1px solid ${C.border}`,
-        background: "rgba(2,6,23,0.9)", backdropFilter: "blur(12px)",
+        background: "rgba(255,255,255,0.6)", backdropFilter: "blur(20px)",
         position: "sticky", top: 0, zIndex: 50
       }}>
         <button
@@ -113,14 +113,16 @@ export function SandboxPage() {
       </header>
 
       {/* ── Layout ─────────────────────────────── */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+      <div style={{ flex: 1, display: "flex", overflow: "hidden", flexDirection: window.innerWidth < 768 ? "column" : "row" }}>
 
         {/* LEFT PANEL — Subject tabs + lesson list */}
         <aside style={{
-          width: "320px", flexShrink: 0,
-          borderInlineEnd: `1px solid ${C.border}`,
+          width: window.innerWidth < 768 ? "100%" : "320px", flexShrink: 0,
+          borderInlineEnd: window.innerWidth < 768 ? "none" : `1px solid ${C.border}`,
+          borderBottom: window.innerWidth < 768 ? `1px solid ${C.border}` : "none",
           display: "flex", flexDirection: "column",
-          background: "rgba(2,6,23,0.6)", overflowY: "auto"
+          background: "rgba(255,255,255,0.4)", overflowY: "auto",
+          maxHeight: window.innerWidth < 768 ? "50vh" : "auto"
         }}>
           {/* Subject tabs */}
           <div style={{ padding: "1rem", borderBottom: `1px solid ${C.border}` }}>
@@ -150,16 +152,17 @@ export function SandboxPage() {
 
           {/* Search */}
           <div style={{ padding: "0.75rem 1rem", borderBottom: `1px solid ${C.border}`, position: "relative" }}>
-            <Search size={14} style={{ position: "absolute", insetInlineStart: "1.75rem", top: "50%", transform: "translateY(-50%)", color: C.textMuted }} />
+              <Search size={14} style={{ position: "absolute", insetInlineStart: "1.75rem", top: "50%", transform: "translateY(-50%)", color: C.textMuted }} />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={t("sandbox.search", "Search lessons...")}
               style={{
                 width: "100%", boxSizing: "border-box",
-                background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`,
+                background: "rgba(255,255,255,0.6)", border: `1px solid ${C.border}`,
                 borderRadius: "10px", padding: "8px 12px 8px 32px",
-                color: C.textPrimary, fontSize: "0.85rem", outline: "none"
+                color: C.textPrimary, fontSize: "0.85rem", outline: "none",
+                boxShadow: "inset 0 2px 4px rgba(37,99,235,0.02)"
               }}
             />
           </div>
@@ -207,7 +210,7 @@ export function SandboxPage() {
               <div style={{ flex: 1 }}>
                 <Canvas
                   camera={{ position: [0, 0, 8], fov: 45 }}
-                  style={{ background: "radial-gradient(ellipse at center, #0f172a 0%, #020617 100%)" }}
+                  style={{ background: "radial-gradient(ellipse at center, #E0F2FE 0%, #DBEAFE 100%)" }}
                   dpr={[1, 2]}
                   gl={{ antialias: true, preserveDrawingBuffer: true }}
                 >
@@ -220,7 +223,7 @@ export function SandboxPage() {
               {/* Info strip */}
               <div style={{
                 padding: "1rem 1.5rem",
-                background: "rgba(2,6,23,0.95)",
+                background: "rgba(255,255,255,0.65)", backdropFilter: "blur(12px)",
                 borderTop: `1px solid ${C.border}`,
                 display: "flex", alignItems: "center", justifyContent: "space-between",
                 flexWrap: "wrap", gap: "12px"

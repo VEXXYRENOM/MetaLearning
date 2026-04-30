@@ -6,11 +6,11 @@ interface LabSidebarProps {
 }
 
 const C = {
-  bg:      "rgba(2,6,23,0.95)",
-  card:    "rgba(15,23,42,0.9)",
-  border:  "rgba(255,255,255,0.07)",
-  text:    "#f1f5f9",
-  muted:   "#64748b",
+  bg:      "rgba(255,255,255,0.6)",
+  card:    "rgba(255,255,255,0.8)",
+  border:  "rgba(37,99,235,0.1)",
+  text:    "#0f1f3d",
+  muted:   "#6b7280",
 };
 
 export function LabSidebar({ onDragStart }: LabSidebarProps) {

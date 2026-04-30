@@ -28,11 +28,11 @@ export function LabAnalyticsHUD({ tempHistory, substances }: LabAnalyticsHUDProp
       
       {/* Thermodynamics Graph */}
       <div style={{
-        background: "rgba(15,23,42,0.85)", backdropFilter: "blur(12px)",
-        border: "1px solid rgba(255,255,255,0.05)", borderRadius: "12px",
-        padding: "16px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
+        background: "rgba(255,255,255,0.65)", backdropFilter: "blur(12px)",
+        border: "1px solid rgba(255,255,255,0.8)", borderRadius: "12px",
+        padding: "16px", boxShadow: "0 10px 30px rgba(37,99,235,0.05)"
       }}>
-        <h3 style={{ margin: "0 0 12px", fontSize: "0.85rem", color: "#f8fafc", display: "flex", justifyContent: "space-between" }}>
+        <h3 style={{ margin: "0 0 12px", fontSize: "0.85rem", color: "#0f1f3d", display: "flex", justifyContent: "space-between" }}>
           <span>♨️ Temperature ($T = f(t)$)</span>
           <span style={{ color: "#ef4444" }}>{tempHistory.length > 0 ? tempHistory[tempHistory.length - 1].temp.toFixed(1) : 25.0}°C</span>
         </h3>
@@ -41,8 +41,8 @@ export function LabAnalyticsHUD({ tempHistory, substances }: LabAnalyticsHUDProp
               <XAxis dataKey="time" type="number" domain={['dataMin', 'dataMax']} hide />
               <YAxis domain={[20, 120]} hide />
               <Tooltip 
-                contentStyle={{ background: "#0f172a", border: "none", borderRadius: "8px", fontSize: "0.75rem", color: "white" }} 
-                itemStyle={{ color: "#f8fafc" }}
+                contentStyle={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(37,99,235,0.2)", borderRadius: "8px", fontSize: "0.75rem", color: "#0f1f3d" }} 
+                itemStyle={{ color: "#0f1f3d" }}
                 labelStyle={{ display: "none" }}
                 formatter={(value: any) => [`${Number(value).toFixed(1)}°C`, "Temp"]}
               />
@@ -54,11 +54,11 @@ export function LabAnalyticsHUD({ tempHistory, substances }: LabAnalyticsHUDProp
       {/* Composition Pie Chart */}
       {substances.length > 0 && (
         <div style={{
-          background: "rgba(15,23,42,0.85)", backdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,255,255,0.05)", borderRadius: "12px",
-          padding: "16px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
+          background: "rgba(255,255,255,0.65)", backdropFilter: "blur(12px)",
+          border: "1px solid rgba(255,255,255,0.8)", borderRadius: "12px",
+          padding: "16px", boxShadow: "0 10px 30px rgba(37,99,235,0.05)"
         }}>
-          <h3 style={{ margin: "0 0 12px", fontSize: "0.85rem", color: "#f8fafc" }}>
+          <h3 style={{ margin: "0 0 12px", fontSize: "0.85rem", color: "#0f1f3d" }}>
             📊 Composition (Mass)
           </h3>
           <div style={{ display: "flex", alignItems: "center" }}>
@@ -78,7 +78,7 @@ export function LabAnalyticsHUD({ tempHistory, substances }: LabAnalyticsHUDProp
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ background: "#0f172a", border: "none", borderRadius: "8px", fontSize: "0.75rem", color: "white" }} 
+                    contentStyle={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(37,99,235,0.2)", borderRadius: "8px", fontSize: "0.75rem", color: "#0f1f3d" }} 
                     formatter={(value: any) => [`${Number(value).toFixed(1)}g`, "Mass"]}
                   />
               </PieChart>
@@ -89,9 +89,9 @@ export function LabAnalyticsHUD({ tempHistory, substances }: LabAnalyticsHUDProp
                 <div key={d.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "0.7rem" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: d.color }}></div>
-                    <span style={{ color: "#cbd5e1", fontWeight: 600 }}>{d.name}</span>
+                    <span style={{ color: "#0f1f3d", fontWeight: 600 }}>{d.name}</span>
                   </div>
-                  <span style={{ color: "#94a3b8", fontFamily: "monospace" }}>{d.moles.toFixed(3)} mol</span>
+                  <span style={{ color: "#6b7280", fontFamily: "monospace" }}>{d.moles.toFixed(3)} mol</span>
                 </div>
               ))}
             </div>

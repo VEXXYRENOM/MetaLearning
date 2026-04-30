@@ -28,7 +28,11 @@ const HubBackground = () => (
 export function AIGenerationHubPage() {
   const { t } = useTranslation();
   return (
-    <div className="ml-landing" style={{ minHeight: "100vh", position: "relative" }} dir={t("dir") === "rtl" ? "rtl" : "ltr"}>
+    <div className="ml-landing" style={{ 
+      minHeight: "100vh", position: "relative",
+      background: "linear-gradient(160deg,#EBF4FF 0%,#DBEAFE 40%,#E0F2FE 70%,#F0F9FF 100%)",
+      color: "#0f1f3d"
+    }} dir={t("dir") === "rtl" ? "rtl" : "ltr"}>
       <style>{`
         @keyframes hub-float {
           from { transform: translateY(0px) scale(1); }
@@ -54,28 +58,27 @@ export function AIGenerationHubPage() {
           {t("nav.back_hub")}
         </Link>
 
-        <div className="ml-options-header" style={{ marginBottom: "4rem" }}>
-          <h2 className="ml-options-title" style={{ fontSize: "3.5rem" }}>{t("options.lab_title")}</h2>
-          <p className="ml-options-sub" style={{ fontSize: "1.2rem" }}>{t("options.lab_desc")}</p>
+        <div className="ml-options-header" style={{ marginBottom: "3rem", textAlign: "center", padding: "0 1rem" }}>
+          <h2 className="ml-options-title" style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", color: "#0f1f3d", textShadow: "none", margin: "0 0 1rem 0" }}>{t("options.lab_title")}</h2>
+          <p className="ml-options-sub" style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "#6b7280" }}>{t("options.lab_desc")}</p>
         </div>
 
         {/* Cards */}
         <div className="ml-options-grid" style={{ maxWidth: "1000px", margin: "0 auto", padding: "0 2rem" }}>
 
-          {/* Card 1: Image to 3D */}
           <Link
             to="/experience/image-to-3d"
             className="ml-option-card"
-            style={{ minHeight: "350px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}
+            style={{ minHeight: "350px", display: "flex", flexDirection: "column", justifyContent: "space-between", background: "rgba(255,255,255,0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.8)", color: "#0f1f3d", borderRadius: "16px", padding: "2rem", textDecoration: "none" }}
           >
             <div>
               <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>🖼️</div>
-              <h3 style={{ fontSize: "2rem", marginBottom: "1rem" }}>Image to 3D</h3>
-              <p style={{ fontSize: "1.1rem", lineHeight: "1.7", color: "#a0aab5" }}>
+              <h3 style={{ fontSize: "2rem", marginBottom: "1rem", color: "#0f1f3d" }}>Image to 3D</h3>
+              <p style={{ fontSize: "1.1rem", lineHeight: "1.7", color: "#6b7280" }}>
                 Transform your existing 2D images or sketches into high-quality, fully interactive 3D models with advanced depth analysis.
               </p>
             </div>
-            <span className="ml-option-link" style={{ fontSize: "1.2rem", marginTop: "2rem", display: "inline-block" }}>
+            <span className="ml-option-link" style={{ fontSize: "1.2rem", marginTop: "2rem", display: "inline-block", color: "#2563EB", fontWeight: 700 }}>
               Open Image Lab →
             </span>
           </Link>
@@ -86,17 +89,17 @@ export function AIGenerationHubPage() {
             className="ml-option-card"
             style={{
               minHeight: "350px", display: "flex", flexDirection: "column", justifyContent: "space-between",
-              borderColor: "rgba(167, 139, 250, 0.4)",
+              borderColor: "rgba(37, 99, 235, 0.4)", background: "rgba(255,255,255,0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.8)", color: "#0f1f3d", borderRadius: "16px", padding: "2rem", textDecoration: "none"
             }}
           >
             <div>
               <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>✨</div>
-              <h3 style={{ fontSize: "2rem", marginBottom: "1rem" }}>Text to 3D</h3>
-              <p style={{ fontSize: "1.1rem", lineHeight: "1.7", color: "#a0aab5" }}>
+              <h3 style={{ fontSize: "2rem", marginBottom: "1rem", color: "#0f1f3d" }}>Text to 3D</h3>
+              <p style={{ fontSize: "1.1rem", lineHeight: "1.7", color: "#6b7280" }}>
                 Describe any object or scene using natural language, and let our generative AI engine build it from scratch in full 3D space.
               </p>
             </div>
-            <span className="ml-option-link" style={{ fontSize: "1.2rem", marginTop: "2rem", display: "inline-block" }}>
+            <span className="ml-option-link" style={{ fontSize: "1.2rem", marginTop: "2rem", display: "inline-block", color: "#2563EB", fontWeight: 700 }}>
               Open Text Lab →
             </span>
           </Link>

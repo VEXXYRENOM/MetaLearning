@@ -859,7 +859,7 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
 
   return (
     <div dir={isRTL ? "rtl" : "ltr"}
-      style={{ height: "100vh", overflow: "hidden", background: "#020617", fontFamily: "'Inter', system-ui, sans-serif",
+      style={{ height: "100vh", overflow: "hidden", background: "linear-gradient(160deg,#EBF4FF 0%,#DBEAFE 40%,#E0F2FE 70%,#F0F9FF 100%)", fontFamily: "'Inter', system-ui, sans-serif",
         display: "flex", flexDirection: "column" }}>
 
       {/* Header */}
@@ -918,7 +918,7 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
             camera={{ position: [0, 1.2, 4.2], fov: 40 }}
             dpr={[1, 1.5]}
             gl={{ antialias: true, preserveDrawingBuffer: false, powerPreference: "high-performance" }}
-            style={{ background: "radial-gradient(ellipse at center, #0f172a 0%, #020617 100%)",
+            style={{ background: "radial-gradient(ellipse at center, #E0F2FE 0%, #DBEAFE 100%)",
               filter: activeReaction?.hasExplosion ? "drop-shadow(0 0 24px orange) brightness(1.15)" :
                       activeReaction ? "drop-shadow(0 0 12px #a5f3fc) brightness(1.05)" : "none",
               transition: "filter 0.4s ease"
