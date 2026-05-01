@@ -133,7 +133,7 @@ export function LabAIAssistant({
         title={isRTL ? "مساعد المختبر الذكي" : "Lab AI Assistant"}
         style={{
           position: "absolute",
-          bottom: "20px",
+          bottom: "90px",
           right: isRTL ? undefined : "20px",
           left: isRTL ? "20px" : undefined,
           zIndex: 40,
@@ -170,7 +170,7 @@ export function LabAIAssistant({
       dir={isRTL ? "rtl" : "ltr"}
       style={{
         position: "absolute",
-        bottom: "20px",
+        bottom: "90px",
         right: isRTL ? undefined : "20px",
         left: isRTL ? "20px" : undefined,
         zIndex: 40,

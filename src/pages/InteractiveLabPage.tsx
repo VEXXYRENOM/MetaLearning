@@ -302,20 +302,20 @@ function CentralBeaker({ beakerState, volumeML, tempRef, isBoiling }: { beakerSt
       <mesh castShadow>
         <cylinderGeometry args={[0.4, 0.35, 1.0, 32, 1, true]} />
         <meshPhysicalMaterial
-          color="#ffffff" transparent opacity={0.15}
-          roughness={0.05} metalness={0.1} transmission={0.95} thickness={0.1}
+          color="#e2e8f0" transparent opacity={0.4}
+          roughness={0.1} metalness={0.2} transmission={0.7} thickness={1.5}
           side={THREE.DoubleSide}
         />
       </mesh>
       
       <mesh position={[0, -0.5, 0]}>
         <cylinderGeometry args={[0.35, 0.35, 0.05, 32]} />
-        <meshPhysicalMaterial color="#ffffff" transparent opacity={0.2} roughness={0.1} />
+        <meshPhysicalMaterial color="#e2e8f0" transparent opacity={0.5} roughness={0.15} />
       </mesh>
       
       <mesh position={[0, 0.5, 0]}>
         <torusGeometry args={[0.4, 0.02, 16, 32]} />
-        <meshPhysicalMaterial color="#ffffff" transparent opacity={0.3} roughness={0.1} />
+        <meshPhysicalMaterial color="#e2e8f0" transparent opacity={0.6} roughness={0.15} />
       </mesh>
 
       <Html center position={[0, -0.2, 0.36]} style={{ pointerEvents: "none" }}>
