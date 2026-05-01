@@ -174,7 +174,7 @@
   font-weight: 600;
 }
 
-.ai-badge-small {
+.ai-badge-small { margin-top: 10px;
   background: rgba(0,0,0,0.5);
   color: #94a3b8;
   padding: 0.25rem 0.5rem;

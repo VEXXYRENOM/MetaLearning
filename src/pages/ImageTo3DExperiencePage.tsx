@@ -20,6 +20,7 @@ import {
   Send,
   Wand2,
   Scissors,
+  Menu,
 } from "lucide-react";
 
 import { DepthMesh3D } from "../components/experience/DepthMesh3D";
@@ -96,6 +97,15 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
   const [sf3dError,    setSf3dError]    = useState<string | null>(null);
   const [true3dGlbUrl, setTrue3dGlbUrl] = useState<string | null>(null);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // Controls
   const [biological,    setBiological]    = useState(true);
   const [handTracking,  setHandTracking]  = useState(false);
@@ -149,6 +159,7 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
     setSf3dMessage("");
     setSf3dError(null);
     setSf3dProgress(0);
+    if (isMobile) setShowMobileSidebar(false);
     displayRef.current = 0;
 
     try {
@@ -197,6 +208,7 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
     setSf3dStatus("CONNECTING");
     setSf3dMessage("🧠 جاري تحليل و فهم طلبك...");
     setSf3dProgress(5);
+    if (isMobile) setShowMobileSidebar(false);
     displayRef.current = 5;
 
     const SVG_PLACEHOLDER = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjwvc3ZnPg==";
@@ -320,30 +332,48 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
     <div className="ai-lab-layout" dir="ltr">
 
       {/* ─── HEADER ─── */}
-      <header className="ai-lab-header">
-        <Link className="ai-back-btn" to="/experience/hub">
-          <ChevronLeft size={20} /> Back to Hub
-        </Link>
-        <div className="ai-lab-title">
+      <header className="ai-lab-header" style={{ flexWrap: isMobile ? "wrap" : "nowrap", padding: isMobile ? "0.75rem 1rem" : "1rem 2rem", gap: isMobile ? "10px" : "0" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <Link className="ai-back-btn" to="/experience/hub">
+            <ChevronLeft size={20} /> {!isMobile && "Back to Hub"}
+          </Link>
+          {isMobile && (
+            <button onClick={() => setShowMobileSidebar(!showMobileSidebar)} style={{
+              background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", color: "#6366f1",
+              padding: "6px 10px", borderRadius: "8px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px"
+            }}>
+              <Menu size={16} /> الإعدادات
+            </button>
+          )}
+        </div>
+        <div className="ai-lab-title" style={{ flex: isMobile ? "1 1 100%" : "auto", justifyContent: isMobile ? "center" : "flex-start" }}>
           <Cpu className="title-icon" />
-          <h1>{inputType === "image" ? "IMAGE TO 3D ENGINE" : "TEXT TO 3D ENGINE"}</h1>
+          <h1 style={{ fontSize: isMobile ? "1.1rem" : undefined }}>{inputType === "image" ? "IMAGE TO 3D ENGINE" : "TEXT TO 3D ENGINE"}</h1>
         </div>
-        <div className="ai-system-status" style={{ color: "#4ade80" }}>
-          <span
-            className="live-dot pulse-dot"
-            style={{
-              backgroundColor: "#4ade80",
-              boxShadow: `0 0 10px #4ade80`,
-            }}
-          />
-          Free Neural Engine Online
-        </div>
+        {!isMobile && (
+          <div className="ai-system-status" style={{ color: "#4ade80" }}>
+            <span
+              className="live-dot pulse-dot"
+              style={{
+                backgroundColor: "#4ade80",
+                boxShadow: `0 0 10px #4ade80`,
+              }}
+            />
+            Free Neural Engine Online
+          </div>
+        )}
       </header>
 
-      <div className="ai-lab-body">
+      <div className="ai-lab-body" style={{ position: "relative" }}>
 
         {/* ─── LEFT CONTROL PANEL ─── */}
-        <aside className="ai-cyber-panel">
+        {(!isMobile || showMobileSidebar) && (
+          <aside className="ai-cyber-panel" style={isMobile ? {
+            position: "absolute", top: 0, left: 0, right: 0, height: "65vh", zIndex: 100,
+            width: "100%", background: "rgba(2,6,23,0.95)", backdropFilter: "blur(12px)",
+            borderBottom: "1px solid rgba(168,85,247,0.4)", borderRadius: "0 0 16px 16px",
+            overflowY: "auto", boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
+          } : undefined}>
 
           <div className="panel-section">
             <h3 className="cyber-title"><Wand2 size={18} /> Creation Mode</h3>
@@ -495,6 +525,7 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
             مجاني تمامًا · يعمل محلياً في متصفحك بشكل فوري وبدون انتظار السيرفرات بفضل MetaLearning Engine.
           </div>
         </aside>
+        )}
 
         {/* ─── MAIN 3D STAGE ─── */}
         <main className="ai-hologram-stage">
