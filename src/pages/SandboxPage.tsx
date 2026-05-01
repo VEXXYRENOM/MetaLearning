@@ -1,9 +1,9 @@
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Play, Search } from "lucide-react";
+import { ArrowLeft, Play, Search, Menu } from "lucide-react";
 import { LESSONS, ALL_SUBJECTS, LessonDef } from "../data/lessons";
 
 // ─── Design tokens (same as StudentDashboard) ─────────────────
@@ -74,6 +74,14 @@ export function SandboxPage() {
   const [selectedSubject, setSelectedSubject] = useState<string>(ALL_SUBJECTS[0]);
   const [selectedLesson, setSelectedLesson] = useState<LessonDef | null>(null);
   const [search, setSearch] = useState("");
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const filteredLessons = LESSONS.filter(l => {
     const matchSubject = l.subjectAr === selectedSubject;
@@ -90,40 +98,65 @@ export function SandboxPage() {
       {/* ── Header ─────────────────────────────── */}
       <header style={{
         display: "flex", alignItems: "center", gap: "16px",
-        padding: "1rem 1.5rem",
+        padding: isMobile ? "0.5rem" : "1rem 1.5rem",
         borderBottom: `1px solid ${C.border}`,
         background: "rgba(255,255,255,0.6)", backdropFilter: "blur(20px)",
-        position: "sticky", top: 0, zIndex: 50
+        position: "sticky", top: 0, zIndex: 50,
+        justifyContent: "space-between"
       }}>
-        <button
-          onClick={() => navigate("/student/dashboard")}
-          style={{ background: "none", border: `1px solid ${C.border}`, color: C.textMuted,
-            padding: "8px", borderRadius: "10px", cursor: "pointer", display: "flex", alignItems: "center" }}
-        >
-          <ArrowLeft size={18} />
-        </button>
-        <div>
-          <h1 style={{ color: C.textPrimary, margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>
-            🔬 {t("sandbox.title", "Open Sandbox")}
-          </h1>
-          <p style={{ color: C.textMuted, margin: 0, fontSize: "0.8rem" }}>
-            {t("sandbox.subtitle", "Free 3D exploration — no PIN required")}
-          </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <button
+            onClick={() => navigate("/student/dashboard")}
+            style={{ background: "none", border: `1px solid ${C.border}`, color: C.textMuted,
+              padding: "8px", borderRadius: "10px", cursor: "pointer", display: "flex", alignItems: "center" }}
+          >
+            <ArrowLeft size={18} />
+          </button>
+          
+          {isMobile && (
+            <button onClick={() => setShowMobileSidebar(!showMobileSidebar)} style={{
+              background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", color: "#6366f1",
+              padding: "8px", borderRadius: "10px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px"
+            }}>
+              <Menu size={18} /> {isRTL ? "الدروس" : "Lessons"}
+            </button>
+          )}
+
+          {!isMobile && (
+            <div>
+              <h1 style={{ color: C.textPrimary, margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>
+                🔬 {t("sandbox.title", "Open Sandbox")}
+              </h1>
+              <p style={{ color: C.textMuted, margin: 0, fontSize: "0.8rem" }}>
+                {t("sandbox.subtitle", "Free 3D exploration — no PIN required")}
+              </p>
+            </div>
+          )}
         </div>
       </header>
 
       {/* ── Layout ─────────────────────────────── */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden", flexDirection: window.innerWidth < 768 ? "column" : "row" }}>
+      <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
 
         {/* LEFT PANEL — Subject tabs + lesson list */}
-        <aside style={{
-          width: window.innerWidth < 768 ? "100%" : "320px", flexShrink: 0,
-          borderInlineEnd: window.innerWidth < 768 ? "none" : `1px solid ${C.border}`,
-          borderBottom: window.innerWidth < 768 ? `1px solid ${C.border}` : "none",
-          display: "flex", flexDirection: "column",
-          background: "rgba(255,255,255,0.4)", overflowY: "auto",
-          maxHeight: window.innerWidth < 768 ? "50vh" : "auto"
-        }}>
+        {(!isMobile || showMobileSidebar) && (
+          <aside style={{
+            ...(isMobile ? {
+              position: "absolute", top: 0, left: 0, right: 0, height: "65vh", zIndex: 100,
+              boxShadow: "0 10px 30px rgba(0,0,0,0.15)", borderRadius: "0 0 16px 16px",
+              background: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)"
+            } : {
+              width: "320px", height: "100%", flexShrink: 0,
+              borderInlineEnd: `1px solid ${C.border}`, background: "rgba(255,255,255,0.4)"
+            }),
+            display: "flex", flexDirection: "column", overflowY: "auto",
+          }}>
+            {isMobile && (
+               <div style={{ background: "rgba(255,255,255,0.95)", padding: "8px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(0,0,0,0.05)", position: "sticky", top: 0, zIndex: 10 }}>
+                 <span style={{ fontWeight: "bold", fontSize: "0.85rem", color: "#0f1f3d" }}>{isRTL ? "اختر درساً" : "Lessons Menu"}</span>
+                 <button onClick={() => setShowMobileSidebar(false)} style={{ background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#64748b" }}>✕</button>
+               </div>
+            )}
           {/* Subject tabs */}
           <div style={{ padding: "1rem", borderBottom: `1px solid ${C.border}` }}>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
@@ -176,7 +209,7 @@ export function SandboxPage() {
             ) : filteredLessons.map(lesson => (
               <button
                 key={lesson.id}
-                onClick={() => setSelectedLesson(lesson)}
+                onClick={() => { setSelectedLesson(lesson); if (isMobile) setShowMobileSidebar(false); }}
                 style={{
                   width: "100%", textAlign: "start", background: displayLesson?.id === lesson.id
                     ? `${SUBJECT_COLORS[lesson.subjectAr] ?? C.indigo}18`
@@ -201,8 +234,9 @@ export function SandboxPage() {
             ))}
           </div>
         </aside>
+        )}
 
-        {/* MAIN — 3D Canvas + info overlay */}
+        {/* RIGHT PANEL — 3D Viewer */}
         <main style={{ flex: 1, position: "relative", display: "flex", flexDirection: "column", minHeight: 0 }}>
           {displayLesson ? (
             <>
