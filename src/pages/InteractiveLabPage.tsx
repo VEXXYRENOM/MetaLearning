@@ -893,11 +893,11 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
 
       {/* Header */}
       <header style={{
-        display: "flex", alignItems: "center", gap: "12px", padding: "0.75rem 1.5rem",
+        display: "flex", alignItems: "center", gap: "12px", padding: isMobile ? "0.5rem" : "0.75rem 1.5rem",
         borderBottom: "1px solid rgba(255,255,255,0.8)",
         background: "rgba(255,255,255,0.6)", backdropFilter: "blur(12px)",
         position: "sticky", top: 0, zIndex: 50, flexShrink: 0,
-        flexWrap: "wrap", justifyContent: "space-between"
+        justifyContent: "space-between"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <button onClick={() => navigate("/student/dashboard")} style={{
@@ -943,19 +943,19 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
         <div style={{ display: "flex", gap: "8px" }}>
           <button onClick={() => setShowReport(true)} style={{
             background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.3)",
-            color: "#60a5fa", padding: "8px 14px", borderRadius: "10px",
+            color: "#60a5fa", padding: isMobile ? "8px" : "8px 14px", borderRadius: "10px",
             cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
             fontSize: "0.82rem", fontWeight: 600
           }}>
-            📋 {t("lab.report", "Generate Report")}
+            📋 {!isMobile && t("lab.report", "Generate Report")}
           </button>
           <button onClick={resetLab} style={{
             background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)",
-            color: "#f87171", padding: "8px 14px", borderRadius: "10px",
+            color: "#f87171", padding: isMobile ? "8px" : "8px 14px", borderRadius: "10px",
             cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
             fontSize: "0.82rem", fontWeight: 600
           }}>
-            <RotateCcw size={14} /> {t("lab.reset", "Empty Beaker")}
+            <RotateCcw size={14} /> {!isMobile && t("lab.reset", "Empty Beaker")}
           </button>
         </div>
       </header>
@@ -1086,8 +1086,10 @@ export function InteractiveLabPage({ defaultInputType = "button" }: { defaultInp
               transform: "translate(-50%, -50%)",
               textAlign: "center", pointerEvents: "none",
             }}>
-              <p style={{ color: "#64748b", fontSize: "0.9rem", background: "rgba(2,6,23,0.5)", padding: "8px 16px", borderRadius: "20px" }}>
-                Drag a chemical bottle onto the canvas to pour it
+              <p style={{ color: "white", fontSize: "0.9rem", background: "rgba(15,31,61,0.6)", padding: "8px 16px", borderRadius: "20px", backdropFilter: "blur(4px)" }}>
+                {isMobile 
+                  ? (isRTL ? "👆 افتح المكونات من الأعلى" : "👆 Tap Elements Menu above") 
+                  : (isRTL ? "اسحب المكونات إلى هنا" : "Drag a chemical bottle onto the canvas to pour it")}
               </p>
             </div>
           )}
