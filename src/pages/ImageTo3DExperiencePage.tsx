@@ -98,7 +98,7 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
   const [true3dGlbUrl, setTrue3dGlbUrl] = useState<string | null>(null);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(true);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
