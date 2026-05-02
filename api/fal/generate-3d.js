@@ -25,40 +25,28 @@ function getSupabaseAdmin() {
 
 // ── Supabase Rate Limiter ─────────────────────────────────────────────────
 /**
- * يتحقق من الحد اليومي ويُزيد العداد في Supabase.
- * يستخدم UPSERT ذرياً لضمان صحة البيانات في الطلبات المتزامنة.
- * 
- * @param userId   معرف المستخدم (UUID أو hashed IP)
- * @param plan     خطة المستخدم: 'free' | 'pro' | 'school'
- * @returns { allowed: boolean, remaining: number, count: number }
+ * يتحقق من الحد اليومي والساعي باستخدام check_fal_generation_limit RPC
  */
 async function checkAndIncrementUsage(userId, plan) {
   const supabase = getSupabaseAdmin();
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD UTC
-  const limit = (plan === 'pro' || plan === 'school') ? RATE_LIMIT_PRO : RATE_LIMIT_FREE;
+  
+  const hourlyLimit = (plan === 'pro' || plan === 'school') ? 20 : 3;
+  const dailyLimit  = (plan === 'pro' || plan === 'school') ? 100 : 10;
 
-  // محاولة إدراج أول طلب اليوم أو زيادة العداد إذا كان السجل موجوداً
-  const { data, error } = await supabase.rpc('increment_api_usage', {
-    p_user_id:   userId,
-    p_date:      today,
-    p_plan:      plan,
-    p_limit:     limit,
+  const { data, error } = await supabase.rpc('check_fal_generation_limit', {
+    p_user_key:    userId,
+    p_plan:        plan,
+    p_hourly_limit: hourlyLimit,
+    p_daily_limit:  dailyLimit,
   });
 
   if (error) {
-    // في حالة خطأ في DB، نسمح بالطلب ونُسجّل التحذير (fail open بحذر)
-    console.error('[RateLimit] Supabase error, allowing request:', error.message);
-    return { allowed: true, remaining: limit - 1, count: 1 };
+    // Fail-Closed: نرفض الطلب في حال وجود خطأ تقني لحماية الـ API
+    console.error('[RateLimit] Supabase error, DENYING request (fail-closed):', error.message);
+    return { allowed: false, error: 'Internal validation error', reason: 'db_error' };
   }
 
-  // الدالة تُعيد: { allowed, current_count }
-  const result = data;
-  const remaining = Math.max(0, limit - (result?.current_count ?? 1));
-  return {
-    allowed:   result?.allowed ?? true,
-    remaining,
-    count:     result?.current_count ?? 1,
-  };
+  return data;
 }
 
 async function getPlanFromDB(userId) {
@@ -128,26 +116,32 @@ export default async function handler(req, res) {
       ?? 'unknown').replace(/[^a-zA-Z0-9.:_-]/g, '');
 
     const headerUserId = req.headers['x-user-id'];
-    const userId = headerUserId || `ip:${clientIp}`;
+    // User format: user:<id> for authenticated, ip:<hash> for anonymous
+    let userId = 'ip:unknown';
+    if (headerUserId) {
+      userId = `user:${headerUserId}`;
+    } else {
+      const ipHash = crypto.createHash('md5').update(clientIp).digest('hex');
+      userId = `ip:${ipHash}`;
+    }
     const userPlan = await getPlanFromDB(headerUserId);
 
     let rateLimitResult;
     try {
       rateLimitResult = await checkAndIncrementUsage(userId, userPlan);
     } catch (rlError) {
-      console.error('[RateLimit] Fatal error, allowing request:', rlError);
-      rateLimitResult = { allowed: true, remaining: 1, count: 1 };
+      console.error('[RateLimit] Fatal error, DENYING request (fail-closed):', rlError);
+      rateLimitResult = { allowed: false, reason: 'fatal_error' };
     }
 
-    res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining);
-    res.setHeader('X-RateLimit-Used', rateLimitResult.count);
-
     if (!rateLimitResult.allowed) {
+      res.setHeader('Retry-After', '3600'); // 1 hour
       return res.status(429).json({
-        error: 'لقد تجاوزت الحد اليومي للتوليد. قم بالترقية للـ Pro للحصول على 50 طلب يومياً.',
-        errorEn: 'Daily generation limit exceeded. Upgrade to Pro for 50 requests/day.',
-        retryAfter: '24h',
+        error: 'You have reached your generation limit. Please wait or upgrade.',
+        errorEn: 'You have reached your generation limit. Please wait or upgrade.',
+        retryAfter: '3600',
         plan: userPlan,
+        reason: rateLimitResult.reason
       });
     }
 

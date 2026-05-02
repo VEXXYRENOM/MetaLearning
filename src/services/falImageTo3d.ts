@@ -87,7 +87,7 @@ export async function falGenerate3DFromImage(
 
   if (res.status === 429) {
     const json = await res.json().catch(() => ({})) as { error?: string };
-    throw new Error(json.error || "لقد تجاوزت الحد اليومي للتوليد. قم بالترقية للـ Pro.");
+    throw new Error(json.error || "You have reached your generation limit. Please wait or upgrade.");
   }
 
   if (!res.ok) {

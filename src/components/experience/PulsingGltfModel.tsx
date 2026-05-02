@@ -12,7 +12,7 @@ type Props = {
 };
 
 export function PulsingGltfModel({ url, modelScale, pulse }: Props) {
-  const { scene } = useGLTF(url);
+  const { scene } = useGLTF(url, "https://www.gstatic.com/draco/versioned/decoders/1.5.5/");
   const clone = useMemo(() => scene.clone(true), [scene]);
   const groupRef = useRef<Group>(null);
 

@@ -461,10 +461,35 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
 
             {/* Error state */}
             {sf3dStatus === "FAILED" && !processing && (
-              <div className="ai-progress-container mt-4" style={{ borderColor: "#ef4444" }}>
-                <span style={{ color: "#ef4444", fontSize: "0.85rem", direction: "rtl", display: "block" }}>
-                  ⚠️ {sf3dError || "فشل التوليد. حاول مرة أخرى."}
+              <div className="ai-progress-container mt-4" style={{ 
+                borderColor: sf3dError?.includes("limit") ? "#f59e0b" : "#ef4444", 
+                background: sf3dError?.includes("limit") ? "rgba(245, 158, 11, 0.05)" : "transparent",
+                padding: sf3dError?.includes("limit") ? "16px" : "12px",
+                flexDirection: "column",
+                gap: "12px"
+              }}>
+                <span style={{ 
+                  color: sf3dError?.includes("limit") ? "#f59e0b" : "#ef4444", 
+                  fontSize: sf3dError?.includes("limit") ? "0.95rem" : "0.85rem", 
+                  direction: sf3dError?.includes("limit") ? "ltr" : "rtl", 
+                  display: "block",
+                  textAlign: "center",
+                  fontWeight: sf3dError?.includes("limit") ? "bold" : "normal"
+                }}>
+                  {sf3dError?.includes("limit") ? "⚠️ " : "⚠️ "}{sf3dError || "فشل التوليد. حاول مرة أخرى."}
                 </span>
+                
+                {sf3dError?.includes("limit") && (
+                  <Link to="/pricing" style={{
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    padding: "8px 16px", background: "linear-gradient(90deg, #f59e0b, #d97706)",
+                    color: "white", borderRadius: "8px", textDecoration: "none",
+                    fontWeight: "bold", fontSize: "0.9rem", alignSelf: "center",
+                    boxShadow: "0 4px 12px rgba(245, 158, 11, 0.3)"
+                  }}>
+                    ⭐ Upgrade to Pro
+                  </Link>
+                )}
               </div>
             )}
           </div>

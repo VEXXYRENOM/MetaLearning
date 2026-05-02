@@ -7,7 +7,7 @@ interface Props {
 }
 
 function LoadedModel({ url }: Props) {
-  const { scene, animations } = useGLTF(url);
+  const { scene, animations } = useGLTF(url, "https://www.gstatic.com/draco/versioned/decoders/1.5.5/");
   const [modelScale, setModelScale] = useState(1);
 
   // دعم الأنميشن إذا كان المجسم متحركاً (مثل الثعلب)

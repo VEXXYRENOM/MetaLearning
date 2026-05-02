@@ -9,7 +9,7 @@ type Props = {
 };
 
 export function ArtifactGltfModel({ url, modelScale = 1 }: Props) {
-  const { scene } = useGLTF(url);
+  const { scene } = useGLTF(url, "https://www.gstatic.com/draco/versioned/decoders/1.5.5/");
   const clone = useMemo(() => scene.clone(true), [scene]);
   const groupRef = useRef<Group>(null);
 
@@ -48,6 +48,7 @@ export function ArtifactGltfModel({ url, modelScale = 1 }: Props) {
   );
 }
 
-// تحميل مسبق للنموذج لتجنب التقطيع
-useGLTF.preload("https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb");
-useGLTF.preload("https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AntiqueCamera/glTF-Binary/AntiqueCamera.glb");
+// تحميل مسبق للنموذج لتجنب التقطيع مع تفعيل Draco
+const DRACO_PATH = "https://www.gstatic.com/draco/versioned/decoders/1.5.5/";
+useGLTF.preload("https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb", DRACO_PATH);
+useGLTF.preload("https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AntiqueCamera/glTF-Binary/AntiqueCamera.glb", DRACO_PATH);
