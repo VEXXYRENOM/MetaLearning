@@ -42,8 +42,14 @@ export function LessonQA({ lessonId, studentId, isTeacher }: LessonQAProps) {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "lesson_questions", filter: `lesson_id=eq.${lessonId}` },
-        () => {
-          fetchQuestions(); // Simplest sync logic
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setQuestions((prev) => [...prev, payload.new as unknown as Question]);
+          } else if (payload.eventType === 'UPDATE') {
+            setQuestions((prev) => prev.map(q => q.id === payload.new.id ? { ...q, ...payload.new } : q));
+          } else if (payload.eventType === 'DELETE') {
+            setQuestions((prev) => prev.filter(q => q.id !== payload.old.id));
+          }
         }
       )
       .subscribe();

@@ -5,47 +5,15 @@ import {
   Atom, Calculator, Book, Globe, Languages, Settings, 
   Star, Palette, FlaskConical, Microscope, Layers, User, 
   ChevronLeft, Search, Copy, Send, LayoutDashboard,
-  ImagePlus, Cuboid, BarChart3, Zap
+  ImagePlus, Cuboid, BarChart3, Zap, Plus, Trash2, CheckCircle2, MessageSquare
 } from "lucide-react";
 import { Suspense, lazy } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, Float } from "@react-three/drei";
 import { Model3DLoader } from "../components/Model3DLoader";
 
-const BeatingHeart3D = lazy(() => import("../components/lesson/BeatingHeart3D").then(m => ({ default: m.BeatingHeart3D })));
-const AtomModel3D = lazy(() => import("../components/lesson/AtomModel3D").then(m => ({ default: m.AtomModel3D })));
-const SolarSystem3D = lazy(() => import("../components/lesson/SolarSystem3D").then(m => ({ default: m.SolarSystem3D })));
-const Pyramid3D = lazy(() => import("../components/lesson/Pyramid3D").then(m => ({ default: m.Pyramid3D })));
-const PlatonicSolids3D = lazy(() => import("../components/lesson/PlatonicSolids3D").then(m => ({ default: m.PlatonicSolids3D })));
-const AnimalCell3D = lazy(() => import("../components/lesson/AnimalCell3D").then(m => ({ default: m.AnimalCell3D })));
-const PlantCell3D = lazy(() => import("../components/lesson/PlantCell3D").then(m => ({ default: m.PlantCell3D })));
-const WaterMolecule3D = lazy(() => import("../components/lesson/WaterMolecule3D").then(m => ({ default: m.WaterMolecule3D })));
-const DNAHelix3D = lazy(() => import("../components/lesson/DNAHelix3D").then(m => ({ default: m.DNAHelix3D })));
-const EarthLayers3D = lazy(() => import("../components/lesson/EarthLayers3D").then(m => ({ default: m.EarthLayers3D })));
-const Volcano3D = lazy(() => import("../components/lesson/Volcano3D").then(m => ({ default: m.Volcano3D })));
-const WaterCycle3D = lazy(() => import("../components/lesson/WaterCycle3D").then(m => ({ default: m.WaterCycle3D })));
-const LungsModel3D = lazy(() => import("../components/lesson/LungsModel3D").then(m => ({ default: m.LungsModel3D })));
-const EyeAnatomy3D = lazy(() => import("../components/lesson/EyeAnatomy3D").then(m => ({ default: m.EyeAnatomy3D })));
-const FunctionGraph3D = lazy(() => import("../components/lesson/FunctionGraph3D").then(m => ({ default: m.FunctionGraph3D })));
-const GeometricVolumes3D = lazy(() => import("../components/lesson/GeometricVolumes3D").then(m => ({ default: m.GeometricVolumes3D })));
-const Colosseum3D = lazy(() => import("../components/lesson/Colosseum3D").then(m => ({ default: m.Colosseum3D })));
-const CarthageRuins3D = lazy(() => import("../components/lesson/CarthageRuins3D").then(m => ({ default: m.CarthageRuins3D })));
-const KairouanMosque3D = lazy(() => import("../components/lesson/KairouanMosque3D").then(m => ({ default: m.KairouanMosque3D })));
-const ArabicLetters3D = lazy(() => import("../components/lesson/ArabicLetters3D").then(m => ({ default: m.ArabicLetters3D })));
-const VocalAnatomy3D = lazy(() => import("../components/lesson/VocalAnatomy3D").then(m => ({ default: m.VocalAnatomy3D })));
-const RoomObjects3D = lazy(() => import("../components/lesson/RoomObjects3D").then(m => ({ default: m.RoomObjects3D })));
-const ColorWheel3D = lazy(() => import("../components/lesson/ColorWheel3D").then(m => ({ default: m.ColorWheel3D })));
-const Pottery3D = lazy(() => import("../components/lesson/Pottery3D").then(m => ({ default: m.Pottery3D })));
-const PaintingFrame3D = lazy(() => import("../components/lesson/PaintingFrame3D").then(m => ({ default: m.PaintingFrame3D })));
 const GltfScene = lazy(() => import("../components/lesson/GltfScene").then(m => ({ default: m.GltfScene })));
 const ArtifactGltfModel = lazy(() => import("../components/experience/ArtifactGltfModel").then(m => ({ default: m.ArtifactGltfModel })));
-const OrthographicProjection3D = lazy(() => import("../components/lesson/OrthographicProjection3D").then(m => ({ default: m.OrthographicProjection3D })));
-const Vectors3D = lazy(() => import("../components/lesson/Vectors3D").then(m => ({ default: m.Vectors3D })));
-const Transformations3D = lazy(() => import("../components/lesson/Transformations3D").then(m => ({ default: m.Transformations3D })));
-const StatisticsProbability3D = lazy(() => import("../components/lesson/StatisticsProbability3D").then(m => ({ default: m.StatisticsProbability3D })));
-const Sequences3D = lazy(() => import("../components/lesson/Sequences3D").then(m => ({ default: m.Sequences3D })));
-const MathematicalLogic3D = lazy(() => import("../components/lesson/MathematicalLogic3D").then(m => ({ default: m.MathematicalLogic3D })));
-
 import { QRCodeSVG } from "qrcode.react";
 import "../teacher.css"; // تنسيق النمط الفاتح المستقل
 import { LESSONS } from "../data/lessons"; // لاستيراد النماذج الجاهزة للأستاذ
@@ -54,7 +22,13 @@ import { OnboardingWizard } from "../components/OnboardingWizard";
 import { showToast } from "../components/Toast";
 import { supabase } from "../services/supabaseClient";
 
-type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
+export interface QuizQuestionState {
+  id: string;
+  question_text: string;
+  answers: { id: string; answer_text: string; is_correct: boolean; }[];
+}
 
 export function TeacherDashboardPage() {
   const { profile, signOut, isPro } = useAuth();
@@ -62,8 +36,12 @@ export function TeacherDashboardPage() {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [lessonName, setLessonName] = useState<string>("");
+  const [lessonNotes, setLessonNotes] = useState<string>("");
+  const [lessonQuiz, setLessonQuiz] = useState<QuizQuestionState[]>([]);
   const [autoExplain, setAutoExplain] = useState<boolean>(true);
   const [showWizard, setShowWizard] = useState<boolean>(false);
+  const [pinCode, setPinCode] = useState<string | null>(null);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile && profile.onboarding_done === false) {
@@ -76,7 +54,7 @@ export function TeacherDashboardPage() {
   // isPro is now pulled from useAuth() above — covers all upgrade paths ✅
 
   const nextStep = () => {
-    if (step < 6) setStep((prev: Step) => (prev + 1) as Step);
+    if (step < 8) setStep((prev: Step) => (prev + 1) as Step);
   };
 
   const prevStep = () => {
@@ -133,7 +111,13 @@ export function TeacherDashboardPage() {
         <div className="teacher-content">
           {/* 🌟 غرفة العمليات المركزية (Teacher Hub) */}
           {step === 0 && (
-            <Step0Hub onStartWizard={() => setStep(1)} profile={profile} isPro={isPro} />
+            <Step0Hub 
+              onStartWizard={() => setStep(1)} 
+              profile={profile} 
+              isPro={isPro} 
+              setStep={setStep}
+              setSelectedSubject={setSelectedSubject}
+            />
           )}
 
           {step === 1 && (
@@ -151,9 +135,11 @@ export function TeacherDashboardPage() {
           
           {step === 2 && <Step2Level selected={selectedLevel} onSelect={setSelectedLevel} onNext={nextStep} />}
           {step === 3 && <Step3Input selectedSubject={selectedSubject} lessonName={lessonName} onChange={setLessonName} onNext={nextStep} />}
-          {step === 4 && <Step4LabPreview lessonName={lessonName} autoExplain={autoExplain} setAutoExplain={setAutoExplain} onNext={nextStep} />}
-          {step === 5 && <Step5Review lessonName={lessonName} autoExplain={autoExplain} onNext={nextStep} />}
-          {step === 6 && <Step6Success lessonName={lessonName} subject={selectedSubject} profile={profile} isPro={isPro} />}
+          {step === 4 && <Step4Notes lessonNotes={lessonNotes} onChange={setLessonNotes} onNext={nextStep} />}
+          {step === 5 && <Step5Quiz lessonQuiz={lessonQuiz} setLessonQuiz={setLessonQuiz} onNext={nextStep} />}
+          {step === 6 && <Step6LabPreview lessonName={lessonName} autoExplain={autoExplain} setAutoExplain={setAutoExplain} onNext={nextStep} />}
+          {step === 7 && <Step7Review lessonName={lessonName} subject={selectedSubject} profile={profile} isPro={isPro} autoExplain={autoExplain} lessonNotes={lessonNotes} lessonQuiz={lessonQuiz} onNext={nextStep} setPinCode={setPinCode} setActiveSessionId={setActiveSessionId} />}
+          {step === 8 && <Step8Success lessonName={lessonName} pinCode={pinCode} activeSessionId={activeSessionId} />}
         </div>
       </main>
     </div>
@@ -163,7 +149,13 @@ export function TeacherDashboardPage() {
 // -----------------------------------------------------
 // 🌟 المكون الجديد: غرفة العمليات (Teacher Hub - Step 0)
 // -----------------------------------------------------
-function Step0Hub({ onStartWizard, profile, isPro }: { onStartWizard: () => void; profile: any; isPro: boolean; }) {
+function Step0Hub({ onStartWizard, profile, isPro, setStep, setSelectedSubject }: { 
+  onStartWizard: () => void; 
+  profile: any; 
+  isPro: boolean;
+  setStep: (s: Step) => void;
+  setSelectedSubject: (subj: string) => void;
+}) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language.startsWith("ar");
   const [myLessons, setMyLessons] = useState<any[]>([]);
@@ -237,11 +229,12 @@ function Step0Hub({ onStartWizard, profile, isPro }: { onStartWizard: () => void
         setLoadingMy(false);
       });
 
+    // 🔹 Count lessons created this month for free tier limit
     supabase
-      .from('lessons')
-      .select('*', { count: 'exact', head: true })
-      .eq('teacher_id', profile.id)
-      .gte('created_at', thisMonth.toISOString())
+      .from("lessons")
+      .select("id", { count: "exact", head: true })
+      .eq("teacher_id", profile.id)
+      .gte("created_at", thisMonth.toISOString())
       .then(({ count }) => {
         setMonthlyLessonCount(count || 0);
       });
@@ -296,7 +289,7 @@ function Step0Hub({ onStartWizard, profile, isPro }: { onStartWizard: () => void
     <div className="hub-container">
       <div className="hub-header-meta">
         <h2>Your Workspace 🚀</h2>
-        <p>Upload your custom model or browse your library of ready-to-use 3D assets.</p>
+        <p>Manage your interactive classroom and design immersive educational paths for students worldwide.</p>
       </div>
 
       {!isPro && (
@@ -371,10 +364,11 @@ function Step0Hub({ onStartWizard, profile, isPro }: { onStartWizard: () => void
         </Link>
 
         <div className="action-card primary-action hoverable"
-             onClick={(!isPro && monthlyLessonCount >= 5) ? undefined : onStartWizard}
-             style={{ opacity: (!isPro && monthlyLessonCount >= 5) ? 0.6 : 1,
-                      cursor: (!isPro && monthlyLessonCount >= 5) ? 'not-allowed' : 'pointer' }}>
-          {(!isPro && monthlyLessonCount >= 5) && (
+             onClick={(!isPro && monthlyLessonCount >= FREE_LESSON_LIMIT) ? undefined : onStartWizard}
+             style={{ opacity: (!isPro && monthlyLessonCount >= FREE_LESSON_LIMIT) ? 0.6 : 1,
+                      cursor: (!isPro && monthlyLessonCount >= FREE_LESSON_LIMIT) ? 'not-allowed' : 'pointer',
+                      border: '2px solid #a855f7' }}>
+          {(!isPro && monthlyLessonCount >= FREE_LESSON_LIMIT) && (
             <div style={{ background: 'rgba(245,158,11,0.15)',
                           border: '1px solid #f59e0b', borderRadius: '8px',
                           padding: '8px 12px', marginBottom: '12px',
@@ -386,10 +380,30 @@ function Step0Hub({ onStartWizard, profile, isPro }: { onStartWizard: () => void
               </Link>
             </div>
           )}
-          <div className="icon-wrap wizard-icon"><Layers size={36} /></div>
-          <h3>Design New Lesson Path</h3>
-          <p>Select a curriculum, organize 3D modules step-by-step, and generate a PIN code for your students.</p>
-          <button className="btn-primary mt-auto width-full" disabled={(!isPro && monthlyLessonCount >= FREE_LESSON_LIMIT)}>Start Designing</button>
+          <div className="icon-wrap wizard-icon" style={{ background: 'linear-gradient(135deg, #a855f7, #3b82f6)' }}><Layers size={36} /></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <h3>Design New Lesson Path</h3>
+              <p>Full 8-step curriculum design with custom notes and quizzes.</p>
+            </div>
+            <button 
+              className="btn-primary" 
+              style={{ padding: '6px 12px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isPro && monthlyLessonCount >= FREE_LESSON_LIMIT) return;
+                // Quick start: Skip to step 3 (Select Model)
+                setSelectedSubject("science");
+                setStep(3);
+              }}
+            >
+              ⚡ Quick Launch (60s)
+            </button>
+          </div>
+          <button className="btn-primary mt-auto width-full" onClick={() => {
+            if (!isPro && monthlyLessonCount >= FREE_LESSON_LIMIT) return;
+            onStartWizard();
+          }} disabled={(!isPro && monthlyLessonCount >= FREE_LESSON_LIMIT)}>Start Full Wizard</button>
         </div>
       </div>
 
@@ -492,26 +506,6 @@ function Step0Hub({ onStartWizard, profile, isPro }: { onStartWizard: () => void
         )}
       </div>
 
-      <div className="gallery-section mt-6">
-        <div className="hub-header-meta mb-4">
-          <h3>🎨 3D Template Library</h3>
-          <p>Ready-to-use 3D scenes. Click to preview immediately!</p>
-        </div>
-        
-        <div className="gallery-grid">
-          {LESSONS.map(l => (
-             <Link key={l.id} to={`/lesson/${l.id}`} className="gallery-card">
-               <div className="gallery-thumb">
-                 <Cuboid size={30} className="text-white opacity-80" />
-               </div>
-               <div className="gallery-info">
-                 <span className="gal-badge">{isArabic ? l.subjectAr : (l.subjectEn || l.subjectAr)}</span>
-                 <h4>{isArabic ? l.titleAr : (l.titleEn || l.titleAr)}</h4>
-               </div>
-             </Link>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -655,7 +649,162 @@ function Step3Input({ selectedSubject, lessonName, onChange, onNext }: any) {
   );
 }
 
-function Step4LabPreview({ lessonName, autoExplain, setAutoExplain, onNext }: any) {
+function Step4Notes({ lessonNotes, onChange, onNext }: any) {
+  return (
+    <div className="step-container center-content" style={{ background: "rgba(255,255,255,0.4)", backdropFilter: "blur(12px)" }}>
+      <h3 className="section-title">Lesson Notes & Explanations</h3>
+      <p style={{ color: "#64748b", fontSize: "0.9rem", marginBottom: "1.5rem" }}>
+        Write educational notes or prompts that students will see alongside the 3D model.
+      </p>
+      <div className="input-group" style={{ maxWidth: "600px", width: "100%" }}>
+        <textarea
+          value={lessonNotes}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Enter lesson details, key concepts, or instructions..."
+          className="large-input"
+          style={{ minHeight: "150px", resize: "vertical", background: "rgba(255,255,255,0.7)", fontFamily: "inherit" }}
+        />
+      </div>
+      <button className="btn-primary large" onClick={onNext}>
+        Continue to Quiz Builder
+      </button>
+    </div>
+  );
+}
+
+function Step5Quiz({ lessonQuiz, setLessonQuiz, onNext }: any) {
+  const addQuestion = () => {
+    setLessonQuiz((prev: any) => [
+      ...prev,
+      {
+        id: `temp_${Date.now()}`,
+        question_text: "",
+        answers: [
+          { id: `t_a1_${Date.now()}`, answer_text: "", is_correct: true },
+          { id: `t_a2_${Date.now()}`, answer_text: "", is_correct: false }
+        ]
+      }
+    ]);
+  };
+
+  const updateQ = (qIdx: number, text: string) => {
+    const updated = [...lessonQuiz];
+    updated[qIdx].question_text = text;
+    setLessonQuiz(updated);
+  };
+
+  const removeQ = (qIdx: number) => {
+    setLessonQuiz((prev: any) => prev.filter((_: any, i: number) => i !== qIdx));
+  };
+
+  const updateA = (qIdx: number, aIdx: number, text: string) => {
+    const updated = [...lessonQuiz];
+    updated[qIdx].answers[aIdx].answer_text = text;
+    setLessonQuiz(updated);
+  };
+
+  const setCorrect = (qIdx: number, aIdx: number) => {
+    const updated = [...lessonQuiz];
+    updated[qIdx].answers.forEach((a: any, i: number) => {
+      a.is_correct = i === aIdx;
+    });
+    setLessonQuiz(updated);
+  };
+
+  const addA = (qIdx: number) => {
+    const updated = [...lessonQuiz];
+    updated[qIdx].answers.push({ id: `t_a_${Date.now()}`, answer_text: "", is_correct: false });
+    setLessonQuiz(updated);
+  };
+
+  const removeA = (qIdx: number, aIdx: number) => {
+    const updated = [...lessonQuiz];
+    if (updated[qIdx].answers.length > 2) {
+      updated[qIdx].answers = updated[qIdx].answers.filter((_: any, i: number) => i !== aIdx);
+      if (!updated[qIdx].answers.some((a: any) => a.is_correct)) {
+        updated[qIdx].answers[0].is_correct = true;
+      }
+      setLessonQuiz(updated);
+    }
+  };
+
+  return (
+    <div className="step-container" style={{ display: "flex", flexDirection: "column", height: "80vh", overflow: "hidden", background: "rgba(255,255,255,0.4)", backdropFilter: "blur(12px)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+        <h3 className="section-title" style={{ margin: 0 }}>Quiz Builder</h3>
+        <button onClick={addQuestion} className="btn-outline">
+          <Plus size={16} /> Add Question
+        </button>
+      </div>
+
+      <div style={{ flex: 1, overflowY: "auto", paddingRight: "10px", display: "flex", flexDirection: "column", gap: "1rem" }}>
+        {lessonQuiz.length === 0 ? (
+          <div style={{ textAlign: "center", color: "#64748b", padding: "3rem" }}>
+            <p>No questions added yet. Click "Add Question" to start building your quiz.</p>
+          </div>
+        ) : (
+          lessonQuiz.map((q: any, qIdx: number) => (
+            <div key={q.id} style={{ background: "rgba(255,255,255,0.6)", padding: "1.2rem", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.8)" }}>
+              <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+                <input
+                  type="text"
+                  placeholder="Question text..."
+                  value={q.question_text}
+                  onChange={(e) => updateQ(qIdx, e.target.value)}
+                  className="large-input"
+                  style={{ flex: 1, background: "rgba(255,255,255,0.8)" }}
+                />
+                <button onClick={() => removeQ(qIdx)} className="btn-outline" style={{ color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}>
+                  <Trash2 size={18} />
+                </button>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {q.answers.map((a: any, aIdx: number) => (
+                  <div key={a.id} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                    <button onClick={() => setCorrect(qIdx, aIdx)} style={{
+                      background: "none", border: "none", cursor: "pointer",
+                      color: a.is_correct ? "#10b981" : "#94a3b8"
+                    }}>
+                      <CheckCircle2 size={24} />
+                    </button>
+                    <input
+                      type="text"
+                      placeholder="Option text..."
+                      value={a.answer_text}
+                      onChange={(e) => updateA(qIdx, aIdx, e.target.value)}
+                      className="large-input"
+                      style={{ flex: 1, padding: "0.6rem 1rem", border: a.is_correct ? "2px solid #10b981" : undefined, background: "rgba(255,255,255,0.8)" }}
+                    />
+                    <button onClick={() => removeA(qIdx, aIdx)} disabled={q.answers.length <= 2} style={{
+                      background: "none", border: "none", cursor: q.answers.length > 2 ? "pointer" : "not-allowed",
+                      color: q.answers.length > 2 ? "#f87171" : "#cbd5e1"
+                    }}>
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                ))}
+                {q.answers.length < 5 && (
+                  <button onClick={() => addA(qIdx)} className="btn-outline" style={{ borderStyle: "dashed", marginTop: "0.5rem" }}>
+                    + Add Option
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div style={{ marginTop: "1.5rem", textAlign: "right" }}>
+        <button className="btn-primary large" onClick={onNext}>
+          Preview Lab Experience
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Step6LabPreview({ lessonName, autoExplain, setAutoExplain, onNext }: any) {
   const renderModel = () => {
     // 1. فحص الدروس المحددة مسبقاً بنظام الـ GLTF
     const lessonData = LESSONS.find((l) => l.titleAr === lessonName);
@@ -668,62 +817,15 @@ function Step4LabPreview({ lessonName, autoExplain, setAutoExplain, onNext }: an
       );
     }
 
-    if (lessonData?.kind === "gltf-url" && lessonData.gltfUrl) {
+    if ((lessonData?.kind === "gltf-url" || lessonData?.kind === "local-model") && lessonData.gltfUrl) {
       return (
         <group scale={[1.5, 1.5, 1.5]}>
-          <GltfScene url={lessonData.gltfUrl} modelScale={1} selectedName={null} onSelectName={() => {}} />
+          <GltfScene url={lessonData.gltfUrl} modelScale={lessonData.kind === "local-model" ? 1.5 : 1} selectedName={null} onSelectName={() => {}} xrayMode={false} />
         </group>
       );
     }
 
-    // 2. علوم الحياة والأرض (Biology)
-    if (lessonName.includes("القلب")) return <BeatingHeart3D />;
-    if (lessonName.includes("الخلية الحيوانية")) return <AnimalCell3D />;
-    if (lessonName.includes("الخلية النباتية") || lessonName.includes("النبات")) return <PlantCell3D />;
-    if (lessonName.includes("التنفسي")) return <LungsModel3D />;
-    if (lessonName.includes("العين") || lessonName.includes("البصر")) return <EyeAnatomy3D />;
-    if (lessonName.includes("DNA") || lessonName.includes("الحمض") || lessonName.includes("الوراثة")) return <DNAHelix3D />;
-    if (lessonName.includes("الخلية")) return <AnimalCell3D />;
-    
-    // الكيمياء (Chemistry)
-    if (lessonName.includes("الذرة") || lessonName.includes("الكيميائي")) return <AtomModel3D />;
-    if (lessonName.includes("الماء") && lessonName.includes("جزيء")) return <WaterMolecule3D />;
-    
-    // الجغرافيا وعلوم الأرض
-    if (lessonName.includes("الشمسية") || lessonName.includes("الكواكب")) return <SolarSystem3D />;
-    if (lessonName.includes("طبقات الأرض")) return <EarthLayers3D />;
-    if (lessonName.includes("الزلازل") || lessonName.includes("البراكين") || lessonName.includes("بركان")) return <Volcano3D />;
-    if (lessonName.includes("المياه") || lessonName.includes("دورة")) return <WaterCycle3D />;
-    if (lessonName.includes("التضاريس") || lessonName.includes("الأرض")) return <EarthLayers3D />;
-    
-    // التاريخ
-    if (lessonName.includes("أهرامات")) return <Pyramid3D />;
-    if (lessonName.includes("الكولوسيوم")) return <Colosseum3D />;
-    if (lessonName.includes("قرطاج")) return <CarthageRuins3D />;
-    if (lessonName.includes("القيروان")) return <KairouanMosque3D />;
-    
-    // الرياضيات
-    if (lessonName.includes("التحويلات الهندسية")) return <Transformations3D />;
-    if (lessonName.includes("الهندسة") || lessonName.includes("الأفلاطونية")) return <PlatonicSolids3D />;
-    if (lessonName.includes("الأحجام") || lessonName.includes("المساحات")) return <GeometricVolumes3D />;
-    if (lessonName.includes("بيانية") || lessonName.includes("الدوال")) return <FunctionGraph3D />;
-    if (lessonName.includes("الإسقاط العمودي")) return <OrthographicProjection3D />;
-    if (lessonName.includes("المتجهات")) return <Vectors3D />;
-    if (lessonName.includes("الإحصاء") || lessonName.includes("الاحتمالات")) return <StatisticsProbability3D />;
-    if (lessonName.includes("المتتاليات")) return <Sequences3D />;
-    if (lessonName.includes("المنطق الرياضي")) return <MathematicalLogic3D />;
-    
-    // اللغات
-    if (lessonName.includes("الحروف الأبجدية")) return <ArabicLetters3D />;
-    if (lessonName.includes("مخارج الحروف") || lessonName.includes("صوتية")) return <VocalAnatomy3D />;
-    if (lessonName.includes("الغرفة")) return <RoomObjects3D />;
-    
-    // الفنون
-    if (lessonName.includes("الألوان")) return <ColorWheel3D />;
-    if (lessonName.includes("الخزف") || lessonName.includes("النحت")) return <Pottery3D />;
-    if (lessonName.includes("اللوحات")) return <PaintingFrame3D />;
-    
-    return <BeatingHeart3D />; // Default fallback
+    return null;
   };
 
   return (
@@ -803,24 +905,80 @@ function Step4LabPreview({ lessonName, autoExplain, setAutoExplain, onNext }: an
   );
 }
 
-function Step5Review({ lessonName, autoExplain, onNext }: any) {
+function Step7Review({ lessonName, subject, profile, isPro, autoExplain, lessonNotes, lessonQuiz, onNext, setPinCode, setActiveSessionId }: any) {
+  const [publishing, setPublishing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  async function generateUniquePin(): Promise<string> {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const generate = () => Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+    for (let i = 0; i < 10; i++) {
+      const pin = generate();
+      const { data } = await supabase.from("sessions").select("id").eq("pin_code", pin).eq("is_active", true).maybeSingle();
+      if (!data) return pin;
+    }
+    return `ML${Date.now().toString(36).toUpperCase().slice(-4)}`;
+  }
+
+  const handlePublish = async () => {
+    if (!profile) return;
+    
+    setPublishing(true);
+    try {
+      const generatedPin = await generateUniquePin();
+      
+      // Use the Atomic RPC to ensure everything is created or nothing is (Prevents technical debt)
+      const { data, error } = await supabase.rpc('publish_lesson_atomic', {
+        p_teacher_id: profile.id,
+        p_title: lessonName || "Unnamed Lesson",
+        p_subject: subject || "General",
+        p_model_key: getLessonKeyFromTitle(lessonName),
+        p_notes: lessonNotes || null,
+        p_pin: generatedPin,
+        p_quiz: lessonQuiz.map((q: any) => ({
+          question_text: q.question_text,
+          answers: q.answers.map((a: any) => ({
+            answer_text: a.answer_text,
+            is_correct: a.is_correct
+          }))
+        }))
+      });
+
+      if (error) throw error;
+      
+      // The RPC returns a single row with lesson_id, session_id, and pin_code
+      const publishResult = data[0]; 
+      if (!publishResult) throw new Error("Publishing failed to return results.");
+
+      setPinCode(publishResult.pin_code);
+      setActiveSessionId(publishResult.session_id);
+      onNext();
+    } catch (err: any) {
+      setErrorMsg(err.message || "Publish failed");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   return (
     <div className="step-container">
-      <h3 className="section-title text-center mb-6">Final Review - Lesson {lessonName}</h3>
+      <h3 className="section-title text-center mb-6">Review & Publish — {lessonName}</h3>
       <div className="review-layout">
         <div className="review-list">
-          <div className="review-item"><div className="rev-icon"><Layers size={24} /></div><div className="rev-text"><h4>{lessonName} 3D Experience</h4><p>Interactive 3D model designed for immersive viewing and real-time manipulation.</p></div></div>
-          <div className="review-item"><div className="rev-icon"><Atom size={24} /></div><div className="rev-text"><h4>AI Integration</h4><p>Powered by advanced AI for tracking and dynamic explanations.</p></div></div>
+          <div className="review-item"><div className="rev-icon"><Layers size={24} /></div><div className="rev-text"><h4>{lessonName} — 3D Model</h4><p>Interactive 3D preset model ready for live streaming to students.</p></div></div>
+          <div className="review-item"><div className="rev-icon"><MessageSquare size={24} /></div><div className="rev-text"><h4>Lesson Notes</h4><p>{lessonNotes ? `${lessonNotes.slice(0,80)}...` : "No notes added"}</p></div></div>
+          <div className="review-item"><div className="rev-icon"><Zap size={24} /></div><div className="rev-text"><h4>Quiz ({lessonQuiz.length} questions)</h4><p>{lessonQuiz.length > 0 ? `${lessonQuiz.length} question(s) will be published with this lesson.` : "No quiz added"}</p></div></div>
+          <div className="review-item"><div className="rev-icon"><Atom size={24} /></div><div className="rev-text"><h4>AI Auto-Explanation</h4><p>{autoExplain ? "Enabled — AI will narrate the 3D model" : "Disabled"}</p></div></div>
         </div>
         <div className="review-summary">
           <div className="summary-box">
-            <h4>Lesson Setup Summary</h4><p>Curriculum Link<br/>- Official standard aligned</p><hr/>
-            <h4>Auto-Explanation</h4>
-            <div className="toggle-line-small">
-              <span>{autoExplain ? 'Enabled' : 'Disabled'}</span><div className={`status-dot ${autoExplain ? 'on' : 'off'}`}></div>
-            </div>
+            <h4>Ready to Publish</h4>
+            <p>A live session PIN will be generated. Share it with students to join instantly.</p>
           </div>
-          <button className="btn-primary full-width mt-4" onClick={onNext}>Confirm Lesson & Publish</button>
+          {errorMsg && <p style={{ color: '#ef4444', marginTop: '1rem' }}>{errorMsg}</p>}
+          <button className="btn-primary full-width mt-4" onClick={handlePublish} disabled={publishing}>
+            {publishing ? "Publishing..." : "🚀 Confirm & Publish Lesson"}
+          </button>
         </div>
       </div>
     </div>
@@ -833,239 +991,73 @@ function getLessonKeyFromTitle(title: string): string {
   return match?.id ?? "";
 }
 
-function Step6Success({ lessonName, subject, profile, isPro }: any) {
-  const [pinCode, setPinCode] = useState<string | null>(null);
+function Step8Success({ lessonName, pinCode, activeSessionId }: any) {
   const [joinedStudents, setJoinedStudents] = useState<any[]>([]);
-  const [errorMsg, setErrorMsg] = useState("");
   const [copyDone, setCopyDone] = useState(false);
-
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [sessionEnded, setSessionEnded] = useState(false);
 
   const handleEndSession = async () => {
     if (!activeSessionId) return;
-    await supabase
-      .from("sessions")
-      .update({ is_active: false })
-      .eq("id", activeSessionId);
+    await supabase.from("sessions").update({ is_active: false }).eq("id", activeSessionId);
     setSessionEnded(true);
   };
 
   useEffect(() => {
-    let channelRef: ReturnType<typeof supabase.channel> | null = null;
-    
-    async function generateUniquePin(): Promise<string> {
-      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no confusing chars (0,O,1,I)
-      const generate = () =>
-        Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-
-      // Try up to 10 times to get a unique PIN
-      for (let i = 0; i < 10; i++) {
-        const pin = generate();
-        const { data } = await supabase
-          .from("sessions")
-          .select("id")
-          .eq("pin_code", pin)
-          .eq("is_active", true)
-          .maybeSingle();
-        if (!data) return pin; // PIN is unique and available
-      }
-      // Fallback with timestamp (virtually impossible to collide)
-      return `ML${Date.now().toString(36).toUpperCase().slice(-4)}`;
-    }
-
-    async function createLessonAndSession() {
-      if (!profile) return;
-      if (!isPro) {
-        const thisMonth = new Date(); 
-        thisMonth.setDate(1);
-        thisMonth.setHours(0,0,0,0);
-        const { count } = await supabase
-          .from('lessons').select('*', { count: 'exact', head: true })
-          .eq('teacher_id', profile.id)
-          .gte('created_at', thisMonth.toISOString());
-        
-        if ((count || 0) >= 5) {
-          setErrorMsg('Monthly lesson limit reached. Please upgrade to Pro.');
-          return;
-        }
-      }
-
-      try {
-        const generatedPin = await generateUniquePin();
-        setPinCode(generatedPin);
-
-        // 1. Create Lesson (with model_key to link back to preset)
-        const { data: lesson, error: lessonError } = await supabase
-          .from("lessons")
-          .insert({
-            teacher_id: profile.id,
-            title: lessonName || "Unnamed Lesson",
-            subject: subject || "General",
-            model_type: "preset",
-            model_key: getLessonKeyFromTitle(lessonName),
-            share_code: generatedPin
-          })
-          .select()
-          .single();
-
-        if (lessonError) throw lessonError;
-
-        // 2. Create Live Session
-        const { data: session, error: sessionError } = await supabase
-          .from("sessions")
-          .insert({
-            lesson_id: lesson.id,
-            teacher_id: profile.id,
-            pin_code: generatedPin,
-            is_active: true,
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-          })
-          .select()
-          .single();
-
-        if (sessionError) throw sessionError;
-        
-        setActiveSessionId(session.id);
-
-        // 3. Listen to student_joins using Realtime
-        channelRef = supabase.channel(`session-${session.id}`)
-          .on(
-            "postgres_changes",
-            { event: "INSERT", schema: "public", table: "student_joins", filter: `session_id=eq.${session.id}` },
-            (payload) => {
-              setJoinedStudents(prev => [...prev, payload.new]);
-            }
-          )
-          .subscribe();
-
-      } catch (err: any) {
-        console.error(err);
-        setErrorMsg("Failed to generate live session");
-      }
-    }
-
-    createLessonAndSession();
-
-    return () => {
-      if (channelRef) {
-        supabase.removeChannel(channelRef);
-      }
-    };
-  }, [profile, lessonName, subject]);
+    if (!activeSessionId) return;
+    const channelRef = supabase.channel(`session-${activeSessionId}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "student_joins", filter: `session_id=eq.${activeSessionId}` },
+        (payload) => setJoinedStudents(prev => [...prev, payload.new]))
+      .subscribe();
+    return () => { supabase.removeChannel(channelRef); };
+  }, [activeSessionId]);
 
   return (
     <div className="step-container center-content success-view">
       <div className="confetti-placeholder">🎉</div>
-      <h2 className="success-msg">Lesson Created Successfully!</h2>
-      {errorMsg ? (
-        <p style={{ color: 'red' }}>{errorMsg}</p>
-      ) : (
-        <>
-          <p className="success-sub">Access Code</p>
-          <div className="code-display" style={{ fontSize: '2.5rem', letterSpacing: '4px', padding: '1rem', background: '#38bdf822', border: '2px solid #38bdf8', borderRadius: '12px' }}>
-            {pinCode || "..."}
-          </div>
-          
-          {pinCode && (
-            <div style={{
-              marginTop: "1.5rem",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "0.75rem"
-            }}>
-              <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: 0 }}>
-                📱 Students can also scan this QR code to join directly
-              </p>
-              <div style={{
-                background: "white",
-                padding: "16px",
-                borderRadius: "12px",
-                display: "inline-block"
-              }}>
-                <QRCodeSVG
-                  value={`${window.location.origin}/join?pin=${pinCode}`}
-                  size={180}
-                  level="H"
-                />
-              </div>
-              <p style={{ color: "#64748b", fontSize: "0.8rem", margin: 0 }}>
-                Scan → enter PIN automatically → join lesson
-              </p>
-            </div>
-          )}
-          
-          <p className="code-hint mt-2">Copy this secure code and share it with your students to begin.</p>
-          
-          {/* Live Students list */}
-          <div style={{ marginTop: '2rem', padding: '1rem', background: '#1f2937', borderRadius: '12px', width: '100%', maxWidth: '400px' }}>
-            <h4 style={{ color: '#9ca3af', marginBottom: '1rem', borderBottom: '1px solid #374151', paddingBottom: '0.5rem' }}>
-              📡 Live Connected Students ({joinedStudents.length})
-            </h4>
-            {joinedStudents.length === 0 ? (
-              <p style={{ color: '#4b5563', fontSize: '0.9rem' }}>Waiting for students to join...</p>
-            ) : (
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                {joinedStudents.map((st, i) => (
-                  <li key={i} style={{ padding: '0.5rem', background: '#374151', marginBottom: '0.5rem', borderRadius: '6px', color: '#6ee7b7', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                     <span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', background: '#34d399' }}></span>
-                     {st.student_name}
-                  </li>
-                ))}
-              </ul>
-            )}
-            
-            {!sessionEnded ? (
-              <button
-                onClick={handleEndSession}
-                style={{
-                  marginTop: "1rem", width: "100%", padding: "12px",
-                  background: "rgba(239,68,68,0.2)", border: "1px solid #ef4444",
-                  borderRadius: "8px", color: "#fca5a5", cursor: "pointer",
-                  fontWeight: "bold"
-                }}
-              >
-                🔒 End Session & Deactivate PIN
-              </button>
-            ) : (
-              <div style={{ marginTop: "1rem", padding: "12px", background: "rgba(34,197,94,0.1)",
-                border: "1px solid #22c55e", borderRadius: "8px", color: "#86efac",
-                textAlign: "center" }}>
-                ✅ Session ended. PIN is now deactivated.
-              </div>
-            )}
-          </div>
-
-          <div className="share-actions mt-6">
-            <a
-              className="btn-whatsapp"
-              href={`https://wa.me/?text=${encodeURIComponent(
-                `Join my MetaLearning 3D lesson!\nLesson: ${lessonName}\nCode: ${pinCode}\nJoin at: ${window.location.origin}/join`
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Send size={18} /> Send via WhatsApp
-            </a>
-            <button
-              className="btn-outline"
-              onClick={() => {
-                navigator.clipboard.writeText(pinCode ?? "").then(() => {
-                  showToast({ type: 'success', title: 'Copied!', message: `PIN ${pinCode} copied to clipboard` });
-                });
-                setCopyDone(true);
-                setTimeout(() => setCopyDone(false), 2000);
-              }}
-            >
-              <Copy size={18} /> {copyDone ? "Copied! ✓" : "Copy Code"}
-            </button>
-          </div>
-        </>
-      )}
-      <div className="lesson-summary-footer mt-6">
-        <Link to="/">← Back to Home</Link>
+      <h2 className="success-msg">Lesson Published Successfully!</h2>
+      <p className="success-sub">Access Code</p>
+      <div className="code-display" style={{ fontSize: '2.5rem', letterSpacing: '4px', padding: '1rem', background: '#38bdf822', border: '2px solid #38bdf8', borderRadius: '12px' }}>
+        {pinCode || "..."}
       </div>
+      {pinCode && (
+        <div style={{ marginTop: "1.5rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
+          <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: 0 }}>📱 Students can scan this QR to join</p>
+          <div style={{ background: "white", padding: "16px", borderRadius: "12px", display: "inline-block" }}>
+            <QRCodeSVG value={`${window.location.origin}/join?pin=${pinCode}`} size={180} level="H" />
+          </div>
+        </div>
+      )}
+      <p className="code-hint mt-2">Copy this code and share it with your students.</p>
+      <div style={{ marginTop: '2rem', padding: '1rem', background: '#1f2937', borderRadius: '12px', width: '100%', maxWidth: '400px' }}>
+        <h4 style={{ color: '#9ca3af', marginBottom: '1rem', borderBottom: '1px solid #374151', paddingBottom: '0.5rem' }}>📡 Live Students ({joinedStudents.length})</h4>
+        {joinedStudents.length === 0 ? (
+          <p style={{ color: '#4b5563', fontSize: '0.9rem' }}>Waiting for students to join...</p>
+        ) : (
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {joinedStudents.map((st, i) => (
+              <li key={i} style={{ padding: '0.5rem', background: '#374151', marginBottom: '0.5rem', borderRadius: '6px', color: '#6ee7b7', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', background: '#34d399' }}></span>
+                {st.student_name}
+              </li>
+            ))}
+          </ul>
+        )}
+        {!sessionEnded ? (
+          <button onClick={handleEndSession} style={{ marginTop: "1rem", width: "100%", padding: "12px", background: "rgba(239,68,68,0.2)", border: "1px solid #ef4444", borderRadius: "8px", color: "#fca5a5", cursor: "pointer", fontWeight: "bold" }}>🔒 End Session & Deactivate PIN</button>
+        ) : (
+          <div style={{ marginTop: "1rem", padding: "12px", background: "rgba(34,197,94,0.1)", border: "1px solid #22c55e", borderRadius: "8px", color: "#86efac", textAlign: "center" }}>✅ Session ended. PIN deactivated.</div>
+        )}
+      </div>
+      <div className="share-actions mt-6">
+        <a className="btn-whatsapp" href={`https://wa.me/?text=${encodeURIComponent(`Join my MetaLearning 3D lesson!\nLesson: ${lessonName}\nCode: ${pinCode}\nJoin at: ${window.location.origin}/join`)}`} target="_blank" rel="noopener noreferrer">
+          <Send size={18} /> Send via WhatsApp
+        </a>
+        <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(pinCode ?? "").then(() => showToast({ type: 'success', title: 'Copied!', message: `PIN ${pinCode} copied` })); setCopyDone(true); setTimeout(() => setCopyDone(false), 2000); }}>
+          <Copy size={18} /> {copyDone ? "Copied! ✓" : "Copy Code"}
+        </button>
+      </div>
+      <div className="lesson-summary-footer mt-6"><Link to="/">← Back to Home</Link></div>
     </div>
   );
 }
+

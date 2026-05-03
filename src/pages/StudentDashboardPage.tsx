@@ -89,6 +89,7 @@ export function StudentDashboardPage() {
   const [loadingJoin, setLoadingJoin] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [recentSessions, setRecentSessions] = useState<any[]>([]);
+  const [insightsHistory, setInsightsHistory] = useState<any[]>([]);
   const [stats, setStats] = useState({ total: 0, subjects: 0, days: 0 });
   const [loadingData, setLoadingData] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
@@ -138,6 +139,16 @@ export function StudentDashboardPage() {
         const subjectSet = new Set(sessionsList.map((s: any) => s.subject));
         const daySet = new Set(sessionsList.map((s: any) => s.joined_at?.split("T")[0]));
         setStats({ total: sessionsList.length, subjects: subjectSet.size, days: daySet.size });
+
+        // Fetch AI Insights
+        const { data: insights } = await supabase
+          .from("ai_insights")
+          .select("*, lessons(title)")
+          .eq("student_id", profile.id)
+          .order("generated_at", { ascending: false })
+          .limit(5);
+        if (insights) setInsightsHistory(insights);
+
       } catch {/* silent */}
       finally { setLoadingData(false); }
     })();
@@ -519,6 +530,57 @@ export function StudentDashboardPage() {
                     >
                       <Play size={12} fill="#a5b4fc" /> {t("student_dashboard.revisit", "Revisit")}
                     </Link>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </BentoCard>
+
+          {/* 9. AI Insights History — 12 cols full width */}
+          <BentoCard className="bento-span-12">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h3 style={{ color: "#0f1f3d", margin: 0, fontSize: "1rem", fontWeight: 700 }}>
+                🧠 AI Tutor Feedback History
+              </h3>
+            </div>
+            {loadingData ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {[1, 2].map(i => <Skeleton key={i} width="100%" height="80px" borderRadius="10px" />)}
+              </div>
+            ) : insightsHistory.length === 0 ? (
+              <p style={{ color: C.textMuted, textAlign: "center", padding: "2rem 0", margin: 0 }}>
+                No AI insights yet. Join a lesson and get feedback to see it here!
+              </p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {insightsHistory.map((insight, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    style={{
+                      background: "rgba(15,23,42,0.9)", border: "1px solid rgba(168,85,247,0.3)",
+                      borderRadius: "12px", padding: "16px", color: "white"
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#c084fc", fontWeight: 600 }}>
+                        <Brain size={16} /> {insight.lessons?.title || "Lesson"}
+                      </div>
+                      {insight.score_percent !== null && (
+                        <div style={{ background: "rgba(168,85,247,0.2)", padding: "2px 8px", borderRadius: "12px", fontSize: "0.8rem", color: "#e879f9", fontWeight: "bold" }}>
+                          Score: {insight.score_percent}%
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.9rem" }}>
+                      <div style={{ display: "flex", gap: "8px" }}><span title="Weakness">🎯</span> <span style={{ color: "#fca5a5" }}>{insight.weakness}</span></div>
+                      <div style={{ display: "flex", gap: "8px" }}><span title="Suggestion">➡️</span> <span style={{ color: "#93c5fd" }}>{insight.suggestion}</span></div>
+                    </div>
+                    <div style={{ marginTop: "12px", fontSize: "0.75rem", color: "#94a3b8", textAlign: "right" }}>
+                      {new Date(insight.generated_at).toLocaleDateString()}
+                    </div>
                   </motion.div>
                 ))}
               </div>

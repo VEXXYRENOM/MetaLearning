@@ -40,17 +40,21 @@ export function CheckoutModal({ tier, priceId, isAnnual, onClose, onSuccess }: C
   useEffect(() => {
     let paddleInstance: Paddle | undefined;
 
-    initializePaddle({
-      environment: (import.meta.env.VITE_PADDLE_ENVIRONMENT as "sandbox" | "production") ?? "sandbox",
-      token: import.meta.env.VITE_PADDLE_CLIENT_TOKEN || "",
-    }).then((p) => {
-      paddleInstance = p;
-      if (p) {
-        setPaddle(p);
-      }
-    });
+    const env = (import.meta.env.VITE_PADDLE_ENVIRONMENT as "sandbox" | "production") || "sandbox";
+    const token = import.meta.env.VITE_PADDLE_CLIENT_TOKEN || "";
 
-    // Cleanup: prevent multiple Paddle instances on re-renders
+    if (token) {
+      initializePaddle({
+        environment: env,
+        token: token,
+      }).then((p) => {
+        paddleInstance = p;
+        if (p) {
+          setPaddle(p);
+        }
+      });
+    }
+
     return () => {
       paddleInstance = undefined;
       setPaddle(undefined);

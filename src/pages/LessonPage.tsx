@@ -8,6 +8,8 @@ import React, {
   type ChangeEvent,
 } from "react";
 import { Canvas } from "@react-three/fiber";
+import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
+import { BlendFunction, KernelSize } from "postprocessing";
 import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 import { OrbitControls, Html } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
@@ -33,8 +35,12 @@ import { QuizOverlay } from "../components/lesson/QuizOverlay";
 import { LessonRating } from "../components/lesson/LessonRating";
 import { useClassroomSync, type CameraState } from "../hooks/useClassroomSync";
 import { useHotspots, HotspotMarker, PendingHotspotMarker, HotspotForm } from "../components/lesson/HotspotSystem";
-import { Target } from "lucide-react";
+import { Target, Brain } from "lucide-react";
 import { useLearningAnalytics } from "../lib/learningAnalytics";
+import { AITutorCard } from "../components/AITutorCard";
+import { useCinematicTour } from "../hooks/useCinematicTour";
+import { ExplodedView } from "../components/lesson/ExplodedView";
+import { DynamicEnvironment } from "../components/lesson/DynamicEnvironment";
 
 // ── Premium 3D loading spinner shown while lazy components load ──────────────
 const ThreeDLoading = () => (
@@ -55,24 +61,9 @@ const ThreeDLoading = () => (
   </div>
 );
 
-// --- Lazy Load ALL Heavy 3D Assets ---
-const BeatingHeart3D = lazy(() => import("../components/lesson/BeatingHeart3D").then(m => ({ default: m.BeatingHeart3D })));
-const AtomModel3D = lazy(() => import("../components/lesson/AtomModel3D").then(m => ({ default: m.AtomModel3D })));
-const SolarSystem3D = lazy(() => import("../components/lesson/SolarSystem3D").then(m => ({ default: m.SolarSystem3D })));
-const Pyramid3D = lazy(() => import("../components/lesson/Pyramid3D").then(m => ({ default: m.Pyramid3D })));
-const PlatonicSolids3D = lazy(() => import("../components/lesson/PlatonicSolids3D").then(m => ({ default: m.PlatonicSolids3D })));
-const AnimalCell3D = lazy(() => import("../components/lesson/AnimalCell3D").then(m => ({ default: m.AnimalCell3D })));
-const PlantCell3D = lazy(() => import("../components/lesson/PlantCell3D").then(m => ({ default: m.PlantCell3D })));
-const WaterMolecule3D = lazy(() => import("../components/lesson/WaterMolecule3D").then(m => ({ default: m.WaterMolecule3D })));
-const DNAHelix3D = lazy(() => import("../components/lesson/DNAHelix3D").then(m => ({ default: m.DNAHelix3D })));
-const EarthLayers3D = lazy(() => import("../components/lesson/EarthLayers3D").then(m => ({ default: m.EarthLayers3D })));
-const Volcano3D = lazy(() => import("../components/lesson/Volcano3D").then(m => ({ default: m.Volcano3D })));
-const WaterCycle3D = lazy(() => import("../components/lesson/WaterCycle3D").then(m => ({ default: m.WaterCycle3D })));
-const LungsModel3D = lazy(() => import("../components/lesson/LungsModel3D").then(m => ({ default: m.LungsModel3D })));
-const EyeAnatomy3D = lazy(() => import("../components/lesson/EyeAnatomy3D").then(m => ({ default: m.EyeAnatomy3D })));
+// --- Lazy Load remaining procedural 3D Assets (not yet replaced by GLB) ---
 const FunctionGraph3D = lazy(() => import("../components/lesson/FunctionGraph3D").then(m => ({ default: m.FunctionGraph3D })));
 const GeometricVolumes3D = lazy(() => import("../components/lesson/GeometricVolumes3D").then(m => ({ default: m.GeometricVolumes3D })));
-const Colosseum3D = lazy(() => import("../components/lesson/Colosseum3D").then(m => ({ default: m.Colosseum3D })));
 const CarthageRuins3D = lazy(() => import("../components/lesson/CarthageRuins3D").then(m => ({ default: m.CarthageRuins3D })));
 const KairouanMosque3D = lazy(() => import("../components/lesson/KairouanMosque3D").then(m => ({ default: m.KairouanMosque3D })));
 const ArabicLetters3D = lazy(() => import("../components/lesson/ArabicLetters3D").then(m => ({ default: m.ArabicLetters3D })));
@@ -89,40 +80,48 @@ const Sequences3D = lazy(() => import("../components/lesson/Sequences3D").then(m
 const MathematicalLogic3D = lazy(() => import("../components/lesson/MathematicalLogic3D").then(m => ({ default: m.MathematicalLogic3D })));
 const RobotKinematics3D = lazy(() => import("../components/lesson/RobotKinematics3D").then(m => ({ default: m.RobotKinematics3D })));
 
-/** خريطة تربط كل نوع درس إجرائي بالمكون ثلاثي الأبعاد المناسب */
+// ── Cinematic Tour Controller (lives inside Canvas for camera access) ─────────
+function CinematicTourController({ onStatusChange }: { onStatusChange: (label: string, touring: boolean) => void }) {
+  const { status, frameLabel, toggleTour } = useCinematicTour();
+
+  const prevLabel = React.useRef("");
+  if (frameLabel !== prevLabel.current) {
+    prevLabel.current = frameLabel;
+    onStatusChange(frameLabel, status === "touring");
+  }
+
+  React.useEffect(() => {
+    (window as any).__cinematicToggle = toggleTour;
+    return () => { delete (window as any).__cinematicToggle; };
+  }, [toggleTour]);
+
+  return null;
+}
+
+/** خريطة تربط الأنواع الإجرائية المتبقية بمكوناتها */
 const PROCEDURAL_COMPONENTS: Partial<Record<LessonKind, React.FC>> = {
-  "procedural-heart": BeatingHeart3D,
-  "procedural-atom": AtomModel3D,
-  "procedural-solarsystem": SolarSystem3D,
-  "procedural-earth-layers": EarthLayers3D,
-  "procedural-animal-cell": AnimalCell3D,
-  "procedural-plant-cell": PlantCell3D,
-  "procedural-water-molecule": WaterMolecule3D,
-  "procedural-dna": DNAHelix3D,
-  "procedural-volcano": Volcano3D,
-  "procedural-water-cycle": WaterCycle3D,
-  "procedural-lungs": LungsModel3D,
-  "procedural-eye": EyeAnatomy3D,
-  "procedural-pyramid": Pyramid3D,
-  "procedural-platonic": PlatonicSolids3D,
-  "procedural-function-graph": FunctionGraph3D,
+  // Biology/Science — still procedural (no GLB yet)
+  "procedural-animal-cell": () => null, // fallback — shouldn't be reached
+  "procedural-plant-cell":  () => null,
+  // Math
+  "procedural-function-graph":    FunctionGraph3D,
   "procedural-geometric-volumes": GeometricVolumes3D,
-  "procedural-colosseum": Colosseum3D,
-  "procedural-carthage": CarthageRuins3D,
-  "procedural-kairouan": KairouanMosque3D,
-  "procedural-arabic-letters": ArabicLetters3D,
-  "procedural-vocal-anatomy": VocalAnatomy3D,
-  "procedural-room-objects": RoomObjects3D,
-  "procedural-color-wheel": ColorWheel3D,
-  "procedural-pottery": Pottery3D,
-  "procedural-painting": PaintingFrame3D,
-  "procedural-orthographic": OrthographicProjection3D,
-  "procedural-vectors": Vectors3D,
-  "procedural-transformations": Transformations3D,
-  "procedural-statistics": StatisticsProbability3D,
-  "procedural-sequences": Sequences3D,
-  "procedural-logic": MathematicalLogic3D,
-  "procedural-kinematics": RobotKinematics3D,
+  "procedural-orthographic":      OrthographicProjection3D,
+  "procedural-vectors":           Vectors3D,
+  "procedural-transformations":   Transformations3D,
+  "procedural-statistics":        StatisticsProbability3D,
+  "procedural-sequences":         Sequences3D,
+  "procedural-logic":             MathematicalLogic3D,
+  "procedural-kinematics":        RobotKinematics3D,
+  // History/Languages/Art
+  "procedural-carthage":          CarthageRuins3D,
+  "procedural-kairouan":          KairouanMosque3D,
+  "procedural-arabic-letters":    ArabicLetters3D,
+  "procedural-vocal-anatomy":     VocalAnatomy3D,
+  "procedural-room-objects":      RoomObjects3D,
+  "procedural-color-wheel":       ColorWheel3D,
+  "procedural-pottery":           Pottery3D,
+  "procedural-painting":          PaintingFrame3D,
 };
 
 function isProcedural(kind: LessonKind): boolean {
@@ -137,15 +136,16 @@ function isUUID(id: string | undefined): boolean {
 export function LessonPage() {
   const { lessonId } = useParams();
   const [searchParams] = useSearchParams();
-  const sessionId = searchParams.get("session") ?? "";
+  const [sessionId, setSessionId] = useState(searchParams.get("session") ?? "");
   const { profile } = useAuth();
   const isTeacher = profile?.role === "teacher";
 
   const [resolvedLesson, setResolvedLesson] = useState(() => getLesson(lessonId));
   const [dbLoading, setDbLoading] = useState(false);
   const [cachedGlbUrl, setCachedGlbUrl] = useState<string | null>(null);
-  // Prevents the old procedural model from flashing before the cache check resolves
   const [cacheChecked, setCacheChecked] = useState(false);
+  // Standardize ID for DB features (QA, Hotspots, Analytics)
+  const [dbLessonId, setDbLessonId] = useState<string | null>(isUUID(lessonId) ? lessonId! : null);
 
   // If lessonId is a Supabase UUID, fetch model_key from DB to resolve the preset
   useEffect(() => {
@@ -165,6 +165,43 @@ export function LessonPage() {
         });
     }
   }, [lessonId, resolvedLesson]);
+
+  // Resolve dbLessonId from sessionId if lessonId is a slug
+  useEffect(() => {
+    if (sessionId && !isUUID(dbLessonId || undefined)) {
+      supabase
+        .from("sessions")
+        .select("lesson_id")
+        .eq("id", sessionId)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.lesson_id) setDbLessonId(data.lesson_id);
+        });
+    } else if (isUUID(lessonId) && dbLessonId !== lessonId) {
+      setDbLessonId(lessonId!);
+    }
+  }, [sessionId, lessonId, dbLessonId]);
+
+  // If student joins without sessionId, try to find an active session for this lesson
+  useEffect(() => {
+    if (!sessionId && lessonId && !isTeacher) {
+      // Try query by UUID first, then by slug (model_key)
+      const query = isUUID(lessonId) 
+        ? supabase.from("sessions").select("id").eq("lesson_id", lessonId)
+        : supabase.from("sessions").select("id, lessons!inner(model_key)").eq("lessons.model_key", lessonId);
+
+      query
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+        .then(({ data }: any) => {
+          if (data?.id) {
+            setSessionId(data.id);
+          }
+        });
+    }
+  }, [lessonId, sessionId, isTeacher]);
 
   // Check generated_assets cache for pre-baked GLB versions of this lesson
   useEffect(() => {
@@ -212,6 +249,12 @@ export function LessonPage() {
   const [showQuizEditor, setShowQuizEditor] = useState(false);
   const [showQuizOverlay, setShowQuizOverlay] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
+  
+  const [showAITutor, setShowAITutor] = useState(false);
+  const [bloomEnabled, setBloomEnabled] = useState(true);
+  const [isTourActive, setIsTourActive] = useState(false);
+  const [tourLabel, setTourLabel]       = useState("");
+  const [explodedView, setExplodedView] = useState(false);
 
   const canvasHostRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -251,15 +294,18 @@ export function LessonPage() {
     saveHotspot,
     deleteHotspot,
     cancelPending,
-  } = useHotspots(lessonId, isTeacher);
+  } = useHotspots(dbLessonId || undefined, isTeacher);
   // ─────────────────────────────────────────────────────────────────────────
 
   // ── X-3: Spatial Analytics Engine ────────────────────────────────────────
   const { trackHotspotClick, trackQuizAnswer } = useLearningAnalytics({
-    lessonId: lessonId || "",
+    lessonId: dbLessonId || "",
     studentId: profile?.id || "",
     sessionId: sessionId,
-    enabled: !isTeacher && isUUID(lessonId) // Only track students in real DB lessons
+    enabled: !isTeacher && isUUID(dbLessonId || ""),
+    onEnd: (duration) => {
+      // Could auto-trigger AI Tutor here
+    }
   });
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -424,7 +470,7 @@ export function LessonPage() {
     return <Navigate to="/" replace />;
   }
 
-  const gltfSource = (lesson.kind === "gltf-url" || lesson.kind === "gltf-artifact") ? lesson.gltfUrl : null;
+  const gltfSource = (lesson.kind === "gltf-url" || lesson.kind === "gltf-artifact" || lesson.kind === "local-model") ? lesson.gltfUrl : null;
   const effectiveGltfUrl =
     cachedGlbUrl || (lesson.kind === "gltf-upload" ? uploadUrl : gltfSource);
 
@@ -432,8 +478,8 @@ export function LessonPage() {
   const isProceduralLesson = isProcedural(lesson.kind) && !cachedGlbUrl;
   // Don't show canvas until cache check completes (prevents flash of old model)
   const showCanvas = cacheChecked && (isProceduralLesson || Boolean(effectiveGltfUrl) || Boolean(cachedGlbUrl));
-  const isHeart = lesson.kind === "procedural-heart" && !cachedGlbUrl;
-  const ProceduralComponent = PROCEDURAL_COMPONENTS[lesson.kind] || null;
+  const isHeart = lesson.id === "heart" && !cachedGlbUrl;
+  const ProceduralComponent = PROCEDURAL_COMPONENTS[lesson.kind as LessonKind] || null;
 
   return (
     <div className="lesson-layout">
@@ -442,18 +488,26 @@ export function LessonPage() {
         description={`Interactive 3D lesson: ${lesson.titleEn || lesson.titleAr}. Powered by MetaLearning AI.`}
         path={`/lesson/${lessonId}`}
       />
-      {lessonId && profile && (
-        <LessonQA lessonId={lessonId} studentId={profile.id} isTeacher={isTeacher} />
+      {dbLessonId && profile && (
+        <LessonQA lessonId={dbLessonId} studentId={profile.id} isTeacher={isTeacher} />
       )}
-      {showQuizEditor && lessonId && <QuizEditor lessonId={lessonId} onClose={() => setShowQuizEditor(false)} />}
-      {showQuizOverlay && lessonId && (
+      {showQuizEditor && dbLessonId && <QuizEditor lessonId={dbLessonId} onClose={() => setShowQuizEditor(false)} />}
+      {showQuizOverlay && dbLessonId && (
         <QuizOverlay 
-          lessonId={lessonId} 
+          lessonId={dbLessonId} 
           onClose={() => setShowQuizOverlay(false)} 
           onComplete={(score) => {
             setQuizScore(score);
             trackQuizAnswer("quiz_overall", score > 50, `Score: ${score}`);
           }}
+        />
+      )}
+      {showAITutor && profile?.role === 'student' && (
+        <AITutorCard
+          studentId={profile.id}
+          lessonId={dbLessonId || ""}
+          sessionId={sessionId}
+          onClose={() => setShowAITutor(false)}
         />
       )}
       {isHeart && (
@@ -601,6 +655,32 @@ export function LessonPage() {
           </button>
           <button
             type="button"
+            className={`lesson-btn full-width ${bloomEnabled ? 'primary' : 'ghost'}`}
+            style={bloomEnabled ? { background: 'linear-gradient(135deg, #7c3aed, #2563eb)', color: '#fff', border: 'none' } : {}}
+            onClick={() => setBloomEnabled(v => !v)}
+          >
+            {bloomEnabled ? '✨ وضع السينمائي: تشغيل' : '✨ وضع السينمائي: إيقاف'}
+          </button>
+          <button
+            type="button"
+            className={`lesson-btn full-width ${explodedView ? 'primary' : 'ghost'}`}
+            style={explodedView ? { background: 'linear-gradient(135deg, #f59e0b, #ef4444)', color: '#fff', border: 'none' } : {}}
+            onClick={() => setExplodedView(v => !v)}
+          >
+            {explodedView ? '🔩 إعادة التجميع' : '💥 تفكيك المجسم'}
+          </button>
+          <button
+            type="button"
+            className={`lesson-btn full-width ${isTourActive ? 'primary' : 'ghost'}`}
+            style={isTourActive ? { background: 'linear-gradient(135deg, #0ea5e9, #10b981)', color: '#fff', border: 'none' } : {}}
+            onClick={() => (window as any).__cinematicToggle?.()}
+          >
+            {isTourActive
+              ? `⏹ إيقاف الجولة  •  ${tourLabel}`
+              : '▶ جولة سينمائية'}
+          </button>
+          <button
+            type="button"
             className={`lesson-btn full-width ar-toggle-btn ${isActive ? "active" : ""}`}
             style={{ marginTop: "1rem", padding: "0.8rem" }}
             onClick={isActive ? stopTracking : startTracking}
@@ -674,6 +754,14 @@ export function LessonPage() {
             ) : (
               <button type="button" className="lesson-btn primary" onClick={() => setShowQuizOverlay(true)}>
                 إجراء الاختبار
+              </button>
+            )}
+            {!isTeacher && profile && isUUID(lessonId) && (
+              <button
+                className="lesson-btn ghost full-width"
+                onClick={() => setShowAITutor(true)}
+              >
+                Feedback (AI Tutor)
               </button>
             )}
           </div>
@@ -791,7 +879,13 @@ export function LessonPage() {
                     </div>
                   </Html>
                 }>
-                  {!isActive && <SceneBackdrop />}
+                  {/* 🌍 Dynamic Environment — adapts to lesson subject */}
+                  {!isActive && (
+                    <DynamicEnvironment
+                      subjectEn={lesson.subjectEn}
+                      subjectAr={lesson.subjectAr}
+                    />
+                  )}
                   {isActive && handData && (
                     <HandLight x={handData.palmPosition.x} y={handData.palmPosition.y} />
                   )}
@@ -809,25 +903,28 @@ export function LessonPage() {
                             depthScale={0.45}
                           />
                         )}
-                        {isHeart && !teacherImageUrl && <BeatingHeart3D />}
                         {!isHeart && isProceduralLesson && ProceduralComponent && (
                           <group scale={[modelScale, modelScale, modelScale]}>
                             <ProceduralComponent />
                           </group>
                         )}
                         {!isProceduralLesson && effectiveGltfUrl && lesson.kind === "gltf-artifact" && !cachedGlbUrl && (
-                          <group scale={[2.5, 2.5, 2.5]}>
-                            <ArtifactGltfModel url={effectiveGltfUrl} modelScale={modelScale} />
-                          </group>
+                          <ExplodedView exploded={explodedView}>
+                            <group scale={[2.5, 2.5, 2.5]}>
+                              <ArtifactGltfModel url={effectiveGltfUrl} modelScale={modelScale} />
+                            </group>
+                          </ExplodedView>
                         )}
                         {!isProceduralLesson && effectiveGltfUrl && (lesson.kind !== "gltf-artifact" || cachedGlbUrl) && (
-                          <GltfScene
-                            url={effectiveGltfUrl}
-                            modelScale={cachedGlbUrl ? modelScale * 1.5 : modelScale * 0.08}
-                            selectedName={selectedGltfName}
-                            onSelectName={onGltfSelect}
-                            xrayMode={xrayMode}
-                          />
+                          <ExplodedView exploded={explodedView}>
+                            <GltfScene
+                              url={effectiveGltfUrl}
+                              modelScale={cachedGlbUrl ? modelScale * 1.5 : modelScale * 0.08}
+                              selectedName={selectedGltfName}
+                              onSelectName={onGltfSelect}
+                              xrayMode={xrayMode}
+                            />
+                          </ExplodedView>
                         )}
                         
                         {/* Hotspot Markers */}
@@ -844,6 +941,16 @@ export function LessonPage() {
                       </group>
                     </HandTrackedModel>
                   </RotatingGroup>
+                  {/* 🎥 Cinematic Tour Controller */}
+                  <CinematicTourController
+                    onStatusChange={(label, touring) => {
+                      setTourLabel(label);
+                      setIsTourActive(touring);
+                      // Pause auto-rotate during tour
+                      if (touring) setAutoRotate(false);
+                    }}
+                  />
+
                   <OrbitControls
                     ref={orbitRef}
                     enablePan
@@ -860,6 +967,26 @@ export function LessonPage() {
                       });
                     }}
                   />
+
+                  {/* ✨ Cinematic Post-Processing */}
+                  {bloomEnabled && !isActive && (
+                    <EffectComposer>
+                      <Bloom
+                        intensity={1.2}
+                        luminanceThreshold={0.2}
+                        luminanceSmoothing={0.9}
+                        kernelSize={KernelSize.LARGE}
+                        blendFunction={BlendFunction.ADD}
+                        mipmapBlur
+                      />
+                      <Vignette
+                        offset={0.3}
+                        darkness={0.7}
+                        blendFunction={BlendFunction.NORMAL}
+                      />
+                    </EffectComposer>
+                  )}
+
                 </Suspense>
               </Canvas>
               </React.Suspense>

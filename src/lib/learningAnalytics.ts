@@ -44,6 +44,8 @@ interface UseLearningAnalyticsOptions {
   sessionId?: string;
   /** Set to true to enable automatic session tracking */
   enabled?: boolean;
+  /** Callback fired when the session ends (useful for triggering end-of-session UI like AI Tutor) */
+  onEnd?: (durationSeconds: number) => void;
 }
 
 export function useLearningAnalytics({
@@ -51,6 +53,7 @@ export function useLearningAnalytics({
   studentId,
   sessionId,
   enabled = true,
+  onEnd,
 }: UseLearningAnalyticsOptions) {
   const startTimeRef = useRef<number>(Date.now());
 
@@ -70,6 +73,11 @@ export function useLearningAnalytics({
     // Track session end on unmount
     return () => {
       const durationSeconds = Math.round((Date.now() - startTimeRef.current) / 1000);
+      
+      if (onEnd) {
+        onEnd(durationSeconds);
+      }
+
       trackInteraction({
         lesson_id: lessonId,
         student_id: studentId,

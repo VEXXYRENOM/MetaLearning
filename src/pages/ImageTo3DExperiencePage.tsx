@@ -703,8 +703,6 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
           </Canvas>
 
           <div className="hud-overlay-text">
-            <span>Powered by</span>
-            <strong>MetaLearning 3D ENGINE Free</strong>
           </div>
         </main>
       </div>

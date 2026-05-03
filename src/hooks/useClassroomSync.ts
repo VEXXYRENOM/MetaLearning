@@ -36,6 +36,11 @@ export function useClassroomSync({
   // receive passively so no throttle needed on their side
   const THROTTLE_MS = role === "teacher" ? 100 : Infinity;
 
+  const onRemoteUpdateRef = useRef(onRemoteUpdate);
+  useEffect(() => {
+    onRemoteUpdateRef.current = onRemoteUpdate;
+  }, [onRemoteUpdate]);
+
   useEffect(() => {
     // Do NOT connect if sync is disabled or no sessionId
     if (!enabled || !sessionId) return;
@@ -68,8 +73,8 @@ export function useClassroomSync({
 
       channel
         .on("broadcast", { event: "camera_sync" }, ({ payload }) => {
-          if (role === "student" && onRemoteUpdate) {
-            onRemoteUpdate((payload as SyncPayload).camera);
+          if (role === "student" && onRemoteUpdateRef.current) {
+            onRemoteUpdateRef.current((payload as SyncPayload).camera);
           }
         })
         .subscribe((status) => {
@@ -87,7 +92,7 @@ export function useClassroomSync({
       channelRef.current = null;
       setIsConnected(false);
     };
-  }, [sessionId, role, enabled, onRemoteUpdate]);
+  }, [sessionId, role, enabled]);
 
   const broadcastCamera = useCallback(
     (camera: CameraState) => {

@@ -31,6 +31,7 @@ export type LessonKind =
   | "procedural-sequences"
   | "procedural-logic"
   | "procedural-kinematics"
+  | "local-model"
   | "gltf-url"
   | "gltf-upload"
   | "gltf-artifact";
@@ -66,7 +67,8 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "❤️",
-    kind: "procedural-heart",
+    kind: "gltf-artifact",
+    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AnatomyHeartSmall/glTF-Binary/AnatomyHeartSmall.glb",
   },
   {
     id: "animal-cell",
@@ -77,7 +79,8 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🔬",
-    kind: "procedural-animal-cell",
+    kind: "gltf-artifact",
+    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BarramundiFish/glTF-Binary/BarramundiFish.glb",
   },
   {
     id: "plant-cell",
@@ -88,7 +91,8 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🌿",
-    kind: "procedural-plant-cell",
+    kind: "gltf-artifact",
+    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DiffuseTransmissionPlant/glTF-Binary/DiffuseTransmissionPlant.glb",
   },
   {
     id: "dna",
@@ -99,7 +103,8 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🧬",
-    kind: "procedural-dna",
+    kind: "gltf-artifact",
+    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb",
   },
   {
     id: "lungs",
@@ -110,7 +115,8 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🫁",
-    kind: "procedural-lungs",
+    kind: "gltf-artifact",
+    gltfUrl: "https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb",
   },
   {
     id: "eye",
@@ -121,7 +127,8 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "👁️",
-    kind: "procedural-eye",
+    kind: "gltf-artifact",
+    gltfUrl: "https://modelviewer.dev/shared-assets/models/Astronaut.glb",
   },
   {
     id: "brain-stem",
@@ -189,26 +196,8 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     kind: "gltf-artifact",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DiffuseTransmissionPlant/glTF-Binary/DiffuseTransmissionPlant.glb"
   },
-  {
-    id: "cell-mitosis",
-    titleAr: "انقسام الخلية — الانقسام المتساوي",
-    titleEn: "Cell Division — Mitosis",
-    blurbAr: "شاهد كيف تنقسم الخلية الحية إلى خليتين متطابقتين، وتتبع أطوار الانقسام من تضاعف الكروموسومات حتى انفصال السيتوبلازم.",
-    subjectAr: "علوم الحياة والأرض",
-    subjectEn: "Biology",
-    emoji: "🦠",
-    kind: "procedural-animal-cell"
-  },
-  {
-    id: "photosynthesis",
-    titleAr: "التركيب الضوئي — كيف تصنع النباتات الطاقة",
-    titleEn: "Photosynthesis — How Plants Make Energy",
-    blurbAr: "رحلة تفاعلية داخل البلاستيدات الخضراء للتعرف على عملية تحويل ضوء الشمس وثاني أكسيد الكربون إلى طاقة وأكسجين.",
-    subjectAr: "علوم الحياة والأرض",
-    subjectEn: "Biology",
-    emoji: "☀️",
-    kind: "procedural-plant-cell"
-  }
+  
+  
 ];
 
 // ─────────────────────────────────────────────
@@ -224,7 +213,8 @@ const CHEMISTRY_LESSONS: LessonDef[] = [
     subjectAr: "الكيمياء",
     subjectEn: "Chemistry",
     emoji: "⚛️",
-    kind: "procedural-atom",
+    kind: "gltf-artifact",
+    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AntiqueCamera/glTF-Binary/AntiqueCamera.glb",
   },
   {
     id: "water-molecule",
@@ -235,18 +225,10 @@ const CHEMISTRY_LESSONS: LessonDef[] = [
     subjectAr: "الكيمياء",
     subjectEn: "Chemistry",
     emoji: "💧",
-    kind: "procedural-water-molecule",
+    kind: "gltf-artifact",
+    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/WaterBottle/glTF-Binary/WaterBottle.glb",
   },
-  {
-    id: "periodic-table-hydrogen",
-    titleAr: "ذرة الهيدروجين — نموذج بور",
-    titleEn: "Hydrogen Atom — Bohr Model",
-    blurbAr: "استكشاف تفاعلي لأبسط عناصر الجدول الدوري، ببروتون واحد مع إلكترون يدور حوله بمسار كمي.",
-    subjectAr: "الكيمياء",
-    subjectEn: "Chemistry",
-    emoji: "🧪",
-    kind: "procedural-atom"
-  }
+  
 ];
 
 // ─────────────────────────────────────────────
@@ -262,7 +244,8 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectAr: "الجغرافيا / الفلك",
     subjectEn: "Astronomy",
     emoji: "🪐",
-    kind: "procedural-solarsystem",
+    kind: "gltf-artifact",
+    gltfUrl: "https://modelviewer.dev/shared-assets/models/Outernet.glb",
   },
   {
     id: "earth-layers",
@@ -273,7 +256,8 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectAr: "الجغرافيا / علوم الأرض",
     subjectEn: "Geography",
     emoji: "🌍",
-    kind: "procedural-earth-layers",
+    kind: "gltf-artifact",
+    gltfUrl: "https://modelviewer.dev/shared-assets/models/Canoe.glb",
   },
   {
     id: "volcano",
@@ -284,7 +268,8 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectAr: "الجغرافيا / علوم الأرض",
     subjectEn: "Geography",
     emoji: "🌋",
-    kind: "procedural-volcano",
+    kind: "gltf-artifact",
+    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb",
   },
   {
     id: "water-cycle",
@@ -295,7 +280,8 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectAr: "الجغرافيا / علوم الأرض",
     subjectEn: "Geography",
     emoji: "🌧️",
-    kind: "procedural-water-cycle",
+    kind: "gltf-artifact",
+    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Lantern/glTF-Binary/Lantern.glb",
   },
   {
     id: "astronaut",
@@ -319,26 +305,8 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     kind: "gltf-artifact",
     gltfUrl: "https://modelviewer.dev/shared-assets/models/Astronaut.glb"
   },
-  {
-    id: "big-bang",
-    titleAr: "نظرية الانفجار العظيم",
-    titleEn: "The Big Bang Theory",
-    blurbAr: "تصور مرئي لبداية الكون، توسع المادة والطاقة في الفراغ بشكل كروي متسارع وديناميكي.",
-    subjectAr: "الجغرافيا / الفلك",
-    subjectEn: "Astronomy",
-    emoji: "🌌",
-    kind: "procedural-solarsystem"
-  },
-  {
-    id: "tectonic-plates",
-    titleAr: "الصفائح التكتونية وانجراف القارات",
-    titleEn: "Tectonic Plates & Continental Drift",
-    blurbAr: "نموذج لحركة القشرة الأرضية فوق الطبقات الباطنية لفهم تكون الجبال والزلازل.",
-    subjectAr: "الجغرافيا / علوم الأرض",
-    subjectEn: "Geography",
-    emoji: "🪨",
-    kind: "procedural-earth-layers"
-  }
+  
+  
 ];
 
 // ─────────────────────────────────────────────
@@ -354,88 +322,17 @@ const MATH_LESSONS: LessonDef[] = [
     subjectAr: "الرياضيات",
     subjectEn: "Mathematics",
     emoji: "📐",
-    kind: "procedural-platonic",
+    kind: "gltf-artifact",
+    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Fox/glTF-Binary/Fox.glb",
   },
-  {
-    id: "function-graph",
-    titleAr: "الدوال البيانية في الفضاء",
-    titleEn: "3D Function Graphs",
-    blurbAr: "سطح رياضي ثلاثي الأبعاد مع تدرج لوني حراري يوضح التمثيل البياني للدوال في الفضاء ثلاثي الأبعاد.",
-    subjectAr: "الرياضيات",
-    subjectEn: "Mathematics",
-    emoji: "📈",
-    kind: "procedural-function-graph",
-  },
-  {
-    id: "geometric-volumes",
-    titleAr: "حساب الأحجام والمساحات",
-    titleEn: "Geometric Volumes & Areas",
-    blurbAr: "مجموعة من المجسمات الهندسية الأساسية (مكعب، كرة، أسطوانة، مخروط) لدراسة خصائصها وقوانين حسابها.",
-    subjectAr: "الرياضيات",
-    subjectEn: "Mathematics",
-    emoji: "🧊",
-    kind: "procedural-geometric-volumes",
-  },
-  {
-    id: "orthographic-projection",
-    titleAr: "الإسقاط العمودي (Orthographic Projection)",
-    titleEn: "Orthographic Projection",
-    blurbAr: "شاهد كيف تُسقط الأشكال الهندسية ثلاثية الأبعاد ظلالها على المستويات المتعامدة (الأمامي، الجانبي، والعلوي) لفهم العلاقة بين الفراغ والمستوى ثنائي الأبعاد.",
-    subjectAr: "الرياضيات",
-    subjectEn: "Mathematics",
-    emoji: "📦",
-    kind: "procedural-orthographic",
-  },
-  {
-    id: "vectors-3d",
-    titleAr: "المتجهات في الفضاء (Vectors in 3D)",
-    titleEn: "Vectors in 3D Space",
-    blurbAr: "تعرف على المتجهات رياضيا: الإحداثيات، الطول، وضعية السهم في فضاء ثلاثي الأبعاد مع تفاعل لتمثيل عمليات الجمع والضرب الاتجاهي.",
-    subjectAr: "الرياضيات",
-    subjectEn: "Mathematics",
-    emoji: "↗️",
-    kind: "procedural-vectors",
-  },
-  {
-    id: "transformations",
-    titleAr: "التحويلات الهندسية (Transformations)",
-    titleEn: "Geometric Transformations",
-    blurbAr: "مراقبة مستمرة وديناميكية لتأثير التحويلات الرياضية على الأجسام: الانسحاب، الدوران حول المحاور، والتكبير/التصغير التدريجي.",
-    subjectAr: "الرياضيات",
-    subjectEn: "Mathematics",
-    emoji: "🔄",
-    kind: "procedural-transformations",
-  },
-  {
-    id: "statistics-probability",
-    titleAr: "الإحصاء والاحتمالات (Statistics & Probability)",
-    titleEn: "Statistics & Probability",
-    blurbAr: "تجسيد بياني لمفاهيم الإحصاء وتوزيع الاحتمالات بطريقة مرئية مبهرة لفهم التوزيع الطبيعي والتباين.",
-    subjectAr: "الرياضيات",
-    subjectEn: "Mathematics",
-    emoji: "📊",
-    kind: "procedural-statistics",
-  },
-  {
-    id: "sequences",
-    titleAr: "المتتاليات الحسابية والهندسية (Sequences)",
-    titleEn: "Arithmetic & Geometric Sequences",
-    blurbAr: "مجسمات كتلية تتزايد تدريجياً لتعبر بشكل بصري عن الفرق بين المتتالية الحسابية والمتتالية الهندسية وتأثير الأساس على النمو.",
-    subjectAr: "الرياضيات",
-    subjectEn: "Mathematics",
-    emoji: "📈",
-    kind: "procedural-sequences",
-  },
-  {
-    id: "mathematical-logic",
-    titleAr: "المنطق الرياضي (Mathematical Logic)",
-    titleEn: "Mathematical Logic",
-    blurbAr: "أشكال ڤن (Venn Diagrams) شفافة ومضيئة لتوضيح العمليات المنطقية مثل التقاطع (AND) والاتحاد (OR) والفرق (NOT).",
-    subjectAr: "الرياضيات",
-    subjectEn: "Mathematics",
-    emoji: "🧠",
-    kind: "procedural-logic",
-  },
+  
+  
+  
+  
+  
+  
+  
+  
   {
     id: "robot-meca",
     titleAr: "روبوت متحرك (هندسة ميكانيكية)",
@@ -447,26 +344,8 @@ const MATH_LESSONS: LessonDef[] = [
     kind: "gltf-artifact",
     gltfUrl: "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"
   },
-  {
-    id: "robot-kinematics",
-    titleAr: "رياضيات الروبوت (Kinematics)",
-    titleEn: "Robot Kinematics",
-    blurbAr: "استخدم الدوال المثلثية والمتجهات لبرمجة مسار الروبوت وتحريكه للوصول إلى الأهداف بدقة متناهية.",
-    subjectAr: "الرياضيات",
-    subjectEn: "Mathematics",
-    emoji: "🧭",
-    kind: "procedural-kinematics",
-  },
-  {
-    id: "pythagorean-theorem",
-    titleAr: "مبرهنة فيثاغورس — الإثبات البصري",
-    titleEn: "Pythagorean Theorem — Visual Proof",
-    blurbAr: "إثبات تفاعلي هندسي لعلاقة مساحات المربعات المنشأة على أضلاع المثلث القائم الزاوية.",
-    subjectAr: "الرياضيات",
-    subjectEn: "Mathematics",
-    emoji: "📐",
-    kind: "procedural-geometric-volumes"
-  }
+  
+  
 ];
 
 // ─────────────────────────────────────────────
@@ -482,7 +361,8 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🏛️",
-    kind: "procedural-pyramid",
+    kind: "gltf-artifact",
+    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ABeautifulGame/glTF-Binary/ABeautifulGame.glb",
   },
   {
     id: "colosseum",
@@ -492,28 +372,11 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🏟️",
-    kind: "procedural-colosseum",
+    kind: "gltf-artifact",
+    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/FlightHelmet/glTF-Binary/FlightHelmet.glb",
   },
-  {
-    id: "carthage",
-    titleAr: "آثار قرطاج القديمة",
-    titleEn: "Ruins of Carthage",
-    blurbAr: "جولة خيالية بين أعمدة قرطاج الرومانية، بقايا الجدران، والأرضيات الحجرية التي تروي قصصاً من الماضي.",
-    subjectAr: "التاريخ",
-    subjectEn: "History",
-    emoji: "🏛️",
-    kind: "procedural-carthage",
-  },
-  {
-    id: "kairouan",
-    titleAr: "المدينة العتيقة بالقيروان",
-    titleEn: "Great Mosque of Kairouan",
-    blurbAr: "جامع عقبة بن نافع التاريخي بمئذنته الفريدة وقبته وفنائه الداخلي المزين بالأقواس.",
-    subjectAr: "التاريخ",
-    subjectEn: "History",
-    emoji: "🕌",
-    kind: "procedural-kairouan",
-  },
+  
+  
   {
     id: "antique-camera",
     titleAr: "الكاميرا التاريخية الأولى (مجسم 3D واقعي)",
@@ -646,88 +509,25 @@ const HISTORY_LESSONS: LessonDef[] = [
     kind: "gltf-artifact",
     gltfUrl: "https://modelviewer.dev/shared-assets/models/SpacemacV.glb"
   },
-  {
-    id: "world-war-trenches",
-    titleAr: "خنادق الحرب العالمية",
-    titleEn: "World War Trenches",
-    blurbAr: "استكشف جبهات القتال في شكل خنادق محصنة خلال مجريات الحرب العالمية الأولى والثانية.",
-    subjectAr: "التاريخ",
-    subjectEn: "History",
-    emoji: "🎖️",
-    kind: "procedural-pyramid"
-  }
+  
 ];
 
 // ─────────────────────────────────────────────
 // 🗣️  اللغات (Languages)
 // ─────────────────────────────────────────────
 const LANGUAGES_LESSONS: LessonDef[] = [
-  {
-    id: "arabic-letters",
-    titleAr: "الحروف الأبجدية 3D",
-    titleEn: "3D Arabic Alphabet",
-    blurbAr: "حروف عربية ثلاثية الأبعاد تطفو في الفضاء مع تأثيرات متوهجة وتفاعلية بصرية ممتعة.",
-    subjectAr: "اللغات",
-    subjectEn: "Languages",
-    emoji: "أ",
-    kind: "procedural-arabic-letters",
-  },
-  {
-    id: "vocal-anatomy",
-    titleAr: "مخارج الحروف الصوتية",
-    titleEn: "Vocal Anatomy & Sounds",
-    blurbAr: "مقطع تشريحي لجهاز النطق البشري يوضح مواضع خروج الأصوات، من الأحبال الصوتية إلى الشفاه.",
-    subjectAr: "اللغات",
-    subjectEn: "Languages",
-    emoji: "🗣️",
-    kind: "procedural-vocal-anatomy",
-  },
-  {
-    id: "room-objects",
-    titleAr: "مفردات الغرفة",
-    titleEn: "Room Vocabulary",
-    blurbAr: "تعلم المفردات الأساسية عبر استكشاف عناصر الغرفة ثلاثية الأبعاد (طاولة، كرسي، كتاب، ساعة...).",
-    subjectAr: "اللغات",
-    subjectEn: "Languages",
-    emoji: "🪑",
-    kind: "procedural-room-objects",
-  },
+  
+  
+  
 ];
 
 // ─────────────────────────────────────────────
 // 🎨  الفنون (Art)
 // ─────────────────────────────────────────────
 const ART_LESSONS: LessonDef[] = [
-  {
-    id: "color-wheel",
-    titleAr: "عجلة الألوان",
-    titleEn: "The Color Wheel",
-    blurbAr: "عجلة تفاعلية تدمج الألوان الأساسية، الثانوية، والثالثية، مع تمثيل للتشبع والسطوع في الفضاء.",
-    subjectAr: "الفنون",
-    subjectEn: "Art",
-    emoji: "🎨",
-    kind: "procedural-color-wheel",
-  },
-  {
-    id: "pottery",
-    titleAr: "الخزف والنحت",
-    titleEn: "Pottery & Sculpting",
-    blurbAr: "محاكاة لقرص الخزاف وصناعة الأواني الفخارية بتفاصيل تقليدية وملامس طينية واقعية.",
-    subjectAr: "الفنون",
-    subjectEn: "Art",
-    emoji: "🏺",
-    kind: "procedural-pottery",
-  },
-  {
-    id: "painting",
-    titleAr: "اللوحات الكلاسيكية",
-    titleEn: "Classic Paintings",
-    blurbAr: "تجربة فنية داخل إطار كلاسيكي مذهب يعرض لوحة ألوان عميقة تتفاعل مع إضاءة المعرض.",
-    subjectAr: "الفنون",
-    subjectEn: "Art",
-    emoji: "🖼️",
-    kind: "procedural-painting",
-  },
+  
+  
+  
   {
     id: "satellite-outernet",
     titleAr: "قمر صناعي مصغر (علوم وتقنية)",
@@ -785,16 +585,7 @@ const TOOL_LESSONS: LessonDef[] = [
 // ⚛️  الفيزياء (Physics)
 // ─────────────────────────────────────────────
 const PHYSICS_LESSONS: LessonDef[] = [
-  {
-    id: "newton-gravity",
-    titleAr: "الجاذبية وقوانين نيوتن",
-    titleEn: "Gravity & Newton's Laws",
-    blurbAr: "تجسيد تفاعلي لقوانين الحركة والجاذبية الأرضية، مع إمكانية تجربة تسارع السقوط الحر.",
-    subjectAr: "الفيزياء",
-    subjectEn: "Physics",
-    emoji: "🍎",
-    kind: "procedural-atom"
-  }
+  
 ];
 
 // ─────────────────────────────────────────────

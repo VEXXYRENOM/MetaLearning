@@ -26,7 +26,6 @@ const SandboxPage           = lazy(() => import("./pages/SandboxPage").then(m =>
 const InteractiveLabPage    = lazy(() => import("./pages/InteractiveLabPage").then(m => ({ default: m.InteractiveLabPage })));
 const PricingPage           = lazy(() => import("./pages/PricingPage").then(m => ({ default: m.PricingPage })));
 const LeaderboardPage       = lazy(() => import("./pages/LeaderboardPage").then(m => ({ default: m.LeaderboardPage })));
-const AIGenerationHubPage   = lazy(() => import("./pages/AIGenerationHubPage").then(m => ({ default: m.AIGenerationHubPage })));
 const ImageTo3DExperiencePage = lazy(() => import("./pages/ImageTo3DExperiencePage").then(m => ({ default: m.ImageTo3DExperiencePage })));
 const CreatorDashboardPage  = lazy(() => import("./pages/CreatorDashboardPage").then(m => ({ default: m.CreatorDashboardPage })));
 const AdminDashboardPage    = lazy(() => import("./pages/AdminDashboardPage").then(m => ({ default: m.AdminDashboardPage })));
@@ -136,11 +135,8 @@ function AnimatedRoutes() {
         } />
 
         {/* ── 3D Lab ──────────────────────────────────────────── */}
-        <Route path="/experience/hub" element={
-          <ProtectedRoute requiredRole={["teacher", "creator"]}>
-            <Suspense fallback={<PageSkeleton />}><PageTransition><AIGenerationHubPage /></PageTransition></Suspense>
-          </ProtectedRoute>
-        } />
+        {/* /experience/hub now redirects directly to image-to-3d */}
+        <Route path="/experience/hub" element={<Navigate to="/experience/image-to-3d" replace />} />
         <Route path="/experience/image-to-3d" element={
           <ProtectedRoute requiredRole={["teacher", "creator"]}>
             <Suspense fallback={<PageSkeleton />}><PageTransition><ImageTo3DExperiencePage key="image" defaultInputType="image" /></PageTransition></Suspense>
