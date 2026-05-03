@@ -252,6 +252,7 @@ export function LessonPage() {
   
   const [showAITutor, setShowAITutor] = useState(false);
   const [bloomEnabled, setBloomEnabled] = useState(true);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const [isTourActive, setIsTourActive] = useState(false);
   const [tourLabel, setTourLabel]       = useState("");
   const [explodedView, setExplodedView] = useState(false);
