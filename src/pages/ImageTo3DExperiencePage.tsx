@@ -98,7 +98,7 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
   const [true3dGlbUrl, setTrue3dGlbUrl] = useState<string | null>(null);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [showMobileSidebar, setShowMobileSidebar] = useState(true);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -334,35 +334,65 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
       {/* ─── HEADER ─── */}
       <header className="ai-lab-header" style={{ 
         flexWrap: "nowrap", 
-        padding: isMobile ? "0.75rem 1rem" : "1rem 2rem", 
-        gap: isMobile ? "6px" : "10px",
+        padding: isMobile ? "0.5rem 0.75rem" : "1rem 2rem", 
+        gap: isMobile ? "4px" : "10px",
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        minHeight: isMobile ? "60px" : "80px"
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <button className="ai-back-btn" onClick={() => navigate("/teacher/create")} style={{ 
-            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", 
-            color: "#94a3b8", padding: "8px", borderRadius: "10px", 
-            display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" 
+        {/* Left: Back Button */}
+        <button className="ai-back-btn" onClick={() => navigate("/teacher/create")} style={{ 
+          background: "rgba(15, 23, 42, 0.05)", border: "1px solid rgba(15, 23, 42, 0.1)", 
+          color: "#475569", padding: "8px", borderRadius: "10px", 
+          display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+          flexShrink: 0
+        }}>
+          <ChevronLeft size={20} />
+        </button>
+
+        {/* Center: Title */}
+        <div className="ai-lab-title" style={{ 
+          display: "flex", 
+          alignItems: "center", 
+          gap: isMobile ? "4px" : "8px", 
+          flex: 1, 
+          justifyContent: "center" 
+        }}>
+          <Cpu className="title-icon" size={isMobile ? 18 : 24} style={{ flexShrink: 0 }} />
+          <h1 style={{ 
+            fontSize: isMobile ? "0.85rem" : "1.2rem", 
+            whiteSpace: "nowrap", 
+            margin: 0,
+            fontWeight: "900",
+            letterSpacing: isMobile ? "0" : "1px"
           }}>
-            <ChevronLeft size={20} /> {!isMobile && "رجوع"}
-          </button>
-          {isMobile && (
-            <button onClick={() => setShowMobileSidebar(!showMobileSidebar)} style={{
-              background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", color: "#6366f1",
-              padding: "6px 10px", borderRadius: "8px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px"
-            }}>
-              <Menu size={16} /> الإعدادات
-            </button>
-          )}
-        </div>
-        <div className="ai-lab-title" style={{ display: "flex", alignItems: "center", gap: "8px", flex: isMobile ? "1 1 auto" : "auto", justifyContent: "flex-end" }}>
-          <Cpu className="title-icon" style={{ flexShrink: 0 }} />
-          <h1 style={{ fontSize: isMobile ? "0.95rem" : undefined, whiteSpace: "nowrap", margin: 0 }}>
             {inputType === "image" ? "IMAGE TO 3D" : "TEXT TO 3D"}
           </h1>
         </div>
+
+        {/* Right: Mobile Sidebar Toggle */}
+        {isMobile && (
+          <button onClick={() => setShowMobileSidebar(!showMobileSidebar)} style={{
+            background: "rgba(99,102,241,0.1)", 
+            border: "1px solid rgba(99,102,241,0.3)", 
+            color: "#6366f1",
+            padding: "8px 12px", 
+            borderRadius: "10px", 
+            cursor: "pointer", 
+            display: "flex", 
+            alignItems: "center", 
+            gap: "6px",
+            fontSize: "0.8rem",
+            fontWeight: "bold",
+            flexShrink: 0
+          }}>
+            <Menu size={16} /> 
+            {!isMobile && "الإعدادات"}
+          </button>
+        )}
+        
+        {/* Desktop Status */}
         {!isMobile && (
           <div className="ai-system-status" style={{ color: "#4ade80" }}>
             <span
@@ -382,7 +412,7 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
         {/* ─── LEFT CONTROL PANEL ─── */}
         {(!isMobile || showMobileSidebar) && (
           <aside className="ai-cyber-panel" style={isMobile ? {
-            position: "absolute", top: 0, left: 0, right: 0, height: "65vh", zIndex: 100,
+            position: "absolute", top: "60px", left: 0, right: 0, height: "calc(100vh - 60px)", zIndex: 100,
             width: "100%", background: "rgba(2,6,23,0.95)", backdropFilter: "blur(12px)",
             borderBottom: "1px solid rgba(168,85,247,0.4)", borderRadius: "0 0 16px 16px",
             overflowY: "auto", boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
@@ -581,10 +611,12 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
 
           {/* ── Empty state ── */}
           {!imageUri && !processing && (
-            <div className="empty-hologram-state">
-              <Cpu size={80} className="empty-icon pulse-fast" />
-              <h2>Hologram Stage Awaiting Input</h2>
-              <p>Type what you want to imagine or upload an image to generate an interactive 3D mesh instantly.</p>
+            <div className="empty-hologram-state" style={{ padding: isMobile ? "20px" : "40px" }}>
+              <Cpu size={isMobile ? 60 : 80} className="empty-icon pulse-fast" />
+              <h2 style={{ fontSize: isMobile ? "1.2rem" : "1.8rem" }}>Hologram Stage Awaiting Input</h2>
+              <p style={{ fontSize: isMobile ? "0.9rem" : "1rem", maxWidth: "400px" }}>
+                Type what you want to imagine or upload an image to generate an interactive 3D mesh instantly.
+              </p>
             </div>
           )}
 
