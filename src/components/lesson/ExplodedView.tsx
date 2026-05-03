@@ -73,7 +73,7 @@ export function ExplodedView({
     });
 
     // If the model has only 1 child (common in GLB), go one level deeper
-    if (parts.length === 1 && group.children[0].children.length > 1) {
+    if (parts.length === 1 && group.children[0]?.children?.length > 1) {
       parts.length = 0; // clear
       const subGroup = group.children[0];
       const subCentroid = new THREE.Vector3();

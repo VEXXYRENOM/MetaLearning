@@ -863,12 +863,12 @@ export function LessonPage() {
             {showCanvas && (
               <ThreeErrorBoundary>
               <React.Suspense fallback={<ThreeDLoading />}>
-              <Canvas
-                shadows
+            <Canvas
+                shadows={!isMobile}
                 camera={{ position: [0, 0.35, 4.1], fov: 45 }}
-                gl={{ antialias: true, alpha: isActive }}
+                gl={{ antialias: !isMobile, alpha: isActive, powerPreference: "high-performance" }}
                 style={isActive ? { background: "transparent" } : {}}
-                dpr={[1, 2]}
+                dpr={isMobile ? [1, 1] : [1, 2]}
                 onPointerMissed={clearSelection}
               >
                 <Suspense fallback={
@@ -928,7 +928,7 @@ export function LessonPage() {
                         )}
                         
                         {/* Hotspot Markers */}
-                        {hotspots.map((hs) => (
+                        {hotspots?.map((hs) => (
                           <HotspotMarker 
                             key={hs.id} 
                             hotspot={hs} 
@@ -968,8 +968,8 @@ export function LessonPage() {
                     }}
                   />
 
-                  {/* ✨ Cinematic Post-Processing */}
-                  {bloomEnabled && !isActive && (
+                  {/* ✨ Cinematic Post-Processing (Disabled on Mobile for FPS) */}
+                  {bloomEnabled && !isActive && !isMobile && (
                     <EffectComposer>
                       <Bloom
                         intensity={1.2}
