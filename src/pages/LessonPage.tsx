@@ -251,7 +251,7 @@ export function LessonPage() {
   const [quizScore, setQuizScore] = useState<number | null>(null);
   
   const [showAITutor, setShowAITutor] = useState(false);
-  const [bloomEnabled, setBloomEnabled] = useState(true);
+  const [bloomEnabled, setBloomEnabled] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const [isTourActive, setIsTourActive] = useState(false);
   const [tourLabel, setTourLabel]       = useState("");
@@ -864,11 +864,11 @@ export function LessonPage() {
               <ThreeErrorBoundary>
               <React.Suspense fallback={<ThreeDLoading />}>
             <Canvas
-                shadows={!isMobile}
-                camera={{ position: [0, 0.35, 4.1], fov: 45 }}
-                gl={{ antialias: !isMobile, alpha: isActive, powerPreference: "high-performance" }}
+                shadows={false}
+                camera={{ fov: 45 }}
+                gl={{ antialias: false, alpha: isActive, powerPreference: "high-performance" }}
                 style={isActive ? { background: "transparent" } : {}}
-                dpr={isMobile ? [1, 1] : [1, 2]}
+                dpr={1}
                 onPointerMissed={clearSelection}
               >
                 <Suspense fallback={
