@@ -77,7 +77,6 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
   ];
 
   const inputType = defaultInputType;
-  const navigate = useNavigate();
 
   function getStageIndex(status: string | null): number {
     if (!status) return -1;
