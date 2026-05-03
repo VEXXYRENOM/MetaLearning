@@ -26,7 +26,7 @@ export function ArtifactGltfModel({ url, modelScale = 1 }: Props) {
       <Environment preset="studio" />
       
       <Float speed={1.5} rotationIntensity={0} floatIntensity={0.5}>
-        <Center>
+        <Center bottom>
           <group ref={groupRef} scale={modelScale}>
             <primitive object={clone} />
           </group>
@@ -35,10 +35,10 @@ export function ArtifactGltfModel({ url, modelScale = 1 }: Props) {
 
       {/* ظلال التلامس الناعمة أسفل القطعة الأثرية */}
       <ContactShadows 
-        position={[0, -1.5, 0]} 
-        opacity={0.7} 
-        scale={10} 
-        blur={2.5} 
+        position={[0, 0, 0]} 
+        opacity={0.6} 
+        scale={20} 
+        blur={2} 
         far={4} 
         resolution={512}
         frames={1}

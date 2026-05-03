@@ -26,6 +26,8 @@ import {
 import { DepthMesh3D } from "../components/experience/DepthMesh3D";
 import { HandFollowGroup } from "../components/experience/HandFollowGroup";
 import { True3DViewer } from "../components/experience/True3DViewer";
+import { ExplodedView } from "../components/lesson/ExplodedView";
+import { CinematicTourController } from "../pages/LessonPage";
 import { Procedural3DObject } from "../components/experience/Procedural3DObject";
 import { useMediaPipe } from "../hooks/useMediaPipe";
 
@@ -96,6 +98,11 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
   const [sf3dProgress, setSf3dProgress] = useState(0);
   const [sf3dError,    setSf3dError]    = useState<string | null>(null);
   const [true3dGlbUrl, setTrue3dGlbUrl] = useState<string | null>(null);
+
+  // ── Viewer States ──
+  const [explodedView, setExplodedView] = useState(false);
+  const [isTourActive, setIsTourActive] = useState(false);
+  const [tourLabel, setTourLabel] = useState("");
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
@@ -571,6 +578,39 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
                 <span className="cyber-slider" />
               </label>
 
+              {/* Viewer Controls */}
+              {mode === "3d" && true3dGlbUrl && (
+                <>
+                  <label className="cyber-toggle-item" style={{ marginTop: "10px", background: "rgba(239, 68, 68, 0.1)" }}>
+                    <div className="toggle-info">
+                      <span style={{ color: "#ef4444" }}>تفكيك المجسم 📌</span>
+                    </div>
+                    <input type="checkbox" className="cyber-checkbox" checked={explodedView}
+                      onChange={e => setExplodedView(e.target.checked)} />
+                    <span className="cyber-slider" />
+                  </label>
+
+                  <button
+                    onClick={() => {
+                      if ((window as any).__cinematicToggle) {
+                        (window as any).__cinematicToggle();
+                      }
+                      setIsTourActive(!isTourActive);
+                    }}
+                    style={{
+                      width: "100%", marginTop: "10px", padding: "10px",
+                      background: isTourActive ? "rgba(99, 102, 241, 0.3)" : "rgba(255, 255, 255, 0.05)",
+                      border: `1px solid ${isTourActive ? "#6366f1" : "rgba(255, 255, 255, 0.1)"}`,
+                      borderRadius: "8px", color: isTourActive ? "#818cf8" : "white",
+                      cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px"
+                    }}
+                  >
+                    <span>▶️ جولة سينيمائية</span>
+                    {isTourActive && <span className="text-xs opacity-75 ml-2">({tourLabel})</span>}
+                  </button>
+                </>
+              )}
+
             </div>
 
             {mode === "2.5d" && (
@@ -708,13 +748,20 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
                     pulse={biological}
                   />
                 ) : mode === "3d" && true3dGlbUrl ? (
-                  handTracking && palm ? (
-                    <HandFollowGroup palm={palm}>
-                      <True3DViewer url={true3dGlbUrl} />
-                    </HandFollowGroup>
-                  ) : (
-                    <True3DViewer url={true3dGlbUrl} />
-                  )
+                  <CinematicTourController onStatusChange={(label, touring) => {
+                    setTourLabel(label);
+                    setIsTourActive(touring);
+                  }}>
+                    <ExplodedView exploded={explodedView}>
+                      {handTracking && palm ? (
+                        <HandFollowGroup palm={palm}>
+                          <True3DViewer url={true3dGlbUrl} />
+                        </HandFollowGroup>
+                      ) : (
+                        <True3DViewer url={true3dGlbUrl} />
+                      )}
+                    </ExplodedView>
+                  </CinematicTourController>
                 ) : mode === "2.5d" ? (
                   handTracking && palm ? (
                     <HandFollowGroup palm={palm}>

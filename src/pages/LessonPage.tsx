@@ -81,7 +81,7 @@ const MathematicalLogic3D = lazy(() => import("../components/lesson/Mathematical
 const RobotKinematics3D = lazy(() => import("../components/lesson/RobotKinematics3D").then(m => ({ default: m.RobotKinematics3D })));
 
 // ── Cinematic Tour Controller (lives inside Canvas for camera access) ─────────
-function CinematicTourController({ onStatusChange, children }: { onStatusChange: (label: string, touring: boolean) => void, children: React.ReactNode }) {
+export function CinematicTourController({ onStatusChange, children }: { onStatusChange: (label: string, touring: boolean) => void, children: React.ReactNode }) {
   const { status, frameLabel, toggleTour, tourRotation } = useCinematicTour();
 
   const prevLabel = React.useRef("");

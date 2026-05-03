@@ -48,7 +48,7 @@ export function GltfScene({
   }, [clone, selectedName, xrayMode]);
 
   return (
-    <Center>
+    <Center bottom>
       <group scale={[modelScale, modelScale, modelScale]}>
         <primitive
           object={clone}
