@@ -742,7 +742,7 @@ export function LessonPage() {
               <>
                 <button type="button" className="lesson-btn" onClick={() => {
                   if (dbLessonId) setShowQuizEditor(true);
-                  else showToast(i18n.language === 'ar' ? "الاختبارات الذكية متوفرة فقط للدروس المخصصة." : "AI Quizzes are only available for custom lessons.", "error");
+                  else showToast({ title: i18n.language === 'ar' ? "الاختبارات الذكية متوفرة فقط للدروس المخصصة." : "AI Quizzes are only available for custom lessons.", type: "error" });
                 }}>
                   {i18n.language === 'ar' ? 'إدارة الاختبار' : 'Manage Quiz'}
                 </button>
@@ -759,7 +759,7 @@ export function LessonPage() {
             ) : (
               <button type="button" className="lesson-btn primary" onClick={() => {
                   if (dbLessonId) setShowQuizOverlay(true);
-                  else showToast(i18n.language === 'ar' ? "هذا الدرس الافتراضي لا يحتوي على اختبار." : "This preset lesson has no quiz.", "error");
+                  else showToast({ title: i18n.language === 'ar' ? "هذا الدرس الافتراضي لا يحتوي على اختبار." : "This preset lesson has no quiz.", type: "error" });
                 }}>
                 {i18n.language === 'ar' ? 'إجراء الاختبار' : 'Take Quiz'}
               </button>
