@@ -41,6 +41,7 @@ import { AITutorCard } from "../components/AITutorCard";
 import { useCinematicTour } from "../hooks/useCinematicTour";
 import { ExplodedView } from "../components/lesson/ExplodedView";
 import { DynamicEnvironment } from "../components/lesson/DynamicEnvironment";
+import { useTranslation } from "react-i18next";
 
 // ── Premium 3D loading spinner shown while lazy components load ──────────────
 const ThreeDLoading = () => (
@@ -134,6 +135,7 @@ function isUUID(id: string | undefined): boolean {
 }
 
 export function LessonPage() {
+  const { t, i18n } = useTranslation();
   const { lessonId } = useParams();
   const [searchParams] = useSearchParams();
   const [sessionId, setSessionId] = useState(searchParams.get("session") ?? "");
@@ -531,7 +533,7 @@ export function LessonPage() {
           ← {profile?.role === "teacher" ? "لوحة المعلم" : profile?.role === "student" ? "لوحتي" : "الرئيسية"}
         </Link>
         <p className="lesson-subject">{lesson.subjectAr}</p>
-        <h1 className="lesson-title">{lesson.titleAr}</h1>
+        <h1 className="lesson-title">{i18n.language === 'ar' ? lesson.titleAr : (lesson.titleEn || lesson.titleAr)}</h1>
         <p className="lesson-blurb">{lesson.blurbAr}</p>
 
         {isHeart && (
@@ -606,28 +608,28 @@ export function LessonPage() {
         )}
 
         <section className="lesson-section">
-          <h2 className="lesson-h2">العرض</h2>
+          <h2 className="lesson-h2">{i18n.language === 'ar' ? 'العرض' : 'View'}</h2>
           <div className="lesson-row">
             <button
               type="button"
               className="lesson-btn"
               onClick={() => setModelScale((s) => Math.max(0.45, s - 0.15))}
             >
-              تصغير
+              {i18n.language === 'ar' ? 'تصغير' : 'Zoom Out'}
             </button>
             <button
               type="button"
               className="lesson-btn"
               onClick={() => setModelScale((s) => Math.min(2.2, s + 0.15))}
             >
-              تكبير
+              {i18n.language === 'ar' ? 'تكبير' : 'Zoom In'}
             </button>
             <button
               type="button"
               className="lesson-btn ghost"
               onClick={() => setModelScale(1)}
             >
-              إعادة ضبط
+              {i18n.language === 'ar' ? 'إعادة ضبط' : 'Reset'}
             </button>
           </div>
           <label className="toggle-line">
@@ -636,7 +638,7 @@ export function LessonPage() {
               checked={autoRotate}
               onChange={(e) => setAutoRotate(e.target.checked)}
             />
-            تدوير تلقائي (حول المحور الرأسي)
+            {i18n.language === 'ar' ? 'تدوير تلقائي (حول المحور الرأسي)' : 'Auto Rotate'}
           </label>
           <label className="toggle-line">
             <input
@@ -644,14 +646,14 @@ export function LessonPage() {
               checked={xrayMode}
               onChange={(e) => setXrayMode(e.target.checked)}
             />
-            رؤية استكشافية (X-Ray Mode)
+            {i18n.language === 'ar' ? 'رؤية استكشافية (X-Ray Mode)' : 'X-Ray Mode'}
           </label>
           <button
             type="button"
             className="lesson-btn ghost full-width"
             onClick={requestFullscreen}
           >
-            ملء الشاشة (المشهد)
+            {i18n.language === 'ar' ? 'ملء الشاشة (المشهد)' : 'Fullscreen Scene'}
           </button>
           <button
             type="button"
@@ -659,7 +661,7 @@ export function LessonPage() {
             style={bloomEnabled ? { background: 'linear-gradient(135deg, #7c3aed, #2563eb)', color: '#fff', border: 'none' } : {}}
             onClick={() => setBloomEnabled(v => !v)}
           >
-            {bloomEnabled ? '✨ وضع السينمائي: تشغيل' : '✨ وضع السينمائي: إيقاف'}
+            {bloomEnabled ? (i18n.language === 'ar' ? '✨ وضع السينمائي: تشغيل' : '✨ Cinematic: ON') : (i18n.language === 'ar' ? '✨ وضع السينمائي: إيقاف' : '✨ Cinematic: OFF')}
           </button>
           <button
             type="button"
@@ -667,7 +669,7 @@ export function LessonPage() {
             style={explodedView ? { background: 'linear-gradient(135deg, #f59e0b, #ef4444)', color: '#fff', border: 'none' } : {}}
             onClick={() => setExplodedView(v => !v)}
           >
-            {explodedView ? '🔩 إعادة التجميع' : '💥 تفكيك المجسم'}
+            {explodedView ? (i18n.language === 'ar' ? '🔩 إعادة التجميع' : '🔩 Reassemble') : (i18n.language === 'ar' ? '💥 تفكيك المجسم' : '💥 Explode View')}
           </button>
           <button
             type="button"
@@ -738,8 +740,11 @@ export function LessonPage() {
           <div className="lesson-row" style={{ flexDirection: "column", gap: "10px" }}>
             {isTeacher ? (
               <>
-                <button type="button" className="lesson-btn" onClick={() => setShowQuizEditor(true)}>
-                  إدارة الاختبار (Quiz)
+                <button type="button" className="lesson-btn" onClick={() => {
+                  if (dbLessonId) setShowQuizEditor(true);
+                  else showToast(i18n.language === 'ar' ? "الاختبارات الذكية متوفرة فقط للدروس المخصصة." : "AI Quizzes are only available for custom lessons.", "error");
+                }}>
+                  {i18n.language === 'ar' ? 'إدارة الاختبار' : 'Manage Quiz'}
                 </button>
                 <button 
                   type="button" 
@@ -752,8 +757,11 @@ export function LessonPage() {
                 </button>
               </>
             ) : (
-              <button type="button" className="lesson-btn primary" onClick={() => setShowQuizOverlay(true)}>
-                إجراء الاختبار
+              <button type="button" className="lesson-btn primary" onClick={() => {
+                  if (dbLessonId) setShowQuizOverlay(true);
+                  else showToast(i18n.language === 'ar' ? "هذا الدرس الافتراضي لا يحتوي على اختبار." : "This preset lesson has no quiz.", "error");
+                }}>
+                {i18n.language === 'ar' ? 'إجراء الاختبار' : 'Take Quiz'}
               </button>
             )}
             {!isTeacher && profile && isUUID(lessonId) && (
@@ -761,7 +769,7 @@ export function LessonPage() {
                 className="lesson-btn ghost full-width"
                 onClick={() => setShowAITutor(true)}
               >
-                Feedback (AI Tutor)
+                {i18n.language === 'ar' ? 'تحدث مع المعلم الذكي' : 'Feedback (AI Tutor)'}
               </button>
             )}
           </div>

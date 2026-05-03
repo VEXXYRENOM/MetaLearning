@@ -67,7 +67,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "❤️",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/realistic_human_heart.glb",
   },
   {
@@ -79,7 +79,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🔬",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/simple_animal_cell_model.glb",
   },
   {
@@ -91,7 +91,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🌿",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/plant_cell_-_cell_structure.glb",
   },
   {
@@ -103,7 +103,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🧬",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/dna.glb",
   },
   {
@@ -115,7 +115,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🫁",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/realistic_human_lungs.glb",
   },
   {
@@ -127,7 +127,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "👁️",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/green_eye.glb",
   },
   {
@@ -138,7 +138,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🧠",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://modelviewer.dev/shared-assets/models/BrainStem.glb"
   },
   {
@@ -149,7 +149,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🐎",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://modelviewer.dev/shared-assets/models/Horse.glb"
   },
   {
@@ -160,7 +160,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🦊",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Fox/glTF-Binary/Fox.glb"
   },
   {
@@ -171,7 +171,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🐟",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BarramundiFish/glTF-Binary/BarramundiFish.glb"
   },
   {
@@ -182,7 +182,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🥑",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Avocado/glTF-Binary/Avocado.glb"
   },
   {
@@ -193,7 +193,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectAr: "علوم الحياة والأرض",
     subjectEn: "Biology",
     emoji: "🌿",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DiffuseTransmissionPlant/glTF-Binary/DiffuseTransmissionPlant.glb"
   },
   
@@ -213,7 +213,7 @@ const CHEMISTRY_LESSONS: LessonDef[] = [
     subjectAr: "الكيمياء",
     subjectEn: "Chemistry",
     emoji: "⚛️",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/atom.glb",
   },
   {
@@ -225,7 +225,7 @@ const CHEMISTRY_LESSONS: LessonDef[] = [
     subjectAr: "الكيمياء",
     subjectEn: "Chemistry",
     emoji: "💧",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/h2o_molecule.glb",
   },
   
@@ -244,7 +244,7 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectAr: "الجغرافيا / الفلك",
     subjectEn: "Astronomy",
     emoji: "🪐",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/solar_system_paint_3d.glb",
   },
   {
@@ -256,7 +256,7 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectAr: "الجغرافيا / علوم الأرض",
     subjectEn: "Geography",
     emoji: "🌍",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/earths_internal_structure__core_to_atmosphere.glb",
   },
   {
@@ -268,7 +268,7 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectAr: "الجغرافيا / علوم الأرض",
     subjectEn: "Geography",
     emoji: "🌋",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/volcano.glb",
   },
   {
@@ -280,7 +280,7 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectAr: "الجغرافيا / علوم الأرض",
     subjectEn: "Geography",
     emoji: "🌧️",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/water_cycle.glb",
   },
   {
@@ -291,7 +291,7 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectAr: "الجغرافيا / الفلك",
     subjectEn: "Astronomy",
     emoji: "👨‍🚀",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
   },
   {
@@ -302,7 +302,7 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectAr: "الجغرافيا / الفلك",
     subjectEn: "Astronomy",
     emoji: "🚀",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://modelviewer.dev/shared-assets/models/Astronaut.glb"
   },
   
@@ -322,7 +322,7 @@ const MATH_LESSONS: LessonDef[] = [
     subjectAr: "الرياضيات",
     subjectEn: "Mathematics",
     emoji: "📐",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/platonic_solids.glb",
   },
   
@@ -341,7 +341,7 @@ const MATH_LESSONS: LessonDef[] = [
     subjectAr: "الرياضيات",
     subjectEn: "Mathematics",
     emoji: "🤖",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"
   },
   
@@ -361,7 +361,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🏛️",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/pyramid_of_menkaure_giza_pyramid_complex_egypt.glb",
   },
   {
@@ -372,7 +372,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🏟️",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "/models/colosseum.glb",
   },
   
@@ -385,7 +385,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "📸",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AntiqueCamera/glTF-Binary/AntiqueCamera.glb"
   },
   {
@@ -396,7 +396,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🪖",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"
   },
   {
@@ -407,7 +407,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🪖",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/FlightHelmet/glTF-Binary/FlightHelmet.glb"
   },
   {
@@ -418,7 +418,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🦟",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF-Binary/MosquitoInAmber.glb"
   },
   {
@@ -429,7 +429,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "💀",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ScatteringSkull/glTF-Binary/ScatteringSkull.glb"
   },
   {
@@ -440,7 +440,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🏮",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Lantern/glTF-Binary/Lantern.glb"
   },
   {
@@ -451,7 +451,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🚗",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ToyCar/glTF-Binary/ToyCar.glb"
   },
   {
@@ -462,7 +462,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🐉",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DragonAttenuation/glTF-Binary/DragonAttenuation.glb"
   },
   {
@@ -473,7 +473,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "♟️",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ABeautifulGame/glTF-Binary/ABeautifulGame.glb"
   },
   {
@@ -484,7 +484,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🫗",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://raw.GithubUserContent.com/KhronosGroup/glTF-Sample-Assets/main/Models/WaterBottle/glTF-Binary/WaterBottle.glb"
   },
   {
@@ -495,7 +495,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🛶",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://modelviewer.dev/shared-assets/models/Canoe.glb"
   },
   {
@@ -506,7 +506,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectAr: "التاريخ",
     subjectEn: "History",
     emoji: "🖥️",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://modelviewer.dev/shared-assets/models/SpacemacV.glb"
   },
   
@@ -536,7 +536,7 @@ const ART_LESSONS: LessonDef[] = [
     subjectAr: "الفنون",
     subjectEn: "Art",
     emoji: "🛰️",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://modelviewer.dev/shared-assets/models/Outernet.glb"
   },
   {
@@ -547,7 +547,7 @@ const ART_LESSONS: LessonDef[] = [
     subjectAr: "الفنون",
     subjectEn: "Art",
     emoji: "👟",
-    kind: "gltf-artifact",
+    kind: "gltf-url",
     gltfUrl: "https://modelviewer.dev/shared-assets/models/Shoe.glb"
   },
 ];

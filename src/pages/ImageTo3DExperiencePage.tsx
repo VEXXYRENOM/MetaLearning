@@ -579,37 +579,35 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
               </label>
 
               {/* Viewer Controls */}
-              {mode === "3d" && true3dGlbUrl && (
-                <>
-                  <label className="cyber-toggle-item" style={{ marginTop: "10px", background: "rgba(239, 68, 68, 0.1)" }}>
-                    <div className="toggle-info">
-                      <span style={{ color: "#ef4444" }}>تفكيك المجسم 📌</span>
-                    </div>
-                    <input type="checkbox" className="cyber-checkbox" checked={explodedView}
-                      onChange={e => setExplodedView(e.target.checked)} />
-                    <span className="cyber-slider" />
-                  </label>
+              <div style={{ opacity: mode === "3d" && true3dGlbUrl ? 1 : 0.4, pointerEvents: mode === "3d" && true3dGlbUrl ? "auto" : "none" }}>
+                <label className="cyber-toggle-item" style={{ marginTop: "10px", background: "rgba(239, 68, 68, 0.1)" }}>
+                  <div className="toggle-info">
+                    <span style={{ color: "#ef4444" }}>تفكيك المجسم 📌</span>
+                  </div>
+                  <input type="checkbox" className="cyber-checkbox" checked={explodedView}
+                    onChange={e => setExplodedView(e.target.checked)} />
+                  <span className="cyber-slider" />
+                </label>
 
-                  <button
-                    onClick={() => {
-                      if ((window as any).__cinematicToggle) {
-                        (window as any).__cinematicToggle();
-                      }
-                      setIsTourActive(!isTourActive);
-                    }}
-                    style={{
-                      width: "100%", marginTop: "10px", padding: "10px",
-                      background: isTourActive ? "rgba(99, 102, 241, 0.3)" : "rgba(255, 255, 255, 0.05)",
-                      border: `1px solid ${isTourActive ? "#6366f1" : "rgba(255, 255, 255, 0.1)"}`,
-                      borderRadius: "8px", color: isTourActive ? "#818cf8" : "white",
-                      cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px"
-                    }}
-                  >
-                    <span>▶️ جولة سينيمائية</span>
-                    {isTourActive && <span className="text-xs opacity-75 ml-2">({tourLabel})</span>}
-                  </button>
-                </>
-              )}
+                <button
+                  onClick={() => {
+                    if ((window as any).__cinematicToggle) {
+                      (window as any).__cinematicToggle();
+                    }
+                    setIsTourActive(!isTourActive);
+                  }}
+                  style={{
+                    width: "100%", marginTop: "10px", padding: "10px",
+                    background: isTourActive ? "rgba(99, 102, 241, 0.3)" : "rgba(255, 255, 255, 0.05)",
+                    border: `1px solid ${isTourActive ? "#6366f1" : "rgba(255, 255, 255, 0.1)"}`,
+                    borderRadius: "8px", color: isTourActive ? "#818cf8" : "white",
+                    cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px"
+                  }}
+                >
+                  <span>▶️ جولة سينيمائية</span>
+                  {isTourActive && <span className="text-xs opacity-75 ml-2">({tourLabel})</span>}
+                </button>
+              </div>
 
             </div>
 
