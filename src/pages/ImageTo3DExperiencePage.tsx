@@ -360,7 +360,7 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
         </div>
         <div className="ai-lab-title" style={{ display: "flex", alignItems: "center", gap: "8px", flex: isMobile ? "1 1 auto" : "auto", justifyContent: "flex-end" }}>
           <Cpu className="title-icon" style={{ flexShrink: 0 }} />
-          <h1 style={{ fontSize: isMobile ? "0.95rem" : undefined, whiteSpace: "nowrap", margin: 0, color: "#fff" }}>
+          <h1 style={{ fontSize: isMobile ? "0.95rem" : undefined, whiteSpace: "nowrap", margin: 0 }}>
             {inputType === "image" ? "IMAGE TO 3D" : "TEXT TO 3D"}
           </h1>
         </div>
