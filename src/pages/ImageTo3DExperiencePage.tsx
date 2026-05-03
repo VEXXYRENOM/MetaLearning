@@ -718,8 +718,8 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
             className="hologram-canvas"
             shadows
             camera={{ position: [0, 0, 5], fov: 45 }}
-            gl={{ antialias: true, alpha: true }}
-            dpr={[1, 2]}
+            gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
+            dpr={1}
             style={{
               opacity: (!processing && imageUri) ? 1 : 0,
               pointerEvents: (!processing && imageUri) ? "auto" : "none",
