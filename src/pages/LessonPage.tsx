@@ -476,8 +476,8 @@ export function LessonPage() {
 
   // If we have a cached GLB, completely disable the procedural components logic
   const isProceduralLesson = isProcedural(lesson.kind) && !cachedGlbUrl;
-  // Don't show canvas until cache check completes (prevents flash of old model)
-  const showCanvas = cacheChecked && (isProceduralLesson || Boolean(effectiveGltfUrl) || Boolean(cachedGlbUrl));
+  // Don't show canvas until cache check completes for procedural, but show immediately for known GLBs
+  const showCanvas = (cacheChecked || Boolean(effectiveGltfUrl)) && (isProceduralLesson || Boolean(effectiveGltfUrl) || Boolean(cachedGlbUrl));
   const isHeart = lesson.id === "heart" && !cachedGlbUrl;
   const ProceduralComponent = PROCEDURAL_COMPONENTS[lesson.kind as LessonKind] || null;
 
