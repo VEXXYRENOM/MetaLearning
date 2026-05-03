@@ -77,6 +77,7 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
   ];
 
   const inputType = defaultInputType;
+  const navigate = useNavigate();
 
   function getStageIndex(status: string | null): number {
     if (!status) return -1;
@@ -332,11 +333,22 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
     <div className="ai-lab-layout" dir="ltr">
 
       {/* ─── HEADER ─── */}
-      <header className="ai-lab-header" style={{ flexWrap: isMobile ? "wrap" : "nowrap", padding: isMobile ? "0.75rem 1rem" : "1rem 2rem", gap: isMobile ? "10px" : "0" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <Link className="ai-back-btn" to="/experience/hub">
-            <ChevronLeft size={20} /> {!isMobile && "Back to Hub"}
-          </Link>
+      <header className="ai-lab-header" style={{ 
+        flexWrap: "nowrap", 
+        padding: isMobile ? "0.75rem 1rem" : "1rem 2rem", 
+        gap: isMobile ? "6px" : "10px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <button className="ai-back-btn" onClick={() => navigate(-1)} style={{ 
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", 
+            color: "#94a3b8", padding: "8px", borderRadius: "10px", 
+            display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" 
+          }}>
+            <ChevronLeft size={20} /> {!isMobile && "رجوع"}
+          </button>
           {isMobile && (
             <button onClick={() => setShowMobileSidebar(!showMobileSidebar)} style={{
               background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", color: "#6366f1",
@@ -346,9 +358,11 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
             </button>
           )}
         </div>
-        <div className="ai-lab-title" style={{ flex: isMobile ? "1 1 100%" : "auto", justifyContent: isMobile ? "center" : "flex-start" }}>
-          <Cpu className="title-icon" />
-          <h1 style={{ fontSize: isMobile ? "1.1rem" : undefined }}>{inputType === "image" ? "IMAGE TO 3D ENGINE" : "TEXT TO 3D ENGINE"}</h1>
+        <div className="ai-lab-title" style={{ display: "flex", alignItems: "center", gap: "8px", flex: isMobile ? "1 1 auto" : "auto", justifyContent: "flex-end" }}>
+          <Cpu className="title-icon" style={{ flexShrink: 0 }} />
+          <h1 style={{ fontSize: isMobile ? "0.95rem" : undefined, whiteSpace: "nowrap", margin: 0, color: "#fff" }}>
+            {inputType === "image" ? "IMAGE TO 3D" : "TEXT TO 3D"}
+          </h1>
         </div>
         {!isMobile && (
           <div className="ai-system-status" style={{ color: "#4ade80" }}>
