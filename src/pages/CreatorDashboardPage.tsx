@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
-import { Image, Type, Sparkles, Clock, ArrowRight, Zap } from "lucide-react";
+import { Image, Type, Sparkles, Clock, ArrowRight, Zap, Layers } from "lucide-react";
 
 export function CreatorDashboardPage() {
   const { profile } = useAuth();
@@ -153,6 +153,47 @@ export function CreatorDashboardPage() {
                 color: "#a855f7", fontWeight: "700", fontSize: "0.9rem",
               }}>
                 ابدأ التوليد <ArrowRight size={16} />
+              </div>
+            </div>
+          </Link>
+
+          {/* Studio */}
+          <Link to="/teacher/create" style={{ textDecoration: "none" }}>
+            <div style={{
+              background: "linear-gradient(135deg, rgba(16,185,129,0.12), rgba(52,211,153,0.08))",
+              border: "1px solid rgba(16,185,129,0.25)",
+              borderRadius: "24px", padding: "2rem", cursor: "pointer",
+              transition: "all 0.3s", position: "relative", overflow: "hidden",
+            }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px)";
+                (e.currentTarget as HTMLDivElement).style.borderColor = "#10b981";
+                (e.currentTarget as HTMLDivElement).style.boxShadow = "0 16px 40px rgba(16,185,129,0.2)";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLDivElement).style.transform = "none";
+                (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(16,185,129,0.25)";
+                (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
+              }}
+            >
+              <div style={{
+                position: "absolute", top: "-20px", right: "-20px",
+                width: "100px", height: "100px",
+                background: "radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)",
+                borderRadius: "50%",
+              }} />
+              <Layers size={40} color="#10b981" style={{ marginBottom: "1rem" }} />
+              <h2 style={{ fontSize: "1.4rem", fontWeight: "800", margin: "0 0 0.5rem 0" }}>
+                مساحة العمل (Workspace)
+              </h2>
+              <p style={{ color: "#64748b", margin: "0 0 1.5rem 0", lineHeight: 1.6, fontSize: "0.9rem" }}>
+                نظّم نماذجك، وأنشئ الدروس، وأضف نقاط التفاعل التوضيحية داخل بيئة ثلاثية الأبعاد متكاملة.
+              </p>
+              <div style={{
+                display: "flex", alignItems: "center", gap: "0.5rem",
+                color: "#10b981", fontWeight: "700", fontSize: "0.9rem",
+              }}>
+                فتح مساحة العمل <ArrowRight size={16} />
               </div>
             </div>
           </Link>

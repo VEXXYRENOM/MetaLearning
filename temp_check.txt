@@ -1,0 +1,41 @@
+﻿/* ========================================================= */
+/* PRIORITY 4: MOBILE SUPPORT (LESSON PAGE)                  */
+/* ========================================================= */
+@media (max-width: 768px) {
+  .lesson-layout {
+    flex-direction: column; /* Stack vertically instead of horizontally */
+  }
+
+  .lesson-canvas-host {
+    height: 65vh; /* Top area for Canvas */
+    min-height: 50vh;
+    order: 1;
+    touch-action: none !important; /* Critical to prevent page scroll when rotating 3D */
+  }
+
+  .lesson-sidebar {
+    width: 100%;
+    height: 35vh; /* Bottom drawer portion */
+    min-height: 250px;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    order: 2;
+    border-radius: 20px 20px 0 0; /* Add drawer handle look */
+    padding-top: 1.5rem;
+    position: relative;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+  }
+
+  /* Drawer handle element using pseudo-element */
+  .lesson-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+}

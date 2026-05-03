@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { 
@@ -15,7 +15,8 @@ import { Model3DLoader } from "../components/Model3DLoader";
 const GltfScene = lazy(() => import("../components/lesson/GltfScene").then(m => ({ default: m.GltfScene })));
 const ArtifactGltfModel = lazy(() => import("../components/experience/ArtifactGltfModel").then(m => ({ default: m.ArtifactGltfModel })));
 import { QRCodeSVG } from "qrcode.react";
-import "../teacher.css"; // تنسيق النمط الفاتح المستقل
+import "../teacher.css"; // ØªÙ†Ø³ÙŠÙ‚ Ø§Ù„Ù†Ù…Ø· Ø§Ù„ÙØ§ØªØ­ Ø§Ù„Ù…Ø³ØªÙ‚Ù„
+import { LESSONS } from "../data/lessons"; // Ù„Ø§Ø³ØªÙŠØ±Ø§Ø¯ Ø§Ù„Ù†Ù…Ø§Ø°Ø¬ Ø§Ù„Ø¬Ø§Ù‡Ø²Ø© Ù„Ù„Ø£Ø³ØªØ§Ø°
 import { useAuth } from "../contexts/AuthContext";
 import { OnboardingWizard } from "../components/OnboardingWizard";
 import { showToast } from "../components/Toast";
@@ -31,7 +32,7 @@ export interface QuizQuestionState {
 
 export function TeacherDashboardPage() {
   const { profile, signOut, isPro } = useAuth();
-  const [step, setStep] = useState<Step>(0); // 🚀 نبدأ من الـ Hub (Step 0)
+  const [step, setStep] = useState<Step>(0); // ðŸš€ Ù†Ø¨Ø¯Ø£ Ù…Ù† Ø§Ù„Ù€ Hub (Step 0)
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [lessonName, setLessonName] = useState<string>("");
@@ -49,8 +50,8 @@ export function TeacherDashboardPage() {
   }, [profile]);
 
   // isPro is derived from AuthContext (checks both subscription_tier AND legacy plan field)
-  // const isPro = profile?.plan === 'pro'; // ❌ WRONG: misses subscription_tier from Paddle
-  // isPro is now pulled from useAuth() above — covers all upgrade paths ✅
+  // const isPro = profile?.plan === 'pro'; // âŒ WRONG: misses subscription_tier from Paddle
+  // isPro is now pulled from useAuth() above â€” covers all upgrade paths âœ…
 
   const nextStep = () => {
     if (step < 8) setStep((prev: Step) => (prev + 1) as Step);
@@ -65,7 +66,7 @@ export function TeacherDashboardPage() {
       {showWizard && (
         <OnboardingWizard role="teacher" onComplete={() => setShowWizard(false)} />
       )}
-      {/* 🔹 الشريط الجانبي الثابت */}
+      {/* ðŸ”¹ Ø§Ù„Ø´Ø±ÙŠØ· Ø§Ù„Ø¬Ø§Ù†Ø¨ÙŠ Ø§Ù„Ø«Ø§Ø¨Øª */}
       <aside className="teacher-sidebar">
         <div className="sidebar-profile">
           <div className="profile-img">
@@ -92,7 +93,7 @@ export function TeacherDashboardPage() {
         </div>
       </aside>
 
-      {/* 🔹 المحتوى الرئيسي (حسب الخطوة) */}
+      {/* ðŸ”¹ Ø§Ù„Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ (Ø­Ø³Ø¨ Ø§Ù„Ø®Ø·ÙˆØ©) */}
       <main className="teacher-main">
         <header className="teacher-header">
           {step > 0 && (
@@ -108,7 +109,7 @@ export function TeacherDashboardPage() {
         </header>
 
         <div className="teacher-content">
-          {/* 🌟 غرفة العمليات المركزية (Teacher Hub) */}
+          {/* ðŸŒŸ ØºØ±ÙØ© Ø§Ù„Ø¹Ù…Ù„ÙŠØ§Øª Ø§Ù„Ù…Ø±ÙƒØ²ÙŠØ© (Teacher Hub) */}
           {step === 0 && (
             <Step0Hub 
               onStartWizard={() => setStep(1)} 
@@ -125,7 +126,7 @@ export function TeacherDashboardPage() {
               onSelect={(subj: string) => {
                 if (subj !== selectedSubject) {
                   setSelectedSubject(subj);
-                  setLessonName(""); // مسح اسم الدرس عند تغيير المادة لتجنب بقاء المجسم السابق
+                  setLessonName(""); // Ù…Ø³Ø­ Ø§Ø³Ù… Ø§Ù„Ø¯Ø±Ø³ Ø¹Ù†Ø¯ ØªØºÙŠÙŠØ± Ø§Ù„Ù…Ø§Ø¯Ø© Ù„ØªØ¬Ù†Ø¨ Ø¨Ù‚Ø§Ø¡ Ø§Ù„Ù…Ø¬Ø³Ù… Ø§Ù„Ø³Ø§Ø¨Ù‚
                 }
                 setTimeout(nextStep, 400); 
               }} 
@@ -146,7 +147,7 @@ export function TeacherDashboardPage() {
 }
 
 // -----------------------------------------------------
-// 🌟 المكون الجديد: غرفة العمليات (Teacher Hub - Step 0)
+// ðŸŒŸ Ø§Ù„Ù…ÙƒÙˆÙ† Ø§Ù„Ø¬Ø¯ÙŠØ¯: ØºØ±ÙØ© Ø§Ù„Ø¹Ù…Ù„ÙŠØ§Øª (Teacher Hub - Step 0)
 // -----------------------------------------------------
 function Step0Hub({ onStartWizard, profile, isPro, setStep, setSelectedSubject }: { 
   onStartWizard: () => void; 
@@ -202,7 +203,7 @@ function Step0Hub({ onStartWizard, profile, isPro, setStep, setSelectedSubject }
       
       showToast({ 
         type: 'success', 
-        title: !currentPublic ? 'Lesson Published to World 🌍' : 'Lesson made Private 🔒',
+        title: !currentPublic ? 'Lesson Published to World ðŸŒ' : 'Lesson made Private ðŸ”’',
         message: !currentPublic ? 'Anyone can now discover this lesson in the Global Library.' : 'Only your students can access this lesson now.'
       });
     } catch (err: any) {
@@ -228,7 +229,7 @@ function Step0Hub({ onStartWizard, profile, isPro, setStep, setSelectedSubject }
         setLoadingMy(false);
       });
 
-    // 🔹 Count lessons created this month for free tier limit
+    // ðŸ”¹ Count lessons created this month for free tier limit
     supabase
       .from("lessons")
       .select("id", { count: "exact", head: true })
@@ -272,7 +273,7 @@ function Step0Hub({ onStartWizard, profile, isPro, setStep, setSelectedSubject }
         subjectCounts[l.subject] = (subjectCounts[l.subject] || 0) + 1;
       });
       const topSubject = Object.entries(subjectCounts)
-        .sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+        .sort((a, b) => b[1] - a[1])[0]?.[0] || "â€”";
 
       setAnalytics({
         totalLessons: lessonCount || 0,
@@ -287,7 +288,7 @@ function Step0Hub({ onStartWizard, profile, isPro, setStep, setSelectedSubject }
   return (
     <div className="hub-container">
       <div className="hub-header-meta">
-        <h2>Your Workspace 🚀</h2>
+        <h2>Your Workspace ðŸš€</h2>
         <p>Manage your interactive classroom and design immersive educational paths for students worldwide.</p>
       </div>
 
@@ -300,10 +301,10 @@ function Step0Hub({ onStartWizard, profile, isPro, setStep, setSelectedSubject }
         }}>
           <div>
             <h3 style={{ margin: "0 0 0.5rem 0", color: "white", display: "flex", alignItems: "center", gap: "8px" }}>
-              <Zap size={20} color="#a855f7" /> {isArabic ? "قم بالترقية إلى Pro" : t("upgrade.banner", "Upgrade to Pro")}
+              <Zap size={20} color="#a855f7" /> {isArabic ? "Ù‚Ù… Ø¨Ø§Ù„ØªØ±Ù‚ÙŠØ© Ø¥Ù„Ù‰ Pro" : t("upgrade.banner", "Upgrade to Pro")}
             </h3>
             <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.9rem" }}>
-              {isArabic ? "افتح إمكانيات لا محدودة للدروس وتحويل الصور إلى ذكاء اصطناعي." : "Unlock unlimited lessons, Image-to-3D AI, and full analytics."}
+              {isArabic ? "Ø§ÙØªØ­ Ø¥Ù…ÙƒØ§Ù†ÙŠØ§Øª Ù„Ø§ Ù…Ø­Ø¯ÙˆØ¯Ø© Ù„Ù„Ø¯Ø±ÙˆØ³ ÙˆØªØ­ÙˆÙŠÙ„ Ø§Ù„ØµÙˆØ± Ø¥Ù„Ù‰ Ø°ÙƒØ§Ø¡ Ø§ØµØ·Ù†Ø§Ø¹ÙŠ." : "Unlock unlimited lessons, Image-to-3D AI, and full analytics."}
             </p>
           </div>
           <Link to="/pricing" style={{
@@ -311,7 +312,7 @@ function Step0Hub({ onStartWizard, profile, isPro, setStep, setSelectedSubject }
             padding: "10px 20px", borderRadius: "8px", textDecoration: "none",
             fontWeight: "bold", fontSize: "0.9rem", whiteSpace: "nowrap"
           }}>
-            {isArabic ? "ترقية الآن ←" : t("upgrade.cta", "Upgrade Now →")}
+            {isArabic ? "ØªØ±Ù‚ÙŠØ© Ø§Ù„Ø¢Ù† â†" : t("upgrade.cta", "Upgrade Now â†’")}
           </Link>
         </div>
       )}
@@ -372,10 +373,10 @@ function Step0Hub({ onStartWizard, profile, isPro, setStep, setSelectedSubject }
                           border: '1px solid #f59e0b', borderRadius: '8px',
                           padding: '8px 12px', marginBottom: '12px',
                           fontSize: '0.8rem', color: '#fbbf24' }}>
-              ⚠️ You've used {monthlyLessonCount}/{FREE_LESSON_LIMIT} free
+              âš ï¸ You've used {monthlyLessonCount}/{FREE_LESSON_LIMIT} free
               lessons this month.{' '}
               <Link to="/pricing" style={{ color: '#a855f7' }}>
-                Upgrade to Pro →
+                Upgrade to Pro â†’
               </Link>
             </div>
           )}
@@ -396,7 +397,7 @@ function Step0Hub({ onStartWizard, profile, isPro, setStep, setSelectedSubject }
                 setStep(3);
               }}
             >
-              ⚡ Quick Launch (60s)
+              âš¡ Quick Launch (60s)
             </button>
           </div>
           <button className="btn-primary mt-auto width-full" onClick={() => {
@@ -408,7 +409,7 @@ function Step0Hub({ onStartWizard, profile, isPro, setStep, setSelectedSubject }
 
       <div className="gallery-section mt-6">
         <div className="hub-header-meta mb-4">
-          <h3>📚 My Created Lessons</h3>
+          <h3>ðŸ“š My Created Lessons</h3>
           <p>Lessons you have published. Click to relaunch or share again.</p>
         </div>
         {loadingMy ? (
@@ -435,7 +436,7 @@ function Step0Hub({ onStartWizard, profile, isPro, setStep, setSelectedSubject }
                     color: '#f87171', cursor: 'pointer', fontSize: '0.75rem',
                   }}
                 >
-                  {deletingId === l.id ? '...' : '🗑'}
+                  {deletingId === l.id ? '...' : 'ðŸ—‘'}
                 </button>
                 
                 {/* Global Publish Badge */}
@@ -562,9 +563,9 @@ function Step1Subject({ selected, onSelect }: any) {
 
 function Step2Level({ selected, onSelect, onNext }: any) {
   const levels = [
-    { id: "high", name: "High School", desc: "Ages 15-18", icon: "🏫" },
-    { id: "middle", name: "Middle School", desc: "Ages 12-15", icon: "🏫" },
-    { id: "primary", name: "Primary School", desc: "Ages 6-12", icon: "🏫" },
+    { id: "high", name: "High School", desc: "Ages 15-18", icon: "ðŸ«" },
+    { id: "middle", name: "Middle School", desc: "Ages 12-15", icon: "ðŸ«" },
+    { id: "primary", name: "Primary School", desc: "Ages 6-12", icon: "ðŸ«" },
   ];
 
   return (
@@ -588,34 +589,61 @@ function Step2Level({ selected, onSelect, onNext }: any) {
   );
 }
 
+function getLessonsForSubject(subjectId: string | null) {
+  if (!subjectId) return [];
+  const map: Record<string, string[]> = {
+    science:   ["Ø¹Ù„ÙˆÙ… Ø§Ù„Ø­ÙŠØ§Ø© ÙˆØ§Ù„Ø£Ø±Ø¶", "Ø§Ù„ÙƒÙŠÙ…ÙŠØ§Ø¡", "Ø§Ù„Ø¹Ù„ÙˆÙ…"],
+    biology:   ["Ø¹Ù„ÙˆÙ… Ø§Ù„Ø­ÙŠØ§Ø© ÙˆØ§Ù„Ø£Ø±Ø¶"],
+    chemistry: ["Ø§Ù„ÙƒÙŠÙ…ÙŠØ§Ø¡"],
+    physics:   ["Ø§Ù„ÙÙŠØ²ÙŠØ§Ø¡"],
+    geography: ["Ø§Ù„Ø¬ØºØ±Ø§ÙÙŠØ§ / Ø¹Ù„ÙˆÙ… Ø§Ù„Ø£Ø±Ø¶", "Ø§Ù„Ø¬ØºØ±Ø§ÙÙŠØ§ / Ø§Ù„ÙÙ„Ùƒ"],
+    astronomy: ["Ø§Ù„Ø¬ØºØ±Ø§ÙÙŠØ§ / Ø§Ù„ÙÙ„Ùƒ", "Ø§Ù„ÙÙ„Ùƒ"],
+    history:   ["Ø§Ù„ØªØ§Ø±ÙŠØ®"],
+    math:      ["Ø§Ù„Ø±ÙŠØ§Ø¶ÙŠØ§Øª"],
+    languages: ["Ø§Ù„Ù„ØºØ§Øª"],
+    art:       ["Ø§Ù„ÙÙ†ÙˆÙ†"]
+  };
+  
+  const targetSubjects = map[subjectId] || [];
+  return LESSONS.filter(l => targetSubjects.includes(l.subjectAr));
+}
+
 function Step3Input({ selectedSubject, lessonName, onChange, onNext }: any) {
   const { i18n } = useTranslation();
   const isArabic = i18n.language.startsWith("ar");
+  const readyLessons = getLessonsForSubject(selectedSubject);
 
   return (
     <div className="step-container center-content">
       <h3 className="section-title">
-        {isArabic ? "اختيار عنوان الدرس" : "Lesson Title"}
+        {isArabic ? "Ø§Ø®ØªÙŠØ§Ø± Ø§Ù„Ø¯Ø±Ø³ ÙˆØ§Ù„Ù†Ù…ÙˆØ°Ø¬" : "Lesson Setup & Specialization"}
       </h3>
       <div className="input-group">
         <label>
-          {isArabic ? "أدخل عنوان الدرس الذي ترغب بإنشائه" : "Enter the title for your new lesson"}
+          {isArabic ? "Ø§Ø®ØªØ± Ù†Ù…ÙˆØ°Ø¬Ø§Ù‹ Ø«Ù„Ø§Ø«ÙŠ Ø§Ù„Ø£Ø¨Ø¹Ø§Ø¯ Ù„Ù…Ø§Ø¯ØªÙƒ" : "Select a 3D module for your subject"}
         </label>
-        <input 
-          type="text"
+        <select 
           value={lessonName} 
           onChange={e => onChange(e.target.value)} 
-          className="large-input custom-input"
-          placeholder={isArabic ? "اكتب اسم الدرس..." : "Enter lesson name..."}
-        />
+          className="large-input custom-select"
+        >
+          <option value="" disabled>
+            {isArabic ? "-- Ø§Ø¶ØºØ· Ù„Ø§Ø®ØªÙŠØ§Ø± Ø¯Ø±Ø³ Ø¬Ø§Ù‡Ø² --" : "-- Click to select a ready 3D lesson --"}
+          </option>
+          {readyLessons.map(lesson => (
+            <option key={lesson.id} value={lesson.titleAr}>
+              {isArabic ? lesson.titleAr : (lesson.titleEn || lesson.titleAr)}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="integration-illustration">
         <div className="int-box meta">Meta Learning <br/><small>3D Experts</small></div>
-        <div className="int-arrows">🔄<br/>Link & Sync</div>
+        <div className="int-arrows">ðŸ”„<br/>Link & Sync</div>
         <div className="int-box min">Education Ministry <br/><small>Official Curricula</small></div>
       </div>
-      <button className="btn-primary large mt-6" onClick={onNext} disabled={!lessonName || lessonName.trim() === ""}>
-        {isArabic ? "متابعة إعداد الدرس" : "Continue Lesson Setup"}
+      <button className="btn-primary large mt-6" onClick={onNext} disabled={!lessonName}>
+        {isArabic ? "Ù…ØªØ§Ø¨Ø¹Ø© Ø¥Ø¹Ø¯Ø§Ø¯ Ø§Ù„Ø¯Ø±Ø³" : "Continue Lesson Setup"}
       </button>
     </div>
   );
@@ -778,26 +806,33 @@ function Step5Quiz({ lessonQuiz, setLessonQuiz, onNext }: any) {
 
 function Step6LabPreview({ lessonName, autoExplain, setAutoExplain, onNext }: any) {
   const renderModel = () => {
-    // Since we no longer use predefined LESSONS dropdown, we render a generic 3D model
-    // or we could check if the user uploaded something. For now, we use a generic placeholder.
-    return (
-      <group scale={[1.5, 1.5, 1.5]}>
-        <GltfScene url="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb" modelScale={1} selectedName={null} onSelectName={() => {}} xrayMode={false} />
-      </group>
-    );
+    // 1. ÙØ­Øµ Ø§Ù„Ø¯Ø±ÙˆØ³ Ø§Ù„Ù…Ø­Ø¯Ø¯Ø© Ù…Ø³Ø¨Ù‚Ø§Ù‹ Ø¨Ù†Ø¸Ø§Ù… Ø§Ù„Ù€ GLTF
+    const lessonData = LESSONS.find((l) => l.titleAr === lessonName);
+
+    if (lessonData?.kind === "gltf-artifact" && lessonData.gltfUrl) {
+      return (
+        <group scale={[2, 2, 2]}>
+          <ArtifactGltfModel url={lessonData.gltfUrl} modelScale={1} />
+        </group>
+      );
+    }
+
+    if ((lessonData?.kind === "gltf-url" || lessonData?.kind === "local-model") && lessonData.gltfUrl) {
+      return (
+        <group scale={[1.5, 1.5, 1.5]}>
+          <GltfScene url={lessonData.gltfUrl} modelScale={lessonData.kind === "local-model" ? 1.5 : 1} selectedName={null} onSelectName={() => {}} xrayMode={false} />
+        </group>
+      );
+    }
+
+    return null;
   };
 
   return (
     <div className="step-container lab-step">
       <div className="lab-header">
-        <h3 className="section-title text-white">
-          {lessonName ? `Preview: ${lessonName}` : "Virtual Lab Preview"}
-        </h3>
-        <p className="text-gray">
-          {lessonName 
-            ? `Viewing the 3D assets assigned to "${lessonName}".` 
-            : "Prepare your custom lesson content below."}
-        </p>
+        <h3 className="section-title text-white">Virtual Lab (Lesson Preview)</h3>
+        <p className="text-gray">You are previewing the ({lessonName}) model before publishing it to students.</p>
       </div>
 
       <div className="lab-wrapper">
@@ -927,13 +962,13 @@ function Step7Review({ lessonName, subject, profile, isPro, autoExplain, lessonN
 
   return (
     <div className="step-container">
-      <h3 className="section-title text-center mb-6">Review & Publish — {lessonName}</h3>
+      <h3 className="section-title text-center mb-6">Review & Publish â€” {lessonName}</h3>
       <div className="review-layout">
         <div className="review-list">
-          <div className="review-item"><div className="rev-icon"><Layers size={24} /></div><div className="rev-text"><h4>{lessonName} — 3D Model</h4><p>Interactive 3D preset model ready for live streaming to students.</p></div></div>
+          <div className="review-item"><div className="rev-icon"><Layers size={24} /></div><div className="rev-text"><h4>{lessonName} â€” 3D Model</h4><p>Interactive 3D preset model ready for live streaming to students.</p></div></div>
           <div className="review-item"><div className="rev-icon"><MessageSquare size={24} /></div><div className="rev-text"><h4>Lesson Notes</h4><p>{lessonNotes ? `${lessonNotes.slice(0,80)}...` : "No notes added"}</p></div></div>
           <div className="review-item"><div className="rev-icon"><Zap size={24} /></div><div className="rev-text"><h4>Quiz ({lessonQuiz.length} questions)</h4><p>{lessonQuiz.length > 0 ? `${lessonQuiz.length} question(s) will be published with this lesson.` : "No quiz added"}</p></div></div>
-          <div className="review-item"><div className="rev-icon"><Atom size={24} /></div><div className="rev-text"><h4>AI Auto-Explanation</h4><p>{autoExplain ? "Enabled — AI will narrate the 3D model" : "Disabled"}</p></div></div>
+          <div className="review-item"><div className="rev-icon"><Atom size={24} /></div><div className="rev-text"><h4>AI Auto-Explanation</h4><p>{autoExplain ? "Enabled â€” AI will narrate the 3D model" : "Disabled"}</p></div></div>
         </div>
         <div className="review-summary">
           <div className="summary-box">
@@ -942,7 +977,7 @@ function Step7Review({ lessonName, subject, profile, isPro, autoExplain, lessonN
           </div>
           {errorMsg && <p style={{ color: '#ef4444', marginTop: '1rem' }}>{errorMsg}</p>}
           <button className="btn-primary full-width mt-4" onClick={handlePublish} disabled={publishing}>
-            {publishing ? "Publishing..." : "🚀 Confirm & Publish Lesson"}
+            {publishing ? "Publishing..." : "ðŸš€ Confirm & Publish Lesson"}
           </button>
         </div>
       </div>
@@ -950,20 +985,10 @@ function Step7Review({ lessonName, subject, profile, isPro, autoExplain, lessonN
   );
 }
 
-// Helper: return a default or procedural key for the lesson based on keywords
+// Helper: find the preset lesson ID from the lesson title
 function getLessonKeyFromTitle(title: string): string {
-  const t = title.toLowerCase();
-  if (t.includes("قلب") || t.includes("heart")) return "procedural-heart";
-  if (t.includes("ذرة") || t.includes("atom")) return "procedural-atom";
-  if (t.includes("خلية") || t.includes("cell")) return "procedural-animal-cell";
-  if (t.includes("شمس") || t.includes("sun") || t.includes("فلك")) return "procedural-solarsystem";
-  if (t.includes("أرض") || t.includes("earth")) return "procedural-earth-layers";
-  if (t.includes("بركان") || t.includes("volcano")) return "procedural-volcano";
-  if (t.includes("رئة") || t.includes("lung")) return "procedural-lungs";
-  if (t.includes("عين") || t.includes("eye")) return "procedural-eye";
-  if (t.includes("ماء") || t.includes("water")) return "procedural-water-molecule";
-  
-  return "procedural-atom"; 
+  const match = LESSONS.find(l => l.titleAr === title);
+  return match?.id ?? "";
 }
 
 function Step8Success({ lessonName, pinCode, activeSessionId }: any) {
@@ -988,7 +1013,7 @@ function Step8Success({ lessonName, pinCode, activeSessionId }: any) {
 
   return (
     <div className="step-container center-content success-view">
-      <div className="confetti-placeholder">🎉</div>
+      <div className="confetti-placeholder">ðŸŽ‰</div>
       <h2 className="success-msg">Lesson Published Successfully!</h2>
       <p className="success-sub">Access Code</p>
       <div className="code-display" style={{ fontSize: '2.5rem', letterSpacing: '4px', padding: '1rem', background: '#38bdf822', border: '2px solid #38bdf8', borderRadius: '12px' }}>
@@ -996,7 +1021,7 @@ function Step8Success({ lessonName, pinCode, activeSessionId }: any) {
       </div>
       {pinCode && (
         <div style={{ marginTop: "1.5rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
-          <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: 0 }}>📱 Students can scan this QR to join</p>
+          <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: 0 }}>ðŸ“± Students can scan this QR to join</p>
           <div style={{ background: "white", padding: "16px", borderRadius: "12px", display: "inline-block" }}>
             <QRCodeSVG value={`${window.location.origin}/join?pin=${pinCode}`} size={180} level="H" />
           </div>
@@ -1004,7 +1029,7 @@ function Step8Success({ lessonName, pinCode, activeSessionId }: any) {
       )}
       <p className="code-hint mt-2">Copy this code and share it with your students.</p>
       <div style={{ marginTop: '2rem', padding: '1rem', background: '#1f2937', borderRadius: '12px', width: '100%', maxWidth: '400px' }}>
-        <h4 style={{ color: '#9ca3af', marginBottom: '1rem', borderBottom: '1px solid #374151', paddingBottom: '0.5rem' }}>📡 Live Students ({joinedStudents.length})</h4>
+        <h4 style={{ color: '#9ca3af', marginBottom: '1rem', borderBottom: '1px solid #374151', paddingBottom: '0.5rem' }}>ðŸ“¡ Live Students ({joinedStudents.length})</h4>
         {joinedStudents.length === 0 ? (
           <p style={{ color: '#4b5563', fontSize: '0.9rem' }}>Waiting for students to join...</p>
         ) : (
@@ -1018,9 +1043,9 @@ function Step8Success({ lessonName, pinCode, activeSessionId }: any) {
           </ul>
         )}
         {!sessionEnded ? (
-          <button onClick={handleEndSession} style={{ marginTop: "1rem", width: "100%", padding: "12px", background: "rgba(239,68,68,0.2)", border: "1px solid #ef4444", borderRadius: "8px", color: "#fca5a5", cursor: "pointer", fontWeight: "bold" }}>🔒 End Session & Deactivate PIN</button>
+          <button onClick={handleEndSession} style={{ marginTop: "1rem", width: "100%", padding: "12px", background: "rgba(239,68,68,0.2)", border: "1px solid #ef4444", borderRadius: "8px", color: "#fca5a5", cursor: "pointer", fontWeight: "bold" }}>ðŸ”’ End Session & Deactivate PIN</button>
         ) : (
-          <div style={{ marginTop: "1rem", padding: "12px", background: "rgba(34,197,94,0.1)", border: "1px solid #22c55e", borderRadius: "8px", color: "#86efac", textAlign: "center" }}>✅ Session ended. PIN deactivated.</div>
+          <div style={{ marginTop: "1rem", padding: "12px", background: "rgba(34,197,94,0.1)", border: "1px solid #22c55e", borderRadius: "8px", color: "#86efac", textAlign: "center" }}>âœ… Session ended. PIN deactivated.</div>
         )}
       </div>
       <div className="share-actions mt-6">
@@ -1028,11 +1053,12 @@ function Step8Success({ lessonName, pinCode, activeSessionId }: any) {
           <Send size={18} /> Send via WhatsApp
         </a>
         <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(pinCode ?? "").then(() => showToast({ type: 'success', title: 'Copied!', message: `PIN ${pinCode} copied` })); setCopyDone(true); setTimeout(() => setCopyDone(false), 2000); }}>
-          <Copy size={18} /> {copyDone ? "Copied! ✓" : "Copy Code"}
+          <Copy size={18} /> {copyDone ? "Copied! âœ“" : "Copy Code"}
         </button>
       </div>
-      <div className="lesson-summary-footer mt-6"><Link to="/">← Back to Home</Link></div>
+      <div className="lesson-summary-footer mt-6"><Link to="/">â† Back to Home</Link></div>
     </div>
   );
 }
+
 

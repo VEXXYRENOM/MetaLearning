@@ -341,7 +341,7 @@ export function ImageTo3DExperiencePage({ defaultInputType = "image" }: { defaul
         justifyContent: "space-between"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <button className="ai-back-btn" onClick={() => navigate(-1)} style={{ 
+          <button className="ai-back-btn" onClick={() => navigate("/teacher/create")} style={{ 
             background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", 
             color: "#94a3b8", padding: "8px", borderRadius: "10px", 
             display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" 

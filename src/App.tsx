@@ -31,7 +31,6 @@ const CreatorDashboardPage  = lazy(() => import("./pages/CreatorDashboardPage").
 const AdminDashboardPage    = lazy(() => import("./pages/AdminDashboardPage").then(m => ({ default: m.AdminDashboardPage })));
 const PrivacyPolicyPage     = lazy(() => import("./pages/PrivacyPolicyPage").then(m => ({ default: m.PrivacyPolicyPage })));
 const TermsOfServicePage    = lazy(() => import("./pages/TermsOfServicePage").then(m => ({ default: m.TermsOfServicePage })));
-const CreatorStudioPage     = lazy(() => import("./pages/CreatorStudioPage").then(m => ({ default: m.CreatorStudioPage })));
 const OrgAdminDashboard     = lazy(() => import("./pages/OrgAdminDashboard").then(m => ({ default: m.OrgAdminDashboard })));
 const LeadMagnetPage        = lazy(() => import("./pages/LeadMagnetPage").then(m => ({ default: m.LeadMagnetPage })));
 const PostGeneratorPage     = lazy(() => import("./pages/PostGeneratorPage").then(m => ({ default: m.PostGeneratorPage })));
@@ -104,11 +103,6 @@ function AnimatedRoutes() {
         <Route path="/creator/lab" element={
           <ProtectedRoute requiredRole="creator">
             <Suspense fallback={<PageSkeleton />}><PageTransition><CreatorDashboardPage /></PageTransition></Suspense>
-          </ProtectedRoute>
-        } />
-        <Route path="/creator/studio" element={
-          <ProtectedRoute requiredRole={["creator", "teacher"]}>
-            <Suspense fallback={<PageSkeleton />}><PageTransition variant="fade"><CreatorStudioPage /></PageTransition></Suspense>
           </ProtectedRoute>
         } />
 
