@@ -25,15 +25,13 @@ export function ArtifactGltfModel({ url, modelScale = 1 }: Props) {
       {/* إضاءة محيطية واقعية (HDRI) لتعزيز خامات PBR كالمعادن والخشب */}
       <Environment preset="studio" />
       
-      <Bounds fit clip observe margin={1.2}>
-        <Float speed={1.5} rotationIntensity={0} floatIntensity={0.5}>
-          <Center>
-            <group ref={groupRef} scale={modelScale}>
-              <primitive object={clone} />
-            </group>
-          </Center>
-        </Float>
-      </Bounds>
+      <Float speed={1.5} rotationIntensity={0} floatIntensity={0.5}>
+        <Center>
+          <group ref={groupRef} scale={modelScale}>
+            <primitive object={clone} />
+          </group>
+        </Center>
+      </Float>
 
       {/* ظلال التلامس الناعمة أسفل القطعة الأثرية */}
       <ContactShadows 

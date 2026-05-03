@@ -11,7 +11,7 @@ import { Canvas } from "@react-three/fiber";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import { BlendFunction, KernelSize } from "postprocessing";
 import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
-import { OrbitControls, Html } from "@react-three/drei";
+import { OrbitControls, Html, Bounds } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { QRCodeSVG } from "qrcode.react";
 import { getLesson, type LessonKind } from "../data/lessons";
@@ -81,8 +81,8 @@ const MathematicalLogic3D = lazy(() => import("../components/lesson/Mathematical
 const RobotKinematics3D = lazy(() => import("../components/lesson/RobotKinematics3D").then(m => ({ default: m.RobotKinematics3D })));
 
 // ── Cinematic Tour Controller (lives inside Canvas for camera access) ─────────
-function CinematicTourController({ onStatusChange }: { onStatusChange: (label: string, touring: boolean) => void }) {
-  const { status, frameLabel, toggleTour } = useCinematicTour();
+function CinematicTourController({ onStatusChange, children }: { onStatusChange: (label: string, touring: boolean) => void, children: React.ReactNode }) {
+  const { status, frameLabel, toggleTour, tourRotation } = useCinematicTour();
 
   const prevLabel = React.useRef("");
   if (frameLabel !== prevLabel.current) {
@@ -95,7 +95,7 @@ function CinematicTourController({ onStatusChange }: { onStatusChange: (label: s
     return () => { delete (window as any).__cinematicToggle; };
   }, [toggleTour]);
 
-  return null;
+  return <group rotation={tourRotation}>{children}</group>;
 }
 
 /** خريطة تربط الأنواع الإجرائية المتبقية بمكوناتها */
@@ -256,7 +256,6 @@ export function LessonPage() {
   const [isTourActive, setIsTourActive] = useState(false);
   const [tourLabel, setTourLabel]       = useState("");
   const [explodedView, setExplodedView] = useState(false);
-
   const canvasHostRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const orbitRef = useRef<OrbitControlsImpl>(null);
@@ -895,6 +894,15 @@ export function LessonPage() {
                   )}
                   <RotatingGroup enabled={autoRotate && !isActive} speed={0.42}>
                     <HandTrackedModel handData={isActive ? handData : null} baseScale={1}>
+                      <Bounds fit clip observe margin={1.2}>
+                      {/* 🎥 Cinematic Tour Controller wraps the models to rotate them */}
+                      <CinematicTourController
+                        onStatusChange={(label, touring) => {
+                          setTourLabel(label);
+                          setIsTourActive(touring);
+                          if (touring) setAutoRotate(false);
+                        }}
+                      >
                       <group onPointerUp={handleModelClick}>
                         {isHeart && teacherImageUrl && (
                           <ImageTo3dVolume
@@ -940,20 +948,14 @@ export function LessonPage() {
                         ))}
                         {pendingPos && <PendingHotspotMarker position={pendingPos} />}
                       </group>
+                      </CinematicTourController>
+                      </Bounds>
                     </HandTrackedModel>
                   </RotatingGroup>
-                  {/* 🎥 Cinematic Tour Controller */}
-                  <CinematicTourController
-                    onStatusChange={(label, touring) => {
-                      setTourLabel(label);
-                      setIsTourActive(touring);
-                      // Pause auto-rotate during tour
-                      if (touring) setAutoRotate(false);
-                    }}
-                  />
 
                   <OrbitControls
                     ref={orbitRef}
+                    makeDefault
                     enablePan
                     minDistance={1.2}
                     maxDistance={12}

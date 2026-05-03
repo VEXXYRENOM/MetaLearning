@@ -953,17 +953,20 @@ function Step7Review({ lessonName, subject, profile, isPro, autoExplain, lessonN
 // Helper: return a default or procedural key for the lesson based on keywords
 function getLessonKeyFromTitle(title: string): string {
   const t = title.toLowerCase();
-  if (t.includes("قلب") || t.includes("heart")) return "procedural-heart";
-  if (t.includes("ذرة") || t.includes("atom")) return "procedural-atom";
-  if (t.includes("خلية") || t.includes("cell")) return "procedural-animal-cell";
-  if (t.includes("شمس") || t.includes("sun") || t.includes("فلك")) return "procedural-solarsystem";
-  if (t.includes("أرض") || t.includes("earth")) return "procedural-earth-layers";
-  if (t.includes("بركان") || t.includes("volcano")) return "procedural-volcano";
-  if (t.includes("رئة") || t.includes("lung")) return "procedural-lungs";
-  if (t.includes("عين") || t.includes("eye")) return "procedural-eye";
-  if (t.includes("ماء") || t.includes("water")) return "procedural-water-molecule";
+  if (t.includes("قلب") || t.includes("heart")) return "heart";
+  if (t.includes("ذرة") || t.includes("atom")) return "atom";
+  if (t.includes("حيوان") || t.includes("animal")) return "animal-cell";
+  if (t.includes("نبات") || t.includes("plant")) return "plant-cell";
+  if (t.includes("خلية") || t.includes("cell")) return "animal-cell";
+  if (t.includes("شمس") || t.includes("sun") || t.includes("فلك")) return "solar-system";
+  if (t.includes("أرض") || t.includes("earth")) return "earth-layers";
+  if (t.includes("بركان") || t.includes("volcano")) return "volcano";
+  if (t.includes("رئة") || t.includes("lung")) return "lungs";
+  if (t.includes("عين") || t.includes("eye")) return "eye";
+  if (t.includes("ماء") || t.includes("water")) return "water-molecule";
+  if (t.includes("حمض") || t.includes("dna") || t.includes("نووي")) return "dna";
   
-  return "procedural-atom"; 
+  return "atom"; 
 }
 
 function Step8Success({ lessonName, pinCode, activeSessionId }: any) {

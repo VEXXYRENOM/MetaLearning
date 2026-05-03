@@ -68,7 +68,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectEn: "Biology",
     emoji: "❤️",
     kind: "gltf-artifact",
-    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AnatomyHeartSmall/glTF-Binary/AnatomyHeartSmall.glb",
+    gltfUrl: "/models/realistic_human_heart.glb",
   },
   {
     id: "animal-cell",
@@ -80,7 +80,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectEn: "Biology",
     emoji: "🔬",
     kind: "gltf-artifact",
-    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BarramundiFish/glTF-Binary/BarramundiFish.glb",
+    gltfUrl: "/models/simple_animal_cell_model.glb",
   },
   {
     id: "plant-cell",
@@ -92,7 +92,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectEn: "Biology",
     emoji: "🌿",
     kind: "gltf-artifact",
-    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DiffuseTransmissionPlant/glTF-Binary/DiffuseTransmissionPlant.glb",
+    gltfUrl: "/models/plant_cell_-_cell_structure.glb",
   },
   {
     id: "dna",
@@ -104,7 +104,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectEn: "Biology",
     emoji: "🧬",
     kind: "gltf-artifact",
-    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb",
+    gltfUrl: "/models/dna.glb",
   },
   {
     id: "lungs",
@@ -116,7 +116,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectEn: "Biology",
     emoji: "🫁",
     kind: "gltf-artifact",
-    gltfUrl: "https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb",
+    gltfUrl: "/models/realistic_human_lungs.glb",
   },
   {
     id: "eye",
@@ -128,7 +128,7 @@ const BIOLOGY_LESSONS: LessonDef[] = [
     subjectEn: "Biology",
     emoji: "👁️",
     kind: "gltf-artifact",
-    gltfUrl: "https://modelviewer.dev/shared-assets/models/Astronaut.glb",
+    gltfUrl: "/models/green_eye.glb",
   },
   {
     id: "brain-stem",
@@ -214,7 +214,7 @@ const CHEMISTRY_LESSONS: LessonDef[] = [
     subjectEn: "Chemistry",
     emoji: "⚛️",
     kind: "gltf-artifact",
-    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AntiqueCamera/glTF-Binary/AntiqueCamera.glb",
+    gltfUrl: "/models/atom.glb",
   },
   {
     id: "water-molecule",
@@ -226,7 +226,7 @@ const CHEMISTRY_LESSONS: LessonDef[] = [
     subjectEn: "Chemistry",
     emoji: "💧",
     kind: "gltf-artifact",
-    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/WaterBottle/glTF-Binary/WaterBottle.glb",
+    gltfUrl: "/models/h2o_molecule.glb",
   },
   
 ];
@@ -245,7 +245,7 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectEn: "Astronomy",
     emoji: "🪐",
     kind: "gltf-artifact",
-    gltfUrl: "https://modelviewer.dev/shared-assets/models/Outernet.glb",
+    gltfUrl: "/models/solar_system_paint_3d.glb",
   },
   {
     id: "earth-layers",
@@ -257,7 +257,7 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectEn: "Geography",
     emoji: "🌍",
     kind: "gltf-artifact",
-    gltfUrl: "https://modelviewer.dev/shared-assets/models/Canoe.glb",
+    gltfUrl: "/models/earths_internal_structure__core_to_atmosphere.glb",
   },
   {
     id: "volcano",
@@ -269,7 +269,7 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectEn: "Geography",
     emoji: "🌋",
     kind: "gltf-artifact",
-    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb",
+    gltfUrl: "/models/volcano.glb",
   },
   {
     id: "water-cycle",
@@ -281,7 +281,7 @@ const GEOGRAPHY_LESSONS: LessonDef[] = [
     subjectEn: "Geography",
     emoji: "🌧️",
     kind: "gltf-artifact",
-    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Lantern/glTF-Binary/Lantern.glb",
+    gltfUrl: "/models/water_cycle.glb",
   },
   {
     id: "astronaut",
@@ -323,7 +323,7 @@ const MATH_LESSONS: LessonDef[] = [
     subjectEn: "Mathematics",
     emoji: "📐",
     kind: "gltf-artifact",
-    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Fox/glTF-Binary/Fox.glb",
+    gltfUrl: "/models/platonic_solids.glb",
   },
   
   
@@ -362,7 +362,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectEn: "History",
     emoji: "🏛️",
     kind: "gltf-artifact",
-    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ABeautifulGame/glTF-Binary/ABeautifulGame.glb",
+    gltfUrl: "/models/pyramid_of_menkaure_giza_pyramid_complex_egypt.glb",
   },
   {
     id: "colosseum",
@@ -373,7 +373,7 @@ const HISTORY_LESSONS: LessonDef[] = [
     subjectEn: "History",
     emoji: "🏟️",
     kind: "gltf-artifact",
-    gltfUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/FlightHelmet/glTF-Binary/FlightHelmet.glb",
+    gltfUrl: "/models/colosseum.glb",
   },
   
   
